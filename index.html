@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#1a1708">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>The Backrooms</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script type="importmap">
+    { "imports": { "three": "./vendor/three.module.min.js" } }
+  </script>
+</head>
+<body>
+  <div id="game"></div>
+
+  <!-- Touch controls: joystick + look area cover the screen; buttons on top. -->
+  <div id="touch-layer" class="hidden">
+    <div id="joy-ghost"></div>
+    <div id="joy-base"><div id="joy-knob"></div></div>
+  </div>
+  <div id="touch-buttons" class="hidden">
+    <button class="tbtn" id="btn-ears" aria-label="Cover ears">
+      <svg viewBox="0 0 24 24"><path d="M7 9a5 5 0 0 1 10 0c0 3-3 4-3 7a3 3 0 0 1-5 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M10 10a2 2 0 0 1 4 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <span>EARS</span>
+    </button>
+    <button class="tbtn" id="btn-drink" aria-label="Drink Almond Water">
+      <svg viewBox="0 0 24 24"><path d="M10 2h4v3l2 3v13a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V8l2-3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M8 13h8" stroke="currentColor" stroke-width="2"/></svg>
+      <span id="drink-count">0</span>
+    </button>
+    <button class="tbtn" id="btn-light" aria-label="Flashlight">
+      <svg viewBox="0 0 24 24"><path d="M6 3h12l-2 6H8z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9 9h6v12H9z" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      <span>LIGHT</span>
+    </button>
+    <button class="tbtn big" id="btn-run" aria-label="Run">
+      <svg viewBox="0 0 24 24"><circle cx="14" cy="4" r="2" fill="currentColor"/><path d="M8 21l3-6 3 2v5M6 11l3-3h4l2 4 3 1M11 8l-1 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>RUN</span>
+    </button>
+  </div>
+
+  <div id="hud" class="hidden">
+    <div id="rec"><span class="dot"></span>REC <span id="rec-time">00:00:00</span></div>
+    <button id="btn-pause" aria-label="Pause">
+      <svg viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" fill="currentColor"/><rect x="14" y="4" width="4" height="16" fill="currentColor"/></svg>
+    </button>
+    <div id="stats">
+      <div class="stat" id="stat-sanity"><label>SANITY</label><div class="bar"><div class="fill"></div></div></div>
+      <div class="stat" id="stat-stamina"><label>STAMINA</label><div class="bar"><div class="fill"></div></div></div>
+      <div class="stat" id="stat-battery"><label>BATTERY</label><div class="bar"><div class="fill"></div></div></div>
+      <div class="stat-line" id="stat-bottles">ALMOND WATER <b id="bottle-count">0</b></div>
+    </div>
+    <div id="crosshair"></div>
+    <div id="ears-warning">COVER YOUR EARS</div>
+    <div id="msg"></div>
+    <div id="controls-hint"></div>
+    <div id="fps"></div>
+  </div>
+
+  <div id="fade"></div>
+  <div id="flash"></div>
+  <div id="glitch"></div>
+
+  <!-- Screens -->
+  <div id="screens">
+    <section class="screen" id="screen-menu">
+      <div class="menu-inner">
+        <h1 class="title">THE BACKROOMS</h1>
+        <p class="subtitle" id="menu-level">LEVEL 0 &mdash; THE LOBBY</p>
+        <p class="tagline">"If you're not careful and you noclip out of reality in the wrong areas..."</p>
+        <div class="buttons">
+          <button class="mbtn primary" id="btn-start">ENTER</button>
+          <div class="seed-row">
+            <input id="seed-input" placeholder="SEED (optional)" maxlength="16" autocomplete="off" autocapitalize="characters" spellcheck="false">
+            <button class="mbtn small" id="btn-seed">PLAY SEED</button>
+          </div>
+          <button class="mbtn" id="btn-howto">HOW TO SURVIVE</button>
+          <button class="mbtn" id="btn-settings">SETTINGS</button>
+          <button class="mbtn" id="btn-fullscreen">FULLSCREEN</button>
+        </div>
+        <p class="records" id="records"></p>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-howto">
+      <div class="menu-inner narrow">
+        <h2>HOW TO SURVIVE</h2>
+        <ul class="howto">
+          <li>Find a <b>flickering wall</b> and throw yourself through it. It is somewhere different every time. Listen for its static.</li>
+          <li>Your <b>sanity</b> drains in the hum. Darkness, red rooms and things you shouldn't see drain it faster.</li>
+          <li>Drink <b>Almond Water</b> to steady your mind.</li>
+          <li>When the buzzing <b>spikes</b>, cover your ears and keep moving until you're out of it.</li>
+          <li>The halls <b>shift</b> when you aren't looking. Don't trust your memory.</li>
+          <li>If you see a dark figure, don't stare. If it follows you, <b>run</b>.</li>
+          <li>Watch your step near the Pitfalls.</li>
+        </ul>
+        <div class="controls-grid">
+          <div><h3>KEYBOARD</h3>
+            <p>WASD &middot; move<br>Mouse &middot; look<br>Shift &middot; run<br>C / Space &middot; cover ears<br>F &middot; flashlight<br>E &middot; drink<br>Esc &middot; pause</p></div>
+          <div><h3>TOUCH</h3>
+            <p>Left thumb &middot; move (anywhere on the left)<br>Drag right side &middot; look<br>RUN &middot; toggle running<br>EARS &middot; hold to cover ears<br>LIGHT &middot; flashlight<br>Bottle &middot; drink</p></div>
+        </div>
+        <button class="mbtn" data-back>BACK</button>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-settings">
+      <div class="menu-inner narrow">
+        <h2>SETTINGS</h2>
+        <div class="setting"><label for="set-look">Mouse sensitivity <output id="out-look"></output></label><input type="range" id="set-look" min="0.2" max="3" step="0.05"></div>
+        <div class="setting"><label for="set-touch">Touch look sensitivity <output id="out-touch"></output></label><input type="range" id="set-touch" min="0.2" max="3" step="0.05"></div>
+        <div class="setting"><label for="set-fov">Field of view <output id="out-fov"></output></label><input type="range" id="set-fov" min="60" max="100" step="1"></div>
+        <div class="setting"><label for="set-volume">Volume <output id="out-volume"></output></label><input type="range" id="set-volume" min="0" max="1" step="0.05"></div>
+        <div class="setting row"><label for="set-quality">Graphics</label>
+          <select id="set-quality"><option value="auto">Auto</option><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select></div>
+        <div class="setting row"><label for="set-invert">Invert look Y</label><input type="checkbox" id="set-invert"></div>
+        <div class="setting row"><label for="set-fps">Show FPS</label><input type="checkbox" id="set-fps"></div>
+        <button class="mbtn" data-back>BACK</button>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-loading">
+      <div class="menu-inner"><p class="loading">NOCLIPPING<span class="dots"></span></p></div>
+    </section>
+
+    <section class="screen" id="screen-pause">
+      <div class="menu-inner narrow">
+        <h2>PAUSED</h2>
+        <p class="sub" id="pause-info"></p>
+        <div class="buttons">
+          <button class="mbtn primary" id="btn-resume">RESUME</button>
+          <button class="mbtn" id="btn-restart">RESTART (SAME LAYOUT)</button>
+          <button class="mbtn" id="btn-newrun">NEW LAYOUT</button>
+          <button class="mbtn" id="btn-pause-settings">SETTINGS</button>
+          <button class="mbtn" id="btn-quit">QUIT TO MENU</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen end" id="screen-dead">
+      <div class="menu-inner narrow">
+        <h2 class="bad">YOU ARE LOST</h2>
+        <p class="sub" id="dead-cause"></p>
+        <p class="sub" id="dead-stats"></p>
+        <div class="buttons">
+          <button class="mbtn primary" id="btn-dead-new">TRY AGAIN (NEW LAYOUT)</button>
+          <button class="mbtn" id="btn-dead-retry">RETRY SAME LAYOUT</button>
+          <button class="mbtn" id="btn-dead-menu">MENU</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen end" id="screen-escaped">
+      <div class="menu-inner narrow">
+        <h2 class="good">YOU NOCLIPPED THROUGH</h2>
+        <p class="sub" id="esc-next"></p>
+        <p class="sub" id="esc-stats"></p>
+        <div class="buttons">
+          <button class="mbtn primary" id="btn-esc-new">PLAY AGAIN (NEW LAYOUT)</button>
+          <button class="mbtn" id="btn-esc-menu">MENU</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div id="rotate-hint">Turn your phone sideways for the best view</div>
+
+  <noscript>The Backrooms needs JavaScript and WebGL.</noscript>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
