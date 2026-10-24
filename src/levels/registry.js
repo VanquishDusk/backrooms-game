@@ -1,5 +1,6 @@
 import { LEVEL0 } from './level0/Level0.js';
 import { LEVEL0_2 } from './level0_2/Level02.js';
+import { LEVEL1 } from './level1/Level1.js';
 
 // Every playable level registers here. A level definition is:
 //
@@ -14,19 +15,25 @@ import { LEVEL0_2 } from './level0_2/Level02.js';
 //   update(dt, player)          gameplay, events; calls ctx.onDeath / onEscape / onCaught
 //   drink(player)               use an Almond Water
 //   audioMix(player)            ambience levels for AudioEngine.update
-//   atmosphere(dt, player)      fog + post-processing values
+//   atmosphere(dt, player)      fog + post-processing values (+ optional fovMul)
 //   hudInfo(player)             { warn, warnCovered, coverLabel, health }
 //   dispose()
 //
-// Levels hand control onward with ctx.onEscape(targetId, 'noclip' | 'door').
+// Levels hand control onward with ctx.onEscape(targetId, 'noclip' | 'door' | 'walk').
 // The player's sanity, health, battery and Almond Water carry over.
 //
-// To add Level 1: create src/levels/level1/Level1.js exporting LEVEL1 and
-// add it to LEVELS below. Level 0's flickering wall already points at 'level1'.
+// Unbuilt targets show a "coming soon" screen (see UPCOMING). Level 1's
+// exit hallway already points at 'level2'.
 
 export const LEVELS = {
   [LEVEL0.id]: LEVEL0,
   [LEVEL0_2.id]: LEVEL0_2,
+  [LEVEL1.id]: LEVEL1,
+};
+
+// Names for levels that exits point at but that aren't built yet.
+export const UPCOMING = {
+  level2: 'LEVEL 2 — PIPE DREAMS',
 };
 
 export const FIRST_LEVEL = LEVEL0.id;

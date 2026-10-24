@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { GridWorld } from '../../world/GridWorld.js';
 import { EDGE_WALL } from '../../world/GridMap.js';
 import { paintedWallTexture, carpetTexture, ceilingTexture, tileTexture, woodTexture } from '../../world/textures.js';
-import { PropKit, nearDoor } from '../../world/props.js';
+import { PropKit, nearDoor, disposeTextures } from '../../world/props.js';
 import { generateLevel02 } from './generate.js';
 
 // Level 0.2 — Level 0, "remodelled" by the Backrooms Remodeling Co.
@@ -35,7 +35,7 @@ export class Level02 {
       wall: paintedWallTexture(renderer),
       floor: carpetTexture(renderer, '#6e2a24'),
       ceiling: ceilingTexture(renderer, '#e3e2d8'),
-      tile: tileTexture(renderer),
+      floors: { tile: tileTexture(renderer) },
       wood: woodTexture(renderer),
     };
     shared.ceilH.value = map.height;
@@ -529,7 +529,7 @@ export class Level02 {
     }
     this.motes.geometry.dispose();
     this.motesMat.dispose();
-    for (const t of Object.values(this.textures)) t.dispose();
+    disposeTextures(this.textures);
   }
 }
 

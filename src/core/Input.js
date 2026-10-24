@@ -1,11 +1,12 @@
 // Keyboard + mouse (pointer lock) and touch controls.
 //
-// Touch layout: the left part of the screen is a floating joystick that
-// appears wherever the thumb lands; anywhere else on the screen drags the
-// camera. Buttons (run, light, ears, drink, pause) sit along the right edge
+// Touch layout: a fixed joystick sits in the bottom-left corner (a touch
+// near it grabs the stick, and the stick never moves); anywhere else on the
+// screen drags the camera. Buttons (run, light, ears, drink, pause) sit along the right edge
 // and never steal the look gesture from another finger.
 
 const JOY_RADIUS = 56;
+const JOY_GRAB = 2.4; // a touch within this many radii of the stick grabs it
 
 export class Input {
   constructor({ canvas, touchLayer, joyBase, joyKnob, settings }) {
@@ -13,7 +14,7 @@ export class Input {
     this.settings = settings;
     this.keys = new Set();
     this.look = { x: 0, y: 0 };
-    this.joy = { id: null, ox: 0, oy: 0, x: 0, y: 0 };
+    this.joy = { id: null, x: 0, y: 0 };
     this.lookTouch = { id: null, x: 0, y: 0 };
     this.joyBase = joyBase;
     this.joyKnob = joyKnob;
@@ -102,11 +103,9 @@ export class Input {
 
   clear() {
     this.keys.clear();
-    this.joy.id = null;
-    this.joy.x = this.joy.y = 0;
+    this.releaseStick();
     this.lookTouch.id = null;
     this.earsHeld = false;
-    this.joyBase.classList.remove('active');
   }
 
   // ---- Touch -----------------------------------------------------------
@@ -115,16 +114,12 @@ export class Input {
     e.preventDefault();
     if (!this.enabled) return;
     for (const t of e.changedTouches) {
-      const joyZone = t.clientX < window.innerWidth * 0.42;
-      if (joyZone && this.joy.id === null) {
+      const [cx, cy] = this.joyCenter();
+      const nearStick = Math.hypot(t.clientX - cx, t.clientY - cy) < JOY_RADIUS * JOY_GRAB;
+      if (nearStick && this.joy.id === null) {
         this.joy.id = t.identifier;
-        this.joy.ox = t.clientX;
-        this.joy.oy = t.clientY;
-        this.joy.x = this.joy.y = 0;
-        this.joyBase.style.left = `${t.clientX}px`;
-        this.joyBase.style.top = `${t.clientY}px`;
-        this.joyKnob.style.transform = 'translate(-50%, -50%)';
         this.joyBase.classList.add('active');
+        this.moveStick(t.clientX, t.clientY);
       } else if (this.lookTouch.id === null) {
         this.lookTouch.id = t.identifier;
         this.lookTouch.x = t.clientX;
@@ -138,21 +133,7 @@ export class Input {
     if (!this.enabled) return;
     for (const t of e.changedTouches) {
       if (t.identifier === this.joy.id) {
-        let dx = t.clientX - this.joy.ox, dy = t.clientY - this.joy.oy;
-        const d = Math.hypot(dx, dy);
-        if (d > JOY_RADIUS) {
-          // Drag the base along so the stick never "runs out".
-          const over = d - JOY_RADIUS;
-          this.joy.ox += (dx / d) * over;
-          this.joy.oy += (dy / d) * over;
-          this.joyBase.style.left = `${this.joy.ox}px`;
-          this.joyBase.style.top = `${this.joy.oy}px`;
-          dx = t.clientX - this.joy.ox;
-          dy = t.clientY - this.joy.oy;
-        }
-        this.joy.x = dx / JOY_RADIUS;
-        this.joy.y = dy / JOY_RADIUS;
-        this.joyKnob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+        this.moveStick(t.clientX, t.clientY);
       } else if (t.identifier === this.lookTouch.id) {
         const k = 2.2 * this.settings.touchSens / this.settings.lookSens;
         this.look.x += (t.clientX - this.lookTouch.x) * k;
@@ -167,13 +148,37 @@ export class Input {
     e.preventDefault();
     for (const t of e.changedTouches) {
       if (t.identifier === this.joy.id) {
-        this.joy.id = null;
-        this.joy.x = this.joy.y = 0;
-        this.joyBase.classList.remove('active');
+        this.releaseStick();
       } else if (t.identifier === this.lookTouch.id) {
         this.lookTouch.id = null;
       }
     }
+  }
+
+  // Centre of the fixed joystick on screen.
+  joyCenter() {
+    const r = this.joyBase.getBoundingClientRect();
+    return [r.left + r.width / 2, r.top + r.height / 2];
+  }
+
+  moveStick(px, py) {
+    const [cx, cy] = this.joyCenter();
+    let dx = px - cx, dy = py - cy;
+    const d = Math.hypot(dx, dy);
+    if (d > JOY_RADIUS) {
+      dx *= JOY_RADIUS / d;
+      dy *= JOY_RADIUS / d;
+    }
+    this.joy.x = dx / JOY_RADIUS;
+    this.joy.y = dy / JOY_RADIUS;
+    this.joyKnob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+  }
+
+  releaseStick() {
+    this.joy.id = null;
+    this.joy.x = this.joy.y = 0;
+    this.joyKnob.style.transform = 'translate(-50%, -50%)';
+    this.joyBase.classList.remove('active');
   }
 
   // Wire a touch button. `hold` buttons report pressed state; others fire once.

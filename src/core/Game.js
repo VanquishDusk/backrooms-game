@@ -7,7 +7,7 @@ import { createRng, randomSeedString } from './rng.js';
 import { load, save } from './storage.js';
 import { createSharedUniforms } from '../world/materials.js';
 import { Hud } from '../ui/Hud.js';
-import { LEVELS, FIRST_LEVEL } from '../levels/registry.js';
+import { LEVELS, FIRST_LEVEL, UPCOMING } from '../levels/registry.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -346,7 +346,7 @@ export class Game {
       $('cover-label').textContent = cover;
       this.hud.setHint(
         this.input.touchMode
-          ? 'LEFT SIDE: MOVE  ·  RIGHT SIDE: LOOK'
+          ? 'STICK: MOVE  ·  DRAG ANYWHERE: LOOK'
           : `WASD MOVE · SHIFT RUN · C ${cover} · F LIGHT · E DRINK · ESC PAUSE`,
         10,
       );
@@ -485,9 +485,12 @@ export class Game {
     this.state = 'escaping';
     this.player.frozen = true;
     const door = style === 'door';
+    const walk = style === 'walk';
     if (door) {
       this.audio.door();
       this.fade(1, 0.7);
+    } else if (walk) {
+      this.fade(1, 1.6);
     } else {
       this.audio.noclip();
       $('glitch').classList.add('on');
@@ -516,10 +519,11 @@ export class Game {
       save('stats', this.stats);
       this.endRun();
       this.state = 'escaped';
-      $('esc-next').textContent = 'LEVEL 1 — HABITABLE ZONE · COMING SOON';
+      $('esc-title').textContent = walk ? 'YOU FOLLOWED THE PIPES' : door ? 'YOU WENT THROUGH THE DOOR' : 'YOU NOCLIPPED THROUGH';
+      $('esc-next').textContent = `${UPCOMING[target] || target.toUpperCase()} · COMING SOON`;
       $('esc-stats').textContent = `ESCAPED IN ${formatTime(time)}${best ? ' · NEW BEST' : ''} · SEED ${this.seed}`;
       this.showScreen('escaped');
-    }, door ? 900 : 2000);
+    }, door ? 900 : walk ? 1800 : 2000);
   }
 
   fade(to, seconds) {
@@ -586,7 +590,7 @@ export class Game {
     } else if (this.state === 'dying' || this.state === 'escaping') {
       player.update(dt, input, level.world, this.settings);
       if (this.state === 'escaping') {
-        // Keep drifting into the wall.
+        // Keep drifting forward.
         player.pos.x -= Math.sin(player.yaw) * dt * 0.8;
         player.pos.z -= Math.cos(player.yaw) * dt * 0.8;
       }
@@ -600,6 +604,11 @@ export class Game {
     this.fog.color.copy(atm.fogColor);
     this.fog.density = atm.fogDensity;
     this.renderer.renderer.setClearColor(atm.fogColor);
+    const fov = this.settings.fov * (atm.fovMul || 1);
+    if (Math.abs(this.camera.fov - fov) > 0.01) {
+      this.camera.fov = fov;
+      this.camera.updateProjectionMatrix();
+    }
     const post = this.renderer.post.uniforms;
     post.warp.value = atm.warp;
     post.aberr.value = atm.aberr;

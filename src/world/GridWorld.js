@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { EDGE_OPEN, EDGE_WALL, EDGE_EXIT } from './GridMap.js';
 import { SURFACE, createWorldMaterial, createGlitchMaterial } from './materials.js';
+import { mergeGeometries } from './props.js';
 
 // Turns a GridMap plus fixtures (lights, pillars, pits) into renderable,
 // collidable geometry. Reusable by any grid-based level.
@@ -11,7 +12,7 @@ const PIT_DEPTH = 5;
 const ATTIC = 0.75; // height of the exposed joist space above a broken ceiling
 const DROP = 0.35; // how far a collapsed floor sits below the carpet
 
-class GeoBuilder {
+export class GeoBuilder {
   constructor() {
     this.pos = [];
     this.nor = [];
@@ -97,11 +98,16 @@ export class GridWorld {
    * @param {object} opts
    * @param {import('./GridMap.js').GridMap} opts.map
    * @param {Array<{x:number,z:number,color:number[],power:number,state:string,zone?:number}>} opts.lights
-   * @param {Array<{x:number,z:number,size:number}>} opts.pillars  world-space centers
+   *   (layer: 1 bakes a light into the emergency lightmap instead)
+   * @param {Array<{x:number,z:number,size:number,round?:boolean,flare?:boolean,style?:string}>} opts.pillars  world-space centers
    * @param {Array<{x0:number,z0:number,x1:number,z1:number}>} opts.pits  world-space rects
-   * @param {object} opts.textures  { wall, floor, ceiling, tile?, wood? }
+   * @param {Array<{x0:number,z0:number,x1:number,z1:number}>} [opts.extraBoxes]  more solid boxes (props)
+   * @param {object} opts.textures  { wall, floor, ceiling, wood?, floors?: {name: tex | {map, scale, surface}}, walls?: {...} }
    * @param {object} [opts.texScale]  per-surface UV scale, number or [u, v]
-   * @param {(x:number,y:number)=>string} [opts.floorStyle]  'floor' | 'tile' per cell
+   * @param {(x:number,y:number)=>string} [opts.floorStyle]  floor material name per cell
+   * @param {(e:{h:boolean,x:number,y:number})=>string} [opts.wallStyle]  wall material name per edge
+   * @param {number[]} [opts.panelSize]  light fixture [width, length]
+   * @param {number} [opts.panelDrop]  how far fixtures hang below the ceiling
    * @param {(x:number,z:number)=>number} [opts.dampAt]  carpet wetness 0..1
    * @param {object} opts.shared  shared uniforms
    */
@@ -112,11 +118,17 @@ export class GridWorld {
     this.pits = opts.pits || [];
     this.textures = opts.textures;
     this.shared = opts.shared;
+    this.shared.emergency.value = 0;
+    this.shared.globalLight.value = 1;
     this.group = new THREE.Group();
     this.chunksX = Math.ceil(this.map.cols / CHUNK);
     this.chunksY = Math.ceil(this.map.rows / CHUNK);
 
     this.floorStyle = opts.floorStyle || (() => 'floor');
+    this.wallStyle = opts.wallStyle || (() => 'wall');
+    this.extraBoxes = opts.extraBoxes || [];
+    this.panelSize = opts.panelSize || [0.62, 1.22];
+    this.panelDrop = opts.panelDrop || 0.012;
     this.dampAt = opts.dampAt || (() => 1);
     const ts = { wall: 1 / 0.9, floor: 1 / 1.6, ceiling: 1 / 1.2, tile: 1 / 1.2, wood: 1 / 1.5, ...opts.texScale };
     const tx = this.textures;
@@ -126,8 +138,16 @@ export class GridWorld {
       ceiling: createWorldMaterial(this.shared, tx.ceiling, SURFACE.CEILING, ts.ceiling),
       glitch: createGlitchMaterial(this.shared, tx.wall, ts.wall),
     };
-    if (tx.tile) this.materials.tile = createWorldMaterial(this.shared, tx.tile, SURFACE.PLAIN, ts.tile);
     if (tx.wood) this.materials.wood = createWorldMaterial(this.shared, tx.wood, SURFACE.PLAIN, ts.wood);
+    // Extra named floor and wall materials.
+    const extra = (list, surface, defScale) => {
+      for (const [name, v] of Object.entries(list || {})) {
+        const def = v.isTexture ? { map: v } : v;
+        this.materials[name] = createWorldMaterial(this.shared, def.map, def.surface ?? surface, def.scale ?? ts[name] ?? defScale);
+      }
+    };
+    extra(tx.floors, SURFACE.PLAIN, ts.floor);
+    extra(tx.walls, SURFACE.WALL, ts.wall);
     // Per-cell destruction: bit 1 = ceiling gone, bit 2 = floor gone.
     this.broken = new Uint8Array(this.map.cols * this.map.rows);
     this.floorMeshes = [];
@@ -170,7 +190,8 @@ export class GridWorld {
     }
     const { map } = this;
     const cs = map.cellSize, H = map.height;
-    const geos = { floor: new GeoBuilder(), tile: new GeoBuilder(), ceiling: new GeoBuilder(), wood: new GeoBuilder() };
+    const geos = { floor: new GeoBuilder(), ceiling: new GeoBuilder(), wood: new GeoBuilder() };
+    const geoFor = (name) => geos[name] || (geos[name] = new GeoBuilder());
     const broken = (x, y, bit) => map.inBounds(x, y) && (this.broken[map.idx(x, y)] & bit) !== 0;
     for (let y = cy * CHUNK; y < Math.min(map.rows, (cy + 1) * CHUNK); y++) {
       for (let x = cx * CHUNK; x < Math.min(map.cols, (cx + 1) * CHUNK); x++) {
@@ -205,7 +226,8 @@ export class GridWorld {
           if (!broken(x, y + 1, 2)) wood.wallZ(z1, x0, x1, -DROP, 0, -1);
           continue;
         }
-        const floor = this.floorStyle(x, y) === 'tile' && this.materials.tile ? geos.tile : geos.floor;
+        const style = this.floorStyle(x, y);
+        const floor = this.materials[style] ? geoFor(style) : geos.floor;
         const pit = this.pitCells.get(map.idx(x, y));
         if (!pit) {
           floor.flat(x0, z0, x1, z1, 0, true);
@@ -233,16 +255,55 @@ export class GridWorld {
     this.floorMeshes[key] = meshes;
   }
 
-  // Pillars never change; one mesh keeps them out of wall rebuilds.
+  // Pillars never change; they stay out of wall rebuilds.
   buildPillars() {
     const H = this.map.height;
-    const pillars = new GeoBuilder();
+    const square = {};
+    const round = {};
+    this.roundGeos = [];
     for (const p of this.pillars) {
-      const h = p.size / 2;
-      pillars.box(p.x - h, p.z - h, p.x + h, p.z + h, 0, H);
+      const style = p.style && this.materials[p.style] ? p.style : 'wall';
+      if (!p.round) {
+        const h = p.size / 2;
+        (square[style] ||= new GeoBuilder()).box(p.x - h, p.z - h, p.x + h, p.z + h, 0, H);
+        continue;
+      }
+      // Round column; optionally flaring out into the ceiling like a vault.
+      const r = p.size / 2;
+      const shaftH = p.flare ? H - 1.1 : H;
+      const shaft = new THREE.CylinderGeometry(r, r * 1.05, shaftH, 16, 1, true);
+      scaleUv(shaft, Math.PI * p.size, shaftH);
+      shaft.translate(p.x, shaftH / 2, p.z);
+      (round[style] ||= []).push(shaft);
+      if (p.flare) {
+        const cap = new THREE.CylinderGeometry(r * 3.2, r, 1.1, 16, 3, true);
+        // Curve the flare so it reads as a vault springing from the column.
+        const pos = cap.attributes.position;
+        for (let i = 0; i < pos.count; i++) {
+          const y = pos.getY(i) + 0.55, k = y / 1.1;
+          const len = Math.hypot(pos.getX(i), pos.getZ(i));
+          const target = r + (r * 3.2 - r) * k * k;
+          if (len > 1e-4) {
+            pos.setX(i, (pos.getX(i) / len) * target);
+            pos.setZ(i, (pos.getZ(i) / len) * target);
+          }
+        }
+        cap.computeVertexNormals();
+        scaleUv(cap, Math.PI * p.size * 2, 1.1);
+        cap.translate(p.x, shaftH + 0.55, p.z);
+        round[style].push(cap);
+      }
     }
-    const pg = pillars.build();
-    if (pg) this.group.add(new THREE.Mesh(pg, this.materials.wall));
+    for (const [style, geo] of Object.entries(square)) {
+      const g = geo.build();
+      if (g) this.group.add(new THREE.Mesh(g, this.materials[style]));
+    }
+    for (const [style, list] of Object.entries(round)) {
+      const g = mergeGeometries(list);
+      for (const piece of list) piece.dispose();
+      this.roundGeos.push(g);
+      this.group.add(new THREE.Mesh(g, this.materials[style]));
+    }
   }
 
   // ---- Destruction (batched; call flush() once per frame) ---------------
@@ -292,14 +353,19 @@ export class GridWorld {
   // Walls of a chunk, rebuilt when the maze shifts.
   rebuildWallChunk(cx, cy) {
     const key = cy * this.chunksX + cx;
-    const old = this.wallMeshes[key];
-    if (old) {
-      this.group.remove(old);
-      old.geometry.dispose();
+    for (const m of this.wallMeshes[key] || []) {
+      this.group.remove(m);
+      m.geometry.dispose();
     }
     const { map } = this;
     const cs = map.cellSize, H = map.height, t = WALL_T / 2;
-    const geo = new GeoBuilder();
+    const geos = {};
+    const geoFor = (e) => {
+      const s = this.wallStyle(e);
+      const name = this.materials[s] ? s : 'wall';
+      return geos[name] || (geos[name] = new GeoBuilder());
+    };
+    const sameStyle = (a, b) => this.wallStyle(a) === this.wallStyle(b);
     const xs = cx * CHUNK, xe = Math.min(map.cols, (cx + 1) * CHUNK);
     const ys = cy * CHUNK, ye = Math.min(map.rows, (cy + 1) * CHUNK);
 
@@ -310,7 +376,9 @@ export class GridWorld {
       while (x < xe) {
         if (map.getH(x, y) !== EDGE_WALL) { x++; continue; }
         const start = x;
-        while (x < xe && map.getH(x, y) === EDGE_WALL) x++;
+        const first = { h: true, x, y };
+        while (x < xe && map.getH(x, y) === EDGE_WALL && sameStyle(first, { h: true, x, y })) x++;
+        const geo = geoFor(first);
         const capStart = start === 0 || map.getH(start - 1, y) !== EDGE_WALL;
         const capEnd = x >= map.cols || map.getH(x, y) !== EDGE_WALL;
         const z = y * cs;
@@ -323,21 +391,24 @@ export class GridWorld {
       while (y < ye) {
         if (map.getV(x, y) !== EDGE_WALL) { y++; continue; }
         const start = y;
-        while (y < ye && map.getV(x, y) === EDGE_WALL) y++;
+        const first = { h: false, x, y };
+        while (y < ye && map.getV(x, y) === EDGE_WALL && sameStyle(first, { h: false, x, y })) y++;
+        const geo = geoFor(first);
         const capStart = start === 0 || map.getV(x, start - 1) !== EDGE_WALL;
         const capEnd = y >= map.rows || map.getV(x, y) !== EDGE_WALL;
         const wx = x * cs;
         geo.boxZ(wx - t, start * cs - (capStart ? t : 0), wx + t, y * cs + (capEnd ? t : 0), 0, H, [capStart, capEnd]);
       }
     }
-    const g = geo.build();
-    if (g) {
-      const mesh = new THREE.Mesh(g, this.materials.wall);
+    const meshes = [];
+    for (const [name, geo] of Object.entries(geos)) {
+      const g = geo.build();
+      if (!g) continue;
+      const mesh = new THREE.Mesh(g, this.materials[name]);
       this.group.add(mesh);
-      this.wallMeshes[key] = mesh;
-    } else {
-      this.wallMeshes[key] = null;
+      meshes.push(mesh);
     }
+    this.wallMeshes[key] = meshes;
   }
 
   // Chunks that hold geometry for an edge (an edge on a chunk border is
@@ -405,6 +476,7 @@ export class GridWorld {
       const h = p.size / 2;
       boxes.push(p.x - h, p.z - h, p.x + h, p.z + h);
     }
+    for (const b of this.extraBoxes) boxes.push(b.x0, b.z0, b.x1, b.z1);
     this.boxes = new Float32Array(boxes);
     // Bucket boxes into every cell they touch.
     this.buckets = Array.from({ length: map.cols * map.rows }, () => []);
@@ -462,15 +534,17 @@ export class GridWorld {
 
   buildPanels() {
     const H = this.map.height;
-    const geo = new THREE.PlaneGeometry(0.62, 1.22);
+    const geo = new THREE.PlaneGeometry(this.panelSize[0], this.panelSize[1]);
     geo.rotateX(Math.PI / 2); // face down
     this.panelMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
     const mesh = new THREE.InstancedMesh(geo, this.panelMat, this.lights.length);
     const m = new THREE.Matrix4();
     const c = new THREE.Color();
     this.lights.forEach((l, i) => {
-      m.makeTranslation(l.x, H - 0.012, l.z);
+      m.makeTranslation(l.x, H - this.panelDrop, l.z);
       if (l.rotate) m.multiply(new THREE.Matrix4().makeRotationY(Math.PI / 2));
+      // Layer-1 (emergency) lights have their own fixtures; hide the panel.
+      if (l.layer === 1) m.makeScale(0, 0, 0);
       mesh.setMatrixAt(i, m);
       mesh.setColorAt(i, c.setRGB(...this.panelColor(l, 1)));
     });
@@ -527,16 +601,28 @@ export class GridWorld {
     if (!this.lm) {
       const w = Math.ceil(map.width / texel), h = Math.ceil(map.depth / texel);
       this.lm = { w, h, texel, data: new Uint8Array(w * h * 4) };
-      const tex = new THREE.DataTexture(this.lm.data, w, h, THREE.RGBAFormat);
-      tex.magFilter = THREE.LinearFilter;
-      tex.minFilter = THREE.LinearFilter;
-      tex.wrapS = tex.wrapT = THREE.ClampToEdgeWrapping;
-      tex.generateMipmaps = false;
-      this.lightTex = tex;
-      this.shared.lightMap.value = tex;
+      const makeTex = (data) => {
+        const tex = new THREE.DataTexture(data, w, h, THREE.RGBAFormat);
+        tex.magFilter = THREE.LinearFilter;
+        tex.minFilter = THREE.LinearFilter;
+        tex.wrapS = tex.wrapT = THREE.ClampToEdgeWrapping;
+        tex.generateMipmaps = false;
+        return tex;
+      };
+      this.lightTex = makeTex(this.lm.data);
+      this.shared.lightMap.value = this.lightTex;
+      // Second layer for lights that switch as a group (emergency lighting).
+      this.hasLayer2 = this.lights.some((l) => l.layer === 1);
+      if (this.hasLayer2) {
+        this.lm.data2 = new Uint8Array(w * h * 4);
+        this.lightTex2 = makeTex(this.lm.data2);
+        this.shared.lightMap2.value = this.lightTex2;
+      } else {
+        this.shared.lightMap2.value = blackTexture();
+      }
       this.shared.lmScale.value.set(1 / (w * texel), 1 / (h * texel));
     }
-    const { w, h, data } = this.lm;
+    const { w, h, data, data2 } = this.lm;
     const R = 9.5;
     const tx0 = region ? Math.max(0, Math.floor(region.x0 / texel)) : 0;
     const tx1 = region ? Math.min(w - 1, Math.ceil(region.x1 / texel)) : w - 1;
@@ -546,11 +632,19 @@ export class GridWorld {
       const pz = (tz + 0.5) * texel;
       for (let tx = tx0; tx <= tx1; tx++) {
         const px = (tx + 0.5) * texel;
-        let r = 0, g = 0, b = 0;
+        let r = 0, g = 0, b = 0, r2 = 0, g2 = 0, b2 = 0;
         const list = this.lightsNear(px, pz, R);
         for (const [i, d] of list) {
           const l = this.lights[i];
           if (l.state !== 'on') continue;
+          if (l.layer === 1) {
+            const walls = map.wallsBetween(px, pz, l.x, l.z, 2);
+            const k = walls ? 0 : l.power * (1 / (1 + 0.3 * (d * d + 1))) * (1 - smoothstep(4, 7, d));
+            r2 += k * l.color[0];
+            g2 += k * l.color[1];
+            b2 += k * l.color[2];
+            continue;
+          }
           const walls = map.wallsBetween(px, pz, l.x, l.z, 3);
           const trans = walls === 0 ? 1 : walls === 1 ? 0.1 : 0.015;
           const d2 = d * d + 2.0;
@@ -565,9 +659,16 @@ export class GridWorld {
         data[o + 1] = 255 * (1 - Math.exp(-g * 0.95));
         data[o + 2] = 255 * (1 - Math.exp(-b * 0.95));
         data[o + 3] = 255 * Math.max(0, Math.min(1, this.dampAt(px, pz)));
+        if (data2) {
+          data2[o] = 255 * (1 - Math.exp(-r2));
+          data2[o + 1] = 255 * (1 - Math.exp(-g2));
+          data2[o + 2] = 255 * (1 - Math.exp(-b2));
+          data2[o + 3] = 255;
+        }
       }
     }
     this.lightTex.needsUpdate = true;
+    if (this.lightTex2) this.lightTex2.needsUpdate = true;
   }
 
   // Baked light (0..1 per channel) at a world point.
@@ -586,7 +687,24 @@ export class GridWorld {
     for (const m of Object.values(this.materials)) m.dispose();
     this.panelMat.dispose();
     this.lightTex.dispose();
+    if (this.lightTex2) this.lightTex2.dispose();
+    for (const g of this.roundGeos) g.dispose();
   }
+}
+
+// Scale a geometry's 0..1 UVs to metres so world textures tile correctly.
+function scaleUv(geo, u, v) {
+  const uv = geo.attributes.uv;
+  for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * u, uv.getY(i) * v);
+}
+
+let black = null;
+function blackTexture() {
+  if (!black) {
+    black = new THREE.DataTexture(new Uint8Array([0, 0, 0, 255]), 1, 1, THREE.RGBAFormat);
+    black.needsUpdate = true;
+  }
+  return black;
 }
 
 function smoothstep(a, b, x) {

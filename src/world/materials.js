@@ -19,6 +19,8 @@ export function createSharedUniforms(fog) {
   }
   return {
     lightMap: { value: null },
+    lightMap2: { value: null },
+    emergency: { value: 0 },
     lmScale: { value: new THREE.Vector2(1, 1) },
     globalLight: { value: 1 },
     ambient: { value: new THREE.Color(0.05, 0.045, 0.035) },
@@ -69,6 +71,8 @@ float vnoise(vec2 p) {
 
 const LIGHTING_GLSL = /* glsl */ `
 uniform sampler2D lightMap;
+uniform sampler2D lightMap2;
+uniform float emergency;
 uniform vec2 lmScale;
 uniform float globalLight;
 uniform vec3 ambient;
@@ -83,7 +87,8 @@ uniform vec3 dynCol[${MAX_DYN_LIGHTS}];
 vec3 sceneLight(vec3 P, vec3 N, float surface) {
   // Sample slightly in front of the surface so walls read the room they face.
   vec2 lmUv = (P.xz + N.xz * 0.3) * lmScale;
-  vec3 baked = texture2D(lightMap, lmUv).rgb * 1.3 * globalLight;
+  vec3 baked = texture2D(lightMap, lmUv).rgb * 1.3 * globalLight
+    + texture2D(lightMap2, lmUv).rgb * 1.3 * emergency;
   float h = clamp(P.y / ceilH, 0.0, 1.0);
   if (surface < 0.5) baked *= mix(0.55, 1.08, h * h);
   else if (surface > 1.5 && surface < 2.5) baked *= 0.78;
@@ -91,6 +96,9 @@ vec3 sceneLight(vec3 P, vec3 N, float surface) {
   if (P.y > ceilH + 0.01) baked *= 0.35;
   // Pits fall off into darkness.
   if (P.y < -0.01) baked *= exp(P.y * 1.7);
+  // Props (pipes, crates, shelving) get simple directional shading so
+  // their shape reads under flat baked light.
+  if (surface > 2.5) baked *= 0.62 + 0.38 * abs(dot(N, vec3(0.32, -0.82, 0.47)));
   vec3 light = ambient + baked;
 
   for (int i = 0; i < ${MAX_DYN_LIGHTS}; i++) {

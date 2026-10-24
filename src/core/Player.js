@@ -36,6 +36,7 @@ export class Player {
     this.fallV = 0;
     this.dead = false;
     this.frozen = false;
+    this.speedMul = 1;
   }
 
   // Stats that travel with you between levels.
@@ -107,6 +108,7 @@ export class Player {
 
     let speed = (this.sprinting ? RUN : WALK) * Math.min(1, Math.max(mag, 0));
     if (this.coveringEars) speed *= EARS_SPEED;
+    speed *= this.speedMul;
     const sin = Math.sin(this.yaw), cos = Math.cos(this.yaw);
     // Forward is -z at yaw 0.
     const wx = (-sin * my + cos * mx) * speed;

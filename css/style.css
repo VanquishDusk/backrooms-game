@@ -48,34 +48,22 @@ button { font-family: inherit; }
   touch-action: none;
 }
 
-#joy-ghost {
-  position: absolute;
-  left: calc(var(--safe-l) + 90px);
-  bottom: calc(var(--safe-b) + 90px);
-  width: 112px;
-  height: 112px;
-  margin: -56px 0 0 -56px;
-  transform: translateY(50%);
-  border-radius: 50%;
-  border: 2px dashed rgba(236, 227, 176, 0.18);
-  pointer-events: none;
-}
-
 #joy-base {
   position: absolute;
-  width: 112px;
-  height: 112px;
-  transform: translate(-50%, -50%);
+  left: calc(var(--safe-l) + 100px);
+  bottom: calc(var(--safe-b) + 100px);
+  width: 120px;
+  height: 120px;
+  transform: translate(-50%, 50%);
   border-radius: 50%;
-  background: rgba(236, 227, 176, 0.08);
-  border: 2px solid rgba(236, 227, 176, 0.3);
+  background: rgba(236, 227, 176, 0.06);
+  border: 2px solid rgba(236, 227, 176, 0.28);
   pointer-events: none;
-  opacity: 0;
+  opacity: 0.7;
   transition: opacity 0.12s;
 }
 
-#joy-base.active { opacity: 1; }
-#touch-layer:has(#joy-base.active) #joy-ghost { opacity: 0; }
+#joy-base.active { opacity: 1; background: rgba(236, 227, 176, 0.1); }
 
 #joy-knob {
   position: absolute;
@@ -454,6 +442,7 @@ h3 { margin: 0 0 4px; font-size: 22px; color: var(--accent); }
   .howto { font-size: 18px; }
   #stats { font-size: 14px; }
   .tbtn { width: 56px; height: 56px; }
+  #joy-base { left: calc(var(--safe-l) + 84px); bottom: calc(var(--safe-b) + 80px); }
   .tbtn.big { width: 72px; height: 72px; }
 }
 

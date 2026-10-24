@@ -139,6 +139,29 @@ export class AudioEngine {
       o.start();
     }
 
+    // Alternative exit beacon: steam hiss and machinery deep in the pipes.
+    this.steamGain = keep(ctx.createGain());
+    this.steamGain.gain.value = 0;
+    this.steamGain.connect(exitOut);
+    const hiss = keep(this.noiseSource(true));
+    const hhp = keep(ctx.createBiquadFilter());
+    hhp.type = 'highpass';
+    hhp.frequency.value = 2800;
+    const hissGain = keep(ctx.createGain());
+    hissGain.gain.value = 0.5;
+    hiss.connect(hhp).connect(hissGain).connect(this.steamGain);
+    hiss.start();
+    const thrum = keep(ctx.createOscillator());
+    thrum.type = 'square';
+    thrum.frequency.value = 46;
+    const tlp = keep(ctx.createBiquadFilter());
+    tlp.type = 'lowpass';
+    tlp.frequency.value = 140;
+    const tg = keep(ctx.createGain());
+    tg.gain.value = 0.8;
+    thrum.connect(tlp).connect(tg).connect(this.steamGain);
+    thrum.start();
+
     // Low drone that swells when the figure is hunting.
     this.droneGain = keep(ctx.createGain());
     this.droneGain.gain.value = 0;
@@ -172,16 +195,17 @@ export class AudioEngine {
 
   /**
    * Per-frame mix.
-   * @param {object} s  { hum, exitGain, exitPan, exitType ('static' | 'hum'), drone, sanity, ears }
+   * @param {object} s  { hum, exitGain, exitPan, exitType ('static' | 'hum' | 'steam'), drone, sanity, ears }
    */
   update(s) {
     if (!this.ctx || !this.ambienceOn) return;
     const t = this.ctx.currentTime;
     this.humGain.gain.setTargetAtTime(s.hum, t, 0.08);
     const crackle = 0.55 + Math.random() * 0.45;
-    const hum = s.exitType === 'hum';
-    this.staticGain.gain.setTargetAtTime(hum ? 0 : s.exitGain * crackle, t, 0.02);
-    this.beaconGain.gain.setTargetAtTime(hum ? s.exitGain * 0.5 : 0, t, 0.1);
+    const type = s.exitType || 'static';
+    this.staticGain.gain.setTargetAtTime(type === 'static' ? s.exitGain * crackle : 0, t, 0.02);
+    this.beaconGain.gain.setTargetAtTime(type === 'hum' ? s.exitGain * 0.5 : 0, t, 0.1);
+    this.steamGain.gain.setTargetAtTime(type === 'steam' ? s.exitGain * 0.45 : 0, t, 0.1);
     if (this.staticPan) this.staticPan.pan.setTargetAtTime(s.exitPan, t, 0.05);
     this.droneGain.gain.setTargetAtTime(s.drone, t, 0.3);
     this.muffle.frequency.setTargetAtTime(s.ears ? 380 : 20000, t, 0.06);
@@ -350,6 +374,118 @@ export class AudioEngine {
     o.connect(bp).connect(g).connect(this.master);
     o.start(t0);
     o.stop(t + 0.05);
+  }
+
+  // Water dripping somewhere in the dark.
+  drip(pan = 0, vol = 0.2) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    const o = this.ctx.createOscillator();
+    o.type = 'sine';
+    const f = 900 + Math.random() * 900;
+    o.frequency.setValueAtTime(f, t);
+    o.frequency.exponentialRampToValueAtTime(f * 0.45, t + 0.08);
+    const g = this.ctx.createGain();
+    this.env(g, t, vol, 0.002, 0.12);
+    o.connect(g).connect(this.out(pan));
+    o.start(t);
+    o.stop(t + 0.2);
+  }
+
+  // Distant metal on concrete.
+  clank(pan = 0, vol = 0.25) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    for (const f of [310, 467, 733]) {
+      const o = this.ctx.createOscillator();
+      o.type = 'triangle';
+      o.frequency.value = f * (0.9 + Math.random() * 0.2);
+      const g = this.ctx.createGain();
+      this.env(g, t, vol / 3, 0.003, 1.2);
+      const lp = this.ctx.createBiquadFilter();
+      lp.type = 'lowpass';
+      lp.frequency.value = 1200;
+      o.connect(lp).connect(g).connect(this.out(pan));
+      o.start(t);
+      o.stop(t + 1.3);
+    }
+  }
+
+  // Small hammer tap.
+  tink(pan = 0, vol = 0.15) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    const o = this.ctx.createOscillator();
+    o.type = 'square';
+    o.frequency.value = 1900 + Math.random() * 300;
+    const g = this.ctx.createGain();
+    this.env(g, t, vol, 0.001, 0.08);
+    const bp = this.ctx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.frequency.value = 2200;
+    o.connect(bp).connect(g).connect(this.out(pan));
+    o.start(t);
+    o.stop(t + 0.12);
+  }
+
+  growl(pan = 0, vol = 0.4) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    const o = this.ctx.createOscillator();
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(62, t);
+    o.frequency.linearRampToValueAtTime(48, t + 1.1);
+    const trem = this.ctx.createOscillator();
+    trem.frequency.value = 22;
+    const tg = this.ctx.createGain();
+    tg.gain.value = 0.5;
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(vol, t + 0.15);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 1.3);
+    const lp = this.ctx.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = 420;
+    const amp = this.ctx.createGain();
+    amp.gain.value = 0.5;
+    trem.connect(tg).connect(amp.gain);
+    o.connect(lp).connect(amp).connect(g).connect(this.out(pan));
+    o.start(t);
+    trem.start(t);
+    o.stop(t + 1.4);
+    trem.stop(t + 1.4);
+  }
+
+  snarl() {
+    if (!this.ctx) return;
+    this.growl(0, 0.7);
+    const t = this.ctx.currentTime;
+    const s = this.noiseSource();
+    const f = this.ctx.createBiquadFilter();
+    f.type = 'bandpass';
+    f.frequency.setValueAtTime(800, t);
+    f.frequency.exponentialRampToValueAtTime(2500, t + 0.15);
+    f.Q.value = 1.5;
+    const g = this.ctx.createGain();
+    this.env(g, t, 0.7, 0.005, 0.35);
+    s.connect(f).connect(g).connect(this.master);
+    s.start(t, Math.random(), 0.4);
+    this.thud(0, 0.5);
+  }
+
+  // Quick padding footfall (claws on concrete).
+  pad(pan = 0, vol = 0.2) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    const s = this.noiseSource();
+    const f = this.ctx.createBiquadFilter();
+    f.type = 'bandpass';
+    f.frequency.value = 2400 + Math.random() * 1200;
+    f.Q.value = 3;
+    const g = this.ctx.createGain();
+    this.env(g, t, vol, 0.002, 0.05);
+    s.connect(f).connect(g).connect(this.out(pan));
+    s.start(t, Math.random() * 2, 0.08);
   }
 
   // Structural creak: a slow, pitched groan.

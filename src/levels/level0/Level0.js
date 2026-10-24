@@ -4,7 +4,7 @@ import { EDGE_OPEN, EDGE_WALL } from '../../world/GridMap.js';
 import { wallpaperTexture, carpetTexture, ceilingTexture } from '../../world/textures.js';
 import { MAX_DYN_LIGHTS } from '../../world/materials.js';
 import { Stalker } from '../../entities/Stalker.js';
-import { PropKit, nearDoor } from '../../world/props.js';
+import { PropKit, nearDoor, disposeTextures } from '../../world/props.js';
 import { generateLevel0, ZONE } from './generate.js';
 
 // Level 0 — "The Lobby" / "The Yellow Hell".
@@ -601,7 +601,7 @@ export class Level0 {
     for (const b of this.bottles) this.scene.remove(b.mesh);
     for (const g of this.bottleGeos) g.dispose();
     for (const m of this.bottleMats) m.dispose();
-    for (const t of Object.values(this.textures)) t.dispose();
+    disposeTextures(this.textures);
     if (this.propGroup) this.scene.remove(this.propGroup);
     this.props.dispose();
   }

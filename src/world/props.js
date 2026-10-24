@@ -204,3 +204,47 @@ export function nearDoor(door, px, pz) {
   const lateral = Math.abs(dx * door.nz - dz * door.nx);
   return normal > -0.05 && normal < 0.48 && lateral < 0.5;
 }
+
+// Dispose a (possibly nested) map of textures.
+export function disposeTextures(obj) {
+  for (const v of Object.values(obj)) {
+    if (!v) continue;
+    if (v.isTexture) v.dispose();
+    else if (v.map && v.map.isTexture) v.map.dispose();
+    else if (typeof v === 'object') disposeTextures(v);
+  }
+}
+
+// Merge indexed BufferGeometries that share position/normal/uv attributes.
+export function mergeGeometries(geos) {
+  let vcount = 0, icount = 0;
+  for (const g of geos) {
+    vcount += g.attributes.position.count;
+    icount += g.index ? g.index.count : g.attributes.position.count;
+  }
+  const pos = new Float32Array(vcount * 3), nor = new Float32Array(vcount * 3), uv = new Float32Array(vcount * 2);
+  const idx = vcount > 65535 ? new Uint32Array(icount) : new Uint16Array(icount);
+  let vo = 0, io = 0;
+  for (const g of geos) {
+    const n = g.attributes.position.count;
+    pos.set(g.attributes.position.array, vo * 3);
+    nor.set(g.attributes.normal.array, vo * 3);
+    if (g.attributes.uv) uv.set(g.attributes.uv.array, vo * 2);
+    if (g.index) {
+      const src = g.index.array;
+      for (let i = 0; i < src.length; i++) idx[io + i] = src[i] + vo;
+      io += src.length;
+    } else {
+      for (let i = 0; i < n; i++) idx[io + i] = vo + i;
+      io += n;
+    }
+    vo += n;
+  }
+  const out = new THREE.BufferGeometry();
+  out.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  out.setAttribute('normal', new THREE.BufferAttribute(nor, 3));
+  out.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+  out.setIndex(new THREE.BufferAttribute(idx, 1));
+  out.computeBoundingSphere();
+  return out;
+}

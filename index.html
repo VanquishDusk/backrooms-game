@@ -22,7 +22,6 @@
 
   <!-- Touch controls: joystick + look area cover the screen; buttons on top. -->
   <div id="touch-layer" class="hidden">
-    <div id="joy-ghost"></div>
     <div id="joy-base"><div id="joy-knob"></div></div>
   </div>
   <div id="touch-buttons" class="hidden">
@@ -103,13 +102,14 @@
           <li>If you see a dark figure, don't stare. If it follows you, <b>run</b>.</li>
           <li>Watch your step near the Pitfalls.</li>
           <li>Where the buzzing quiets and the carpet dries, the rooms look half-built. There may be a <b>door</b>.</li>
+          <li><b>Level 1</b>: when the lights die, something hunts the halls. Get into a corridor. Crates hold supplies, junk or worse. To leave, follow the pipes.</li>
           <li><b>Level 0.2</b> falls apart once you're inside. Find the door back to Level 0 before the collapse reaches it. Cover your mouth in the dust. Outlets charge your flashlight.</li>
         </ul>
         <div class="controls-grid">
           <div><h3>KEYBOARD</h3>
             <p>WASD &middot; move<br>Mouse &middot; look<br>Shift &middot; run<br>C / Space &middot; cover ears / mouth<br>F &middot; flashlight<br>E &middot; drink<br>Esc &middot; pause</p></div>
           <div><h3>TOUCH</h3>
-            <p>Left thumb &middot; move (anywhere on the left)<br>Drag right side &middot; look<br>RUN &middot; toggle running<br>EARS / MOUTH &middot; hold to cover<br>LIGHT &middot; flashlight<br>Bottle &middot; drink</p></div>
+            <p>Stick (bottom left) &middot; move<br>Drag anywhere else &middot; look<br>RUN &middot; toggle running<br>EARS / MOUTH &middot; hold to cover<br>LIGHT &middot; flashlight<br>Bottle &middot; drink</p></div>
         </div>
         <button class="mbtn" data-back>BACK</button>
       </div>
@@ -163,7 +163,7 @@
 
     <section class="screen end" id="screen-escaped">
       <div class="menu-inner narrow">
-        <h2 class="good">YOU NOCLIPPED THROUGH</h2>
+        <h2 class="good" id="esc-title">YOU NOCLIPPED THROUGH</h2>
         <p class="sub" id="esc-next"></p>
         <p class="sub" id="esc-stats"></p>
         <div class="buttons">

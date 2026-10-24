@@ -2,7 +2,7 @@
 
 A replayable 3D horror game set in the Backrooms, playable in the browser on desktop and mobile.
 
-Playable now: **Level 0 — "The Lobby" / "The Yellow Hell"** and its sub-level **Level 0.2 — "The Remodel"**. More levels will follow.
+Playable now: **Level 0 — "The Lobby" / "The Yellow Hell"**, its sub-level **Level 0.2 — "The Remodel"**, and **Level 1 — "The Habitable Zone"**. More levels will follow.
 
 ## Play
 
@@ -28,6 +28,7 @@ You've noclipped out of reality into endless mono-yellow halls, damp carpet and 
 - **A dark figure** watches from the end of the corridors. If your sanity slips far enough, it stops watching.
 - **The Pitfalls:** a room full of holes in the floor. Watch your step.
 - **Dark zones** where the lights died (use your flashlight), and a **red room**.
+- **Exit:** throw yourself through the flickering wall to reach Level 1.
 
 Some layouts have a pocket where the buzzing quiets, the carpet dries out and the rooms look half-built. If you find the **door** there, it leads to Level 0.2.
 
@@ -41,7 +42,26 @@ Level 0 as remodelled by the Backrooms Remodeling Co. It has dry red carpet, fre
 - **Outlets** charge your flashlight.
 - Going back puts you in a fresh Level 0. Your sanity, health, battery and Almond Water carry over.
 
-Once you've reached Level 0.2, you can start a run there from the main menu.
+## Level 1 — The Habitable Zone (Survival Difficulty 1)
+
+An endless, abandoned concrete complex: half underground car park, half empty warehouse.
+
+- **Halls:** huge pillared spaces with damp floors, exposed pipes and long sightlines. This is where you explore, and where things happen.
+- **Corridors:** concrete hallways with offices and infirmaries. They're safer, and red emergency lighting stays on in a blackout.
+- **Storage:** shelving and crates.
+- **Sectors:**
+  - **Aquila:** the garage where you arrive, with an explorers' cache and a note.
+  - **Gild:** warehouse, full of crates.
+  - **Gothic:** vaulted round columns and a medical station.
+  - **Ouroboros:** construction that never ends, with workers who never look at you.
+  - **Garden:** overgrown and harmful to stay in, but with better loot.
+  - **Fabled:** old wood panelling and neon.
+- **Blackouts:** the lights die and something hunts the halls. It won't follow you into the corridors.
+- **Impossible geometry:** halls stretch away from you, and corridor walls move when you aren't looking.
+- **Crates** hold Almond Water, batteries, first aid kits, junk, or something worse. Some vanish when you look away, and new ones turn up.
+- **Exit:** follow an extended hallway where pipes and dials gradually appear. Pipes on the ceiling get denser as you get closer, and you can hear steam ahead. The hallway leads on to Level 2, which is coming soon.
+
+Levels you've reached can be started directly from the main menu.
 
 Every run comes from a seed, which shows on the pause, death and escape screens. Type a seed on the main menu to replay a layout.
 
@@ -49,8 +69,8 @@ Every run comes from a seed, which shows on the pause, death and escape screens.
 
 | | Desktop | Touch |
 |---|---|---|
-| Move | WASD / arrows | Left side of the screen: a floating joystick |
-| Look | Mouse | Drag anywhere on the right side |
+| Move | WASD / arrows | Fixed stick in the bottom-left corner |
+| Look | Mouse | Drag anywhere else |
 | Run | Shift | RUN (toggle) |
 | Cover ears / mouth | C / Space (hold) | EARS / MOUTH (hold) |
 | Flashlight | F | LIGHT |
@@ -69,10 +89,11 @@ src/core/                     engine: Game loop/state, Input, Player, AudioEngin
 src/world/                    reusable grid-level toolkit: GridMap (layout + pathing + line of sight),
                               GridWorld (meshes, collision, baked lightmap, destructible cells),
                               materials (shaders), textures (procedural), props (doors, clutter, fixtures)
-src/entities/Stalker.js       the dark figure
+src/entities/                 Stalker (Level 0's dark figure), Hound (Level 1's blackout hunter)
 src/levels/registry.js        list of levels + the level interface
 src/levels/level0/            Level 0 generator and runtime (events, hazards, exits)
 src/levels/level0_2/          Level 0.2 generator and runtime (the collapse)
+src/levels/level1/            Level 1 generator and runtime (sectors, blackouts, crates, the hallway out)
 ```
 
 All textures and sounds are generated in code, so there are no asset files.
@@ -83,4 +104,4 @@ All textures and sounds are generated in code, so there are no asset files.
 2. Grid-style levels can reuse `GridMap` and `GridWorld` with their own generator, textures and lighting.
 3. Register the level in `src/levels/registry.js`.
 
-Levels hand off with `ctx.onEscape(targetId, 'noclip' | 'door')`, and player stats carry over. Level 0's flickering wall already targets `level1`. Once a level with that id is registered, walking through the flickering wall loads it.
+Levels hand off with `ctx.onEscape(targetId, 'noclip' | 'door' | 'walk')`, and player stats carry over. An exit that targets a level that isn't built yet shows a "coming soon" screen, using the names in `UPCOMING`. Level 1's hallway already targets `level2`.
