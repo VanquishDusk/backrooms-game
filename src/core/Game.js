@@ -27,7 +27,7 @@ const BATTERY_RECHARGE = 0.45;
 export class Game {
   constructor() {
     this.settings = load('settings', DEFAULT_SETTINGS);
-    this.stats = load('stats', { runs: 0, escapes: 0, deaths: 0, bestTime: null });
+    this.stats = load('stats', { runs: 0, escapes: 0, deaths: 0, bestTime: null, remodels: 0, unlocked: [] });
 
     this.renderer = new Renderer($('game'));
     this.scene = new THREE.Scene();
@@ -68,6 +68,7 @@ export class Game {
     this.bindUi();
     this.updateTouchUi();
     this.showRecords();
+    this.showUnlocked();
 
     window.addEventListener('resize', () => this.onResize());
     window.addEventListener('orientationchange', () => setTimeout(() => this.onResize(), 200));
@@ -130,11 +131,11 @@ export class Game {
     click('btn-fullscreen', () => this.toggleFullscreen());
 
     click('btn-resume', () => this.resume());
-    click('btn-restart', () => this.startRun(this.seed));
+    click('btn-restart', () => this.startRun(this.seed, this.runStartLevel));
     click('btn-newrun', () => this.startRun(randomSeedString()));
     click('btn-quit', () => this.quitToMenu());
     click('btn-dead-new', () => this.startRun(randomSeedString()));
-    click('btn-dead-retry', () => this.startRun(this.seed));
+    click('btn-dead-retry', () => this.startRun(this.seed, this.runStartLevel));
     click('btn-dead-menu', () => this.quitToMenu());
     click('btn-esc-new', () => this.startRun(randomSeedString()));
     click('btn-esc-menu', () => this.quitToMenu());
@@ -236,6 +237,7 @@ export class Game {
     const parts = [];
     if (st.runs) parts.push(`WANDERED ${st.runs}`);
     if (st.escapes) parts.push(`ESCAPED ${st.escapes}`);
+    if (st.remodels) parts.push(`SURVIVED 0.2 ×${st.remodels}`);
     if (st.bestTime != null) parts.push(`BEST ${formatTime(st.bestTime)}`);
     $('records').textContent = parts.join(' · ');
   }
@@ -254,7 +256,7 @@ export class Game {
       this.level.dispose();
     }
     this.levelDef = LEVELS[id];
-    this.seed = seed;
+    this.levelSeed = seed;
     const game = this;
     const runId = this.runId;
     const ctx = {
@@ -269,56 +271,126 @@ export class Game {
       },
       onDeath: (cause) => runId === this.runId && this.die(cause),
       onCaught: (stalker) => runId === this.runId && this.caught(stalker),
-      onEscape: (target) => runId === this.runId && this.escape(target),
+      onEscape: (target, style) => runId === this.runId && this.escape(target, style),
       fade: (to, dur) => this.fade(to, dur),
+      hurtFlash: (a) => this.hurtFlash(a),
       vibrate: (p) => navigator.vibrate && navigator.vibrate(p),
       isOver: () => runId !== this.runId || this.state !== 'playing',
     };
     this.level = this.levelDef.create(ctx);
     const sp = this.level.spawn;
     this.player.reset(sp.x, sp.z, sp.yaw);
-    $('menu-level').textContent = `${this.levelDef.name.toUpperCase()} — ${this.levelDef.title.toUpperCase()}`;
   }
 
+  // A fresh run. `seed` names the whole run; each level visited derives its
+  // own layout from it, so going back to Level 0 gives a new Level 0.
   startRun(seed, levelId = FIRST_LEVEL) {
     this.audio.unlock();
     this.input.lockPointer();
     this.runId++;
-    this.state = 'loading';
+    this.seed = seed;
+    this.runStartLevel = levelId;
+    this.visit = 0;
+    this.runTime = 0;
+    this.stats.runs++;
+    save('stats', this.stats);
     this.showScreen('loading');
-    this.hud.show(false);
     this.fade(0, 0);
+    this.enterLevel(levelId, null);
+  }
+
+  // Load a level and start playing it, optionally carrying player stats over.
+  enterLevel(levelId, carry) {
+    this.state = 'loading';
+    this.hud.show(false);
     $('glitch').classList.remove('on');
     $('flash').style.opacity = '0';
-    // Let the loading screen paint before the (blocking) generation.
+    const runId = this.runId;
+    // Let the loading screen / fade paint before the (blocking) generation.
     setTimeout(() => {
-      this.loadLevel(levelId, seed);
-      this.runTime = 0;
-      this.stats.runs++;
-      save('stats', this.stats);
+      if (runId !== this.runId) return;
+      const levelSeed = this.visit === 0 ? this.seed : `${this.seed}#${this.visit}`;
+      this.loadLevel(levelId, levelSeed);
+      this.player.restore(carry);
+      if (levelId !== FIRST_LEVEL && !this.stats.unlocked.includes(levelId)) {
+        this.stats.unlocked.push(levelId);
+        save('stats', this.stats);
+        this.showUnlocked();
+      }
       this.state = 'playing';
       this.input.enabled = true;
       this.input.clear();
       this.input.sprintToggle = false;
       $('btn-run').classList.remove('on');
+      $('btn-light').classList.toggle('on', this.player.flashlight);
       this.input.consumeActions();
       this.input.consumeLook();
       this.showScreen('none');
       this.hud.show(true);
+      this.hud.clearMessage();
       this.updateTouchUi();
       this.audio.startAmbience();
       this.fade(1, 0);
       this.fade(0, 2.5);
-      const runId = this.runId;
-      this.hud.message('You noclipped out of reality.', 3.5);
-      setTimeout(() => runId === this.runId && this.hud.message('Find a flickering wall. Throw yourself through it.', 5), 4200);
+      this.showLevelCard();
+
+      if (levelId === FIRST_LEVEL) {
+        if (carry) {
+          this.hud.message('Back in the Yellow Hell. The buzzing never stopped.', 4);
+        } else {
+          this.hud.message('You noclipped out of reality.', 3.5);
+          setTimeout(() => runId === this.runId && this.hud.message('Find a flickering wall. Throw yourself through it.', 5), 4200);
+        }
+      }
+      const cover = this.level.hudInfo(this.player).coverLabel;
+      $('cover-label').textContent = cover;
       this.hud.setHint(
         this.input.touchMode
           ? 'LEFT SIDE: MOVE  ·  RIGHT SIDE: LOOK'
-          : 'WASD MOVE · SHIFT RUN · C EARS · F LIGHT · E DRINK · ESC PAUSE',
+          : `WASD MOVE · SHIFT RUN · C ${cover} · F LIGHT · E DRINK · ESC PAUSE`,
         10,
       );
     }, 60);
+  }
+
+  showLevelCard() {
+    const card = $('level-card');
+    const def = this.levelDef;
+    card.querySelector('.lc-name').textContent = def.name.toUpperCase();
+    card.querySelector('.lc-title').textContent = def.title.toUpperCase();
+    card.querySelector('.lc-diff').textContent = def.difficulty != null ? `SURVIVAL DIFFICULTY ${def.difficulty}` : '';
+    card.classList.add('show');
+    clearTimeout(this.cardTimer);
+    this.cardTimer = setTimeout(() => card.classList.remove('show'), 3200);
+  }
+
+  showUnlocked() {
+    const box = $('unlocked-levels');
+    box.textContent = '';
+    for (const id of this.stats.unlocked) {
+      const def = LEVELS[id];
+      if (!def) continue;
+      const b = document.createElement('button');
+      b.className = 'mbtn';
+      b.textContent = `${def.name.toUpperCase()} — ${def.title.toUpperCase()}`;
+      b.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.audio.unlock();
+        this.audio.click();
+        this.startRun(randomSeedString(), id);
+      });
+      box.appendChild(b);
+    }
+  }
+
+  hurtFlash(a) {
+    const el = $('hurt');
+    el.style.transition = 'none';
+    el.style.opacity = String(a);
+    requestAnimationFrame(() => {
+      el.style.transition = 'opacity 0.8s';
+      el.style.opacity = '0';
+    });
   }
 
   pause() {
@@ -327,7 +399,7 @@ export class Game {
     this.input.enabled = false;
     this.input.clear();
     this.input.unlockPointer();
-    $('pause-info').textContent = `SEED ${this.seed} · ${formatTime(this.runTime)}`;
+    $('pause-info').textContent = `${this.levelDef.name.toUpperCase()} · SEED ${this.seed} · ${formatTime(this.runTime)}`;
     this.showScreen('pause');
     this.updateTouchUi();
     if (this.audio.ctx) this.audio.ctx.suspend();
@@ -379,7 +451,7 @@ export class Game {
     this.endRun();
     this.fade(0.6, 0.4);
     $('dead-cause').textContent = cause;
-    $('dead-stats').textContent = `SURVIVED ${formatTime(this.runTime)} · SEED ${this.seed}`;
+    $('dead-stats').textContent = `${this.levelDef.name.toUpperCase()} · SURVIVED ${formatTime(this.runTime)} · SEED ${this.seed}`;
     this.showScreen('dead');
   }
 
@@ -409,20 +481,33 @@ export class Game {
     }, 1200);
   }
 
-  escape(target) {
+  escape(target, style = 'noclip') {
     this.state = 'escaping';
     this.player.frozen = true;
-    this.audio.noclip();
-    $('glitch').classList.add('on');
-    navigator.vibrate && navigator.vibrate([30, 30, 30, 30, 80]);
-    this.fade(1, 1.6);
+    const door = style === 'door';
+    if (door) {
+      this.audio.door();
+      this.fade(1, 0.7);
+    } else {
+      this.audio.noclip();
+      $('glitch').classList.add('on');
+      navigator.vibrate && navigator.vibrate([30, 30, 30, 30, 80]);
+      this.fade(1, 1.6);
+    }
     const runId = this.runId;
     const time = this.runTime;
+    const from = this.levelDef.id;
     setTimeout(() => {
       if (runId !== this.runId) return;
       $('glitch').classList.remove('on');
       if (LEVELS[target]) {
-        this.startRun(this.seed, target);
+        if (from === 'level0_2') {
+          this.stats.remodels = (this.stats.remodels || 0) + 1;
+          save('stats', this.stats);
+        }
+        this.audio.stopAmbience();
+        this.visit++;
+        this.enterLevel(target, this.player.carry());
         return;
       }
       this.stats.escapes++;
@@ -434,7 +519,7 @@ export class Game {
       $('esc-next').textContent = 'LEVEL 1 — HABITABLE ZONE · COMING SOON';
       $('esc-stats').textContent = `ESCAPED IN ${formatTime(time)}${best ? ' · NEW BEST' : ''} · SEED ${this.seed}`;
       this.showScreen('escaped');
-    }, 2000);
+    }, door ? 900 : 2000);
   }
 
   fade(to, seconds) {
@@ -494,7 +579,7 @@ export class Game {
       } else {
         player.battery = Math.min(100, player.battery + BATTERY_RECHARGE * dt);
       }
-      $('btn-ears').classList.toggle('alert', !!level.hudInfo(player).ears && !player.coveringEars);
+      $('btn-ears').classList.toggle('alert', !!level.hudInfo(player).warn && !player.coveringEars);
       level.update(dt, player);
       this.runTime += dt;
       this.adaptQuality(dt);

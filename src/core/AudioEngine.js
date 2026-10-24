@@ -117,10 +117,27 @@ export class AudioEngine {
     this.staticGain = keep(ctx.createGain());
     this.staticGain.gain.value = 0;
     this.staticPan = ctx.createStereoPanner ? keep(ctx.createStereoPanner()) : null;
-    st.connect(sthp).connect(this.staticGain);
-    if (this.staticPan) this.staticGain.connect(this.staticPan).connect(this.master);
-    else this.staticGain.connect(this.master);
+    const exitOut = this.staticPan || this.master;
+    if (this.staticPan) this.staticPan.connect(this.master);
+    st.connect(sthp).connect(this.staticGain).connect(exitOut);
     st.start();
+
+    // Alternative exit beacon: Level 0's hum leaking through a door.
+    this.beaconGain = keep(ctx.createGain());
+    this.beaconGain.gain.value = 0;
+    const blp = keep(ctx.createBiquadFilter());
+    blp.type = 'lowpass';
+    blp.frequency.value = 520;
+    blp.connect(this.beaconGain).connect(exitOut);
+    for (const [f, g] of [[60, 0.5], [120, 0.7], [240, 0.2]]) {
+      const o = keep(ctx.createOscillator());
+      o.type = f === 60 ? 'sawtooth' : 'sine';
+      o.frequency.value = f;
+      const gg = keep(ctx.createGain());
+      gg.gain.value = g;
+      o.connect(gg).connect(blp);
+      o.start();
+    }
 
     // Low drone that swells when the figure is hunting.
     this.droneGain = keep(ctx.createGain());
@@ -155,14 +172,16 @@ export class AudioEngine {
 
   /**
    * Per-frame mix.
-   * @param {object} s  { hum, exitGain, exitPan, drone, sanity, ears, crackle }
+   * @param {object} s  { hum, exitGain, exitPan, exitType ('static' | 'hum'), drone, sanity, ears }
    */
   update(s) {
     if (!this.ctx || !this.ambienceOn) return;
     const t = this.ctx.currentTime;
     this.humGain.gain.setTargetAtTime(s.hum, t, 0.08);
     const crackle = 0.55 + Math.random() * 0.45;
-    this.staticGain.gain.setTargetAtTime(s.exitGain * crackle, t, 0.02);
+    const hum = s.exitType === 'hum';
+    this.staticGain.gain.setTargetAtTime(hum ? 0 : s.exitGain * crackle, t, 0.02);
+    this.beaconGain.gain.setTargetAtTime(hum ? s.exitGain * 0.5 : 0, t, 0.1);
     if (this.staticPan) this.staticPan.pan.setTargetAtTime(s.exitPan, t, 0.05);
     this.droneGain.gain.setTargetAtTime(s.drone, t, 0.3);
     this.muffle.frequency.setTargetAtTime(s.ears ? 380 : 20000, t, 0.06);
@@ -331,6 +350,115 @@ export class AudioEngine {
     o.connect(bp).connect(g).connect(this.master);
     o.start(t0);
     o.stop(t + 0.05);
+  }
+
+  // Structural creak: a slow, pitched groan.
+  creak(pan = 0, vol = 0.3) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    const o = this.ctx.createOscillator();
+    o.type = 'sawtooth';
+    const f = 70 + Math.random() * 60;
+    o.frequency.setValueAtTime(f, t);
+    o.frequency.linearRampToValueAtTime(f * (0.7 + Math.random() * 0.6), t + 0.8);
+    const bp = this.ctx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.frequency.value = 600 + Math.random() * 500;
+    bp.Q.value = 8;
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(vol, t + 0.2);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.9);
+    o.connect(bp).connect(g).connect(this.out(pan));
+    o.start(t);
+    o.stop(t + 1);
+  }
+
+  // Sharp crack of plaster or timber.
+  crack(pan = 0, vol = 0.4) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    const s = this.noiseSource();
+    const f = this.ctx.createBiquadFilter();
+    f.type = 'highpass';
+    f.frequency.value = 1200;
+    const g = this.ctx.createGain();
+    this.env(g, t, vol, 0.002, 0.12);
+    s.connect(f).connect(g).connect(this.out(pan));
+    s.start(t, Math.random() * 2, 0.2);
+  }
+
+  // A wall or a chunk of floor coming down.
+  crash(pan = 0, vol = 0.6) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    const s = this.noiseSource();
+    const f = this.ctx.createBiquadFilter();
+    f.type = 'lowpass';
+    f.frequency.setValueAtTime(2200, t);
+    f.frequency.exponentialRampToValueAtTime(180, t + 1.2);
+    const g = this.ctx.createGain();
+    this.env(g, t, vol, 0.01, 1.3);
+    s.connect(f).connect(g).connect(this.out(pan));
+    s.start(t, Math.random(), 1.5);
+    this.thud(pan, vol * 0.9);
+  }
+
+  // Ceiling tiles clattering down.
+  clatter(pan = 0, vol = 0.3) {
+    if (!this.ctx) return;
+    const t0 = this.ctx.currentTime;
+    const n = 3 + Math.floor(Math.random() * 4);
+    for (let i = 0; i < n; i++) {
+      const t = t0 + i * (0.05 + Math.random() * 0.12);
+      const s = this.noiseSource();
+      const f = this.ctx.createBiquadFilter();
+      f.type = 'bandpass';
+      f.frequency.value = 900 + Math.random() * 1600;
+      f.Q.value = 2;
+      const g = this.ctx.createGain();
+      this.env(g, t, vol * (0.5 + Math.random() * 0.5), 0.003, 0.08);
+      s.connect(f).connect(g).connect(this.out(pan));
+      s.start(t, Math.random() * 2, 0.12);
+    }
+  }
+
+  cough() {
+    if (!this.ctx) return;
+    const t0 = this.ctx.currentTime;
+    for (let i = 0; i < 2 + Math.floor(Math.random() * 2); i++) {
+      const t = t0 + i * 0.32;
+      const s = this.noiseSource();
+      const f = this.ctx.createBiquadFilter();
+      f.type = 'bandpass';
+      f.frequency.value = 500 + Math.random() * 200;
+      f.Q.value = 1.2;
+      const g = this.ctx.createGain();
+      this.env(g, t, 0.4, 0.01, 0.18);
+      s.connect(f).connect(g).connect(this.master);
+      s.start(t, Math.random() * 2, 0.25);
+    }
+  }
+
+  hurt() {
+    if (!this.ctx) return;
+    this.thud(0, 0.5);
+    this.crack(0, 0.25);
+  }
+
+  door() {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    this.creak(0, 0.25);
+    const o = this.ctx.createOscillator();
+    o.type = 'square';
+    o.frequency.setValueAtTime(1800, t + 0.05);
+    const g = this.ctx.createGain();
+    this.env(g, t + 0.05, 0.08, 0.002, 0.03);
+    o.connect(g).connect(this.master);
+    o.start(t + 0.05);
+    o.stop(t + 0.12);
+    this.thud(0, 0.3);
   }
 
   pickup() {

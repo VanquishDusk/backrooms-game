@@ -7,7 +7,7 @@ import * as THREE from 'three';
 
 export const MAX_DYN_LIGHTS = 4;
 
-export const SURFACE = { WALL: 0, FLOOR: 1, CEILING: 2 };
+export const SURFACE = { WALL: 0, FLOOR: 1, CEILING: 2, PLAIN: 3 };
 
 // Uniform objects shared by every world material, so one write per frame
 // updates all of them.
@@ -86,7 +86,9 @@ vec3 sceneLight(vec3 P, vec3 N, float surface) {
   vec3 baked = texture2D(lightMap, lmUv).rgb * 1.3 * globalLight;
   float h = clamp(P.y / ceilH, 0.0, 1.0);
   if (surface < 0.5) baked *= mix(0.55, 1.08, h * h);
-  else if (surface > 1.5) baked *= 0.78;
+  else if (surface > 1.5 && surface < 2.5) baked *= 0.78;
+  // Exposed joist space above a broken ceiling is dim.
+  if (P.y > ceilH + 0.01) baked *= 0.35;
   // Pits fall off into darkness.
   if (P.y < -0.01) baked *= exp(P.y * 1.7);
   vec3 light = ambient + baked;
@@ -123,9 +125,10 @@ void main() {
   vec3 N = normalize(vNormal);
   vec3 albedo = texture2D(map, vUv * texScale).rgb;
   if (surface > 0.5 && surface < 1.5) {
-    // Damp patches in the carpet.
+    // Damp patches in the carpet (wetness lives in the lightmap's alpha).
+    float wet = texture2D(lightMap, vWorld.xz * lmScale).a;
     float n = vnoise(vWorld.xz * 0.32) * 0.65 + vnoise(vWorld.xz * 1.4) * 0.35;
-    albedo *= mix(1.0, 0.7, smoothstep(0.56, 0.82, n));
+    albedo *= mix(1.0, 0.7, smoothstep(0.56, 0.82, n) * wet);
   } else if (surface < 0.5) {
     // Water stains creeping up from the floor.
     float along = dot(vWorld.xz, vec2(1.0 - abs(N.x), 1.0 - abs(N.z)));
@@ -138,12 +141,15 @@ void main() {
 }
 `;
 
+const scaleVec = (s) => (Array.isArray(s) ? new THREE.Vector2(s[0], s[1]) : new THREE.Vector2(s, s));
+
+// texScale: UV repeats per metre, either one number or [u, v].
 export function createWorldMaterial(shared, map, surface, texScale) {
   return new THREE.ShaderMaterial({
     uniforms: {
       ...shared,
       map: { value: map },
-      texScale: { value: new THREE.Vector2(texScale, texScale) },
+      texScale: { value: scaleVec(texScale) },
       surface: { value: surface },
     },
     vertexShader: WORLD_VERT,
@@ -190,7 +196,7 @@ export function createGlitchMaterial(shared, map, texScale) {
     uniforms: {
       ...shared,
       map: { value: map },
-      texScale: { value: new THREE.Vector2(texScale, texScale) },
+      texScale: { value: scaleVec(texScale) },
       prox: { value: 0 },
     },
     vertexShader: WORLD_VERT,

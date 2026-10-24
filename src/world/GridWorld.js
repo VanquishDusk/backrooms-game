@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { EDGE_WALL, EDGE_EXIT } from './GridMap.js';
+import { EDGE_OPEN, EDGE_WALL, EDGE_EXIT } from './GridMap.js';
 import { SURFACE, createWorldMaterial, createGlitchMaterial } from './materials.js';
 
 // Turns a GridMap plus fixtures (lights, pillars, pits) into renderable,
@@ -8,6 +8,8 @@ import { SURFACE, createWorldMaterial, createGlitchMaterial } from './materials.
 const CHUNK = 8; // cells per chunk side
 const WALL_T = 0.16; // wall thickness
 const PIT_DEPTH = 5;
+const ATTIC = 0.75; // height of the exposed joist space above a broken ceiling
+const DROP = 0.35; // how far a collapsed floor sits below the carpet
 
 class GeoBuilder {
   constructor() {
@@ -97,7 +99,10 @@ export class GridWorld {
    * @param {Array<{x:number,z:number,color:number[],power:number,state:string,zone?:number}>} opts.lights
    * @param {Array<{x:number,z:number,size:number}>} opts.pillars  world-space centers
    * @param {Array<{x0:number,z0:number,x1:number,z1:number}>} opts.pits  world-space rects
-   * @param {object} opts.textures  { wall, floor, ceiling }
+   * @param {object} opts.textures  { wall, floor, ceiling, tile?, wood? }
+   * @param {object} [opts.texScale]  per-surface UV scale, number or [u, v]
+   * @param {(x:number,y:number)=>string} [opts.floorStyle]  'floor' | 'tile' per cell
+   * @param {(x:number,z:number)=>number} [opts.dampAt]  carpet wetness 0..1
    * @param {object} opts.shared  shared uniforms
    */
   constructor(opts) {
@@ -111,12 +116,24 @@ export class GridWorld {
     this.chunksX = Math.ceil(this.map.cols / CHUNK);
     this.chunksY = Math.ceil(this.map.rows / CHUNK);
 
+    this.floorStyle = opts.floorStyle || (() => 'floor');
+    this.dampAt = opts.dampAt || (() => 1);
+    const ts = { wall: 1 / 0.9, floor: 1 / 1.6, ceiling: 1 / 1.2, tile: 1 / 1.2, wood: 1 / 1.5, ...opts.texScale };
+    const tx = this.textures;
     this.materials = {
-      wall: createWorldMaterial(this.shared, this.textures.wall, SURFACE.WALL, 1 / 0.9),
-      floor: createWorldMaterial(this.shared, this.textures.floor, SURFACE.FLOOR, 1 / 1.6),
-      ceiling: createWorldMaterial(this.shared, this.textures.ceiling, SURFACE.CEILING, 1 / 1.2),
-      glitch: createGlitchMaterial(this.shared, this.textures.wall, 1 / 0.9),
+      wall: createWorldMaterial(this.shared, tx.wall, SURFACE.WALL, ts.wall),
+      floor: createWorldMaterial(this.shared, tx.floor, SURFACE.FLOOR, ts.floor),
+      ceiling: createWorldMaterial(this.shared, tx.ceiling, SURFACE.CEILING, ts.ceiling),
+      glitch: createGlitchMaterial(this.shared, tx.wall, ts.wall),
     };
+    if (tx.tile) this.materials.tile = createWorldMaterial(this.shared, tx.tile, SURFACE.PLAIN, ts.tile);
+    if (tx.wood) this.materials.wood = createWorldMaterial(this.shared, tx.wood, SURFACE.PLAIN, ts.wood);
+    // Per-cell destruction: bit 1 = ceiling gone, bit 2 = floor gone.
+    this.broken = new Uint8Array(this.map.cols * this.map.rows);
+    this.floorMeshes = [];
+    this.dirtyChunks = new Set();
+    this.dirtyWalls = new Set();
+    this.collisionDirty = false;
 
     this.pitCells = new Map();
     for (const p of this.pits) {
@@ -125,9 +142,12 @@ export class GridWorld {
     }
 
     this.wallMeshes = [];
-    this.buildStatic();
+    this.buildPillars();
     for (let cy = 0; cy < this.chunksY; cy++) {
-      for (let cx = 0; cx < this.chunksX; cx++) this.rebuildWallChunk(cx, cy);
+      for (let cx = 0; cx < this.chunksX; cx++) {
+        this.rebuildFloorChunk(cx, cy);
+        this.rebuildWallChunk(cx, cy);
+      }
     }
     this.rebuildCollision();
     this.buildPanels();
@@ -141,48 +161,132 @@ export class GridWorld {
     ];
   }
 
-  // Floors, ceilings and pillars never change after generation.
-  buildStatic() {
+  // Floors and ceilings of a chunk; rebuilt when cells are destroyed.
+  rebuildFloorChunk(cx, cy) {
+    const key = cy * this.chunksX + cx;
+    for (const m of this.floorMeshes[key] || []) {
+      this.group.remove(m);
+      m.geometry.dispose();
+    }
     const { map } = this;
     const cs = map.cellSize, H = map.height;
-    for (let cy = 0; cy < this.chunksY; cy++) {
-      for (let cx = 0; cx < this.chunksX; cx++) {
-        const floor = new GeoBuilder();
-        const ceil = new GeoBuilder();
-        for (let y = cy * CHUNK; y < Math.min(map.rows, (cy + 1) * CHUNK); y++) {
-          for (let x = cx * CHUNK; x < Math.min(map.cols, (cx + 1) * CHUNK); x++) {
-            const x0 = x * cs, z0 = y * cs, x1 = x0 + cs, z1 = z0 + cs;
-            ceil.flat(x0, z0, x1, z1, H, false);
-            const pit = this.pitCells.get(map.idx(x, y));
-            if (!pit) {
-              floor.flat(x0, z0, x1, z1, 0, true);
-              continue;
-            }
-            floor.flat(x0, z0, pit.x0, z1, 0, true);
-            floor.flat(pit.x1, z0, x1, z1, 0, true);
-            floor.flat(pit.x0, z0, pit.x1, pit.z0, 0, true);
-            floor.flat(pit.x0, pit.z1, pit.x1, z1, 0, true);
-            floor.wallX(pit.x0, pit.z0, pit.z1, -PIT_DEPTH, 0, 1);
-            floor.wallX(pit.x1, pit.z0, pit.z1, -PIT_DEPTH, 0, -1);
-            floor.wallZ(pit.z0, pit.x0, pit.x1, -PIT_DEPTH, 0, 1);
-            floor.wallZ(pit.z1, pit.x0, pit.x1, -PIT_DEPTH, 0, -1);
-            floor.flat(pit.x0, pit.z0, pit.x1, pit.z1, -PIT_DEPTH, true);
+    const geos = { floor: new GeoBuilder(), tile: new GeoBuilder(), ceiling: new GeoBuilder(), wood: new GeoBuilder() };
+    const broken = (x, y, bit) => map.inBounds(x, y) && (this.broken[map.idx(x, y)] & bit) !== 0;
+    for (let y = cy * CHUNK; y < Math.min(map.rows, (cy + 1) * CHUNK); y++) {
+      for (let x = cx * CHUNK; x < Math.min(map.cols, (cx + 1) * CHUNK); x++) {
+        const x0 = x * cs, z0 = y * cs, x1 = x0 + cs, z1 = z0 + cs;
+        const state = this.broken[map.idx(x, y)];
+
+        if (state & 1) {
+          // Ceiling gone: the unfinished house's joists and roof deck.
+          const top = H + ATTIC;
+          const wood = geos.wood;
+          wood.flat(x0, z0, x1, z1, top, false);
+          if (!broken(x - 1, y, 1)) wood.wallX(x0, z0, z1, H, top, 1);
+          if (!broken(x + 1, y, 1)) wood.wallX(x1, z0, z1, H, top, -1);
+          if (!broken(x, y - 1, 1)) wood.wallZ(z0, x0, x1, H, top, 1);
+          if (!broken(x, y + 1, 1)) wood.wallZ(z1, x0, x1, H, top, -1);
+          for (let k = 1; k < 5; k++) {
+            const zc = z0 + k * (cs / 5);
+            wood.box(x0, zc - 0.04, x1, zc + 0.04, top - 0.3, top, [false, false]);
+            wood.flat(x0, zc - 0.04, x1, zc + 0.04, top - 0.3, false);
           }
+        } else {
+          geos.ceiling.flat(x0, z0, x1, z1, H, false);
         }
-        for (const [geo, mat] of [[floor, this.materials.floor], [ceil, this.materials.ceiling]]) {
-          const g = geo.build();
-          if (g) this.group.add(new THREE.Mesh(g, mat));
+
+        if (state & 2) {
+          // Floor gone: bare subfloor a step lower.
+          const wood = geos.wood;
+          wood.flat(x0, z0, x1, z1, -DROP, true);
+          if (!broken(x - 1, y, 2)) wood.wallX(x0, z0, z1, -DROP, 0, 1);
+          if (!broken(x + 1, y, 2)) wood.wallX(x1, z0, z1, -DROP, 0, -1);
+          if (!broken(x, y - 1, 2)) wood.wallZ(z0, x0, x1, -DROP, 0, 1);
+          if (!broken(x, y + 1, 2)) wood.wallZ(z1, x0, x1, -DROP, 0, -1);
+          continue;
         }
+        const floor = this.floorStyle(x, y) === 'tile' && this.materials.tile ? geos.tile : geos.floor;
+        const pit = this.pitCells.get(map.idx(x, y));
+        if (!pit) {
+          floor.flat(x0, z0, x1, z1, 0, true);
+          continue;
+        }
+        floor.flat(x0, z0, pit.x0, z1, 0, true);
+        floor.flat(pit.x1, z0, x1, z1, 0, true);
+        floor.flat(pit.x0, z0, pit.x1, pit.z0, 0, true);
+        floor.flat(pit.x0, pit.z1, pit.x1, z1, 0, true);
+        floor.wallX(pit.x0, pit.z0, pit.z1, -PIT_DEPTH, 0, 1);
+        floor.wallX(pit.x1, pit.z0, pit.z1, -PIT_DEPTH, 0, -1);
+        floor.wallZ(pit.z0, pit.x0, pit.x1, -PIT_DEPTH, 0, 1);
+        floor.wallZ(pit.z1, pit.x0, pit.x1, -PIT_DEPTH, 0, -1);
+        floor.flat(pit.x0, pit.z0, pit.x1, pit.z1, -PIT_DEPTH, true);
       }
     }
+    const meshes = [];
+    for (const [name, geo] of Object.entries(geos)) {
+      const g = geo.build();
+      if (!g) continue;
+      const mesh = new THREE.Mesh(g, this.materials[name] || this.materials.floor);
+      this.group.add(mesh);
+      meshes.push(mesh);
+    }
+    this.floorMeshes[key] = meshes;
+  }
+
+  // Pillars never change; one mesh keeps them out of wall rebuilds.
+  buildPillars() {
+    const H = this.map.height;
     const pillars = new GeoBuilder();
     for (const p of this.pillars) {
       const h = p.size / 2;
       pillars.box(p.x - h, p.z - h, p.x + h, p.z + h, 0, H);
     }
-    // Pillars are few; one mesh is fine and keeps them out of wall rebuilds.
     const pg = pillars.build();
     if (pg) this.group.add(new THREE.Mesh(pg, this.materials.wall));
+  }
+
+  // ---- Destruction (batched; call flush() once per frame) ---------------
+
+  breakCell(x, y, bits) {
+    const i = this.map.idx(x, y);
+    if ((this.broken[i] & bits) === bits) return;
+    this.broken[i] |= bits;
+    // Neighbouring chunks may need their edge skirts updated.
+    for (const [dx, dy] of [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      if (!this.map.inBounds(x + dx, y + dy)) continue;
+      const [cx, cy] = this.chunkOf(x + dx, y + dy);
+      this.dirtyChunks.add(cy * this.chunksX + cx);
+    }
+  }
+
+  removeWall(e) {
+    if (this.map.getEdge(e) !== EDGE_WALL) return;
+    this.map.setEdge(e, EDGE_OPEN);
+    const [cx, cy] = this.chunkOf(Math.min(e.x, this.map.cols - 1), Math.min(e.y, this.map.rows - 1));
+    for (let dy = -1; dy <= 1; dy++) {
+      for (let dx = -1; dx <= 1; dx++) {
+        const nx = cx + dx, ny = cy + dy;
+        if (nx >= 0 && ny >= 0 && nx < this.chunksX && ny < this.chunksY) this.dirtyWalls.add(ny * this.chunksX + nx);
+      }
+    }
+    this.collisionDirty = true;
+  }
+
+  flush() {
+    for (const k of this.dirtyChunks) this.rebuildFloorChunk(k % this.chunksX, Math.floor(k / this.chunksX));
+    for (const k of this.dirtyWalls) this.rebuildWallChunk(k % this.chunksX, Math.floor(k / this.chunksX));
+    this.dirtyChunks.clear();
+    this.dirtyWalls.clear();
+    if (this.collisionDirty) {
+      this.rebuildCollision();
+      this.collisionDirty = false;
+    }
+  }
+
+  // Floor height under a point.
+  groundAt(x, z) {
+    const [cx, cy] = this.map.cellAt(x, z);
+    return this.broken[this.map.idx(cx, cy)] & 2 ? -DROP : 0;
   }
 
   // Walls of a chunk, rebuilt when the maze shifts.
@@ -460,7 +564,7 @@ export class GridWorld {
         data[o] = 255 * (1 - Math.exp(-r * 0.95));
         data[o + 1] = 255 * (1 - Math.exp(-g * 0.95));
         data[o + 2] = 255 * (1 - Math.exp(-b * 0.95));
-        data[o + 3] = 255;
+        data[o + 3] = 255 * Math.max(0, Math.min(1, this.dampAt(px, pz)));
       }
     }
     this.lightTex.needsUpdate = true;

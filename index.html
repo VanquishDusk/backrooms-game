@@ -28,7 +28,7 @@
   <div id="touch-buttons" class="hidden">
     <button class="tbtn" id="btn-ears" aria-label="Cover ears">
       <svg viewBox="0 0 24 24"><path d="M7 9a5 5 0 0 1 10 0c0 3-3 4-3 7a3 3 0 0 1-5 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M10 10a2 2 0 0 1 4 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-      <span>EARS</span>
+      <span id="cover-label">EARS</span>
     </button>
     <button class="tbtn" id="btn-drink" aria-label="Drink Almond Water">
       <svg viewBox="0 0 24 24"><path d="M10 2h4v3l2 3v13a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V8l2-3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M8 13h8" stroke="currentColor" stroke-width="2"/></svg>
@@ -51,6 +51,7 @@
     </button>
     <div id="stats">
       <div class="stat" id="stat-sanity"><label>SANITY</label><div class="bar"><div class="fill"></div></div></div>
+      <div class="stat" id="stat-health"><label>HEALTH</label><div class="bar"><div class="fill"></div></div></div>
       <div class="stat" id="stat-stamina"><label>STAMINA</label><div class="bar"><div class="fill"></div></div></div>
       <div class="stat" id="stat-battery"><label>BATTERY</label><div class="bar"><div class="fill"></div></div></div>
       <div class="stat-line" id="stat-bottles">ALMOND WATER <b id="bottle-count">0</b></div>
@@ -62,6 +63,8 @@
     <div id="fps"></div>
   </div>
 
+  <div id="level-card"><div class="lc-name"></div><div class="lc-title"></div><div class="lc-diff"></div></div>
+  <div id="hurt"></div>
   <div id="fade"></div>
   <div id="flash"></div>
   <div id="glitch"></div>
@@ -79,6 +82,7 @@
             <input id="seed-input" placeholder="SEED (optional)" maxlength="16" autocomplete="off" autocapitalize="characters" spellcheck="false">
             <button class="mbtn small" id="btn-seed">PLAY SEED</button>
           </div>
+          <div id="unlocked-levels"></div>
           <button class="mbtn" id="btn-howto">HOW TO SURVIVE</button>
           <button class="mbtn" id="btn-settings">SETTINGS</button>
           <button class="mbtn" id="btn-fullscreen">FULLSCREEN</button>
@@ -98,12 +102,14 @@
           <li>The halls <b>shift</b> when you aren't looking. Don't trust your memory.</li>
           <li>If you see a dark figure, don't stare. If it follows you, <b>run</b>.</li>
           <li>Watch your step near the Pitfalls.</li>
+          <li>Where the buzzing quiets and the carpet dries, the rooms look half-built. There may be a <b>door</b>.</li>
+          <li><b>Level 0.2</b> falls apart once you're inside. Find the door back to Level 0 before the collapse reaches it. Cover your mouth in the dust. Outlets charge your flashlight.</li>
         </ul>
         <div class="controls-grid">
           <div><h3>KEYBOARD</h3>
-            <p>WASD &middot; move<br>Mouse &middot; look<br>Shift &middot; run<br>C / Space &middot; cover ears<br>F &middot; flashlight<br>E &middot; drink<br>Esc &middot; pause</p></div>
+            <p>WASD &middot; move<br>Mouse &middot; look<br>Shift &middot; run<br>C / Space &middot; cover ears / mouth<br>F &middot; flashlight<br>E &middot; drink<br>Esc &middot; pause</p></div>
           <div><h3>TOUCH</h3>
-            <p>Left thumb &middot; move (anywhere on the left)<br>Drag right side &middot; look<br>RUN &middot; toggle running<br>EARS &middot; hold to cover ears<br>LIGHT &middot; flashlight<br>Bottle &middot; drink</p></div>
+            <p>Left thumb &middot; move (anywhere on the left)<br>Drag right side &middot; look<br>RUN &middot; toggle running<br>EARS / MOUTH &middot; hold to cover<br>LIGHT &middot; flashlight<br>Bottle &middot; drink</p></div>
         </div>
         <button class="mbtn" data-back>BACK</button>
       </div>

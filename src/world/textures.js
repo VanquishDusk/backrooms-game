@@ -76,11 +76,11 @@ export function wallpaperTexture(renderer, variant = 'yellow') {
   return finish(c, renderer);
 }
 
-// Damp, slightly worn tan carpet.
-export function carpetTexture(renderer) {
+// Damp, slightly worn tan carpet (or any other colour).
+export function carpetTexture(renderer, color = '#a99363') {
   const S = 512;
   const [c, ctx] = makeCanvas(S);
-  ctx.fillStyle = '#a99363';
+  ctx.fillStyle = color;
   ctx.fillRect(0, 0, S, S);
   const img = ctx.getImageData(0, 0, S, S);
   const d = img.data;
@@ -101,10 +101,10 @@ export function carpetTexture(renderer) {
 }
 
 // Suspended ceiling: 2x2 acoustic tiles with grid lines.
-export function ceilingTexture(renderer) {
+export function ceilingTexture(renderer, color = '#d8d1a2') {
   const S = 512;
   const [c, ctx] = makeCanvas(S);
-  ctx.fillStyle = '#d8d1a2';
+  ctx.fillStyle = color;
   ctx.fillRect(0, 0, S, S);
   speckle(ctx, S, 14000, '120,112,70', 0.35, 1.6);
   speckle(ctx, S, 4000, '255,255,235', 0.25, 1.2);
@@ -121,6 +121,77 @@ export function ceilingTexture(renderer) {
   for (const p of [0, half]) {
     ctx.fillRect(p + 3, 0, 1, S);
     ctx.fillRect(0, p + 3, S, 1);
+  }
+  return finish(c, renderer);
+}
+
+// Fresh off-white paint with a dark red chair rail. Spans the full wall
+// height once (v = 0 floor, v = 1 ceiling), so use it with texScale [u, 1/height].
+export function paintedWallTexture(renderer, railFrom = 0.29, railTo = 0.315) {
+  const W = 256, H = 512;
+  const c = document.createElement('canvas');
+  c.width = W;
+  c.height = H;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#e6e4d2';
+  ctx.fillRect(0, 0, W, H);
+  speckle(ctx, Math.max(W, H), 5000, '150,145,120', 0.08, 1.4);
+  // Faint roller marks.
+  for (let x = 0; x < W; x += 2) {
+    ctx.fillStyle = `rgba(120,115,95,${(Math.random() * 0.025).toFixed(3)})`;
+    ctx.fillRect(x, 0, 2, H);
+  }
+  const y0 = H * (1 - railTo), y1 = H * (1 - railFrom);
+  ctx.fillStyle = '#5e2a22';
+  ctx.fillRect(0, y0, W, y1 - y0);
+  ctx.fillStyle = 'rgba(255,255,255,0.12)';
+  ctx.fillRect(0, y0, W, 2);
+  ctx.fillStyle = 'rgba(0,0,0,0.25)';
+  ctx.fillRect(0, y1 - 2, W, 2);
+  // Baseboard.
+  ctx.fillStyle = '#d6d3c0';
+  ctx.fillRect(0, H - 14, W, 14);
+  ctx.fillStyle = 'rgba(0,0,0,0.15)';
+  ctx.fillRect(0, H - 14, W, 2);
+  return finish(c, renderer);
+}
+
+// Small white bathroom tiles.
+export function tileTexture(renderer) {
+  const S = 256;
+  const [c, ctx] = makeCanvas(S);
+  ctx.fillStyle = '#9a978a';
+  ctx.fillRect(0, 0, S, S);
+  const n = 4, g = 3, w = S / n;
+  for (let y = 0; y < n; y++) {
+    for (let x = 0; x < n; x++) {
+      const v = 228 + Math.floor(Math.random() * 18);
+      ctx.fillStyle = `rgb(${v},${v},${v - 6})`;
+      ctx.fillRect(x * w + g / 2, y * w + g / 2, w - g, w - g);
+    }
+  }
+  speckle(ctx, S, 1500, '120,120,110', 0.12);
+  return finish(c, renderer);
+}
+
+// Raw plywood / OSB for the unfinished house under the remodel.
+export function woodTexture(renderer) {
+  const S = 256;
+  const [c, ctx] = makeCanvas(S);
+  ctx.fillStyle = '#8f6c42';
+  ctx.fillRect(0, 0, S, S);
+  for (let i = 0; i < 420; i++) {
+    const v = Math.random();
+    ctx.fillStyle = v < 0.5 ? `rgba(60,40,20,${(0.1 + Math.random() * 0.25).toFixed(2)})` : `rgba(200,160,110,${(0.1 + Math.random() * 0.25).toFixed(2)})`;
+    ctx.save();
+    ctx.translate(Math.random() * S, Math.random() * S);
+    ctx.rotate(Math.random() * Math.PI);
+    ctx.fillRect(-10, -3, 14 + Math.random() * 18, 3 + Math.random() * 4);
+    ctx.restore();
+  }
+  for (let y = 0; y < S; y += 3) {
+    ctx.fillStyle = `rgba(70,45,20,${(Math.random() * 0.08).toFixed(3)})`;
+    ctx.fillRect(0, y, S, 1);
   }
   return finish(c, renderer);
 }

@@ -14,6 +14,7 @@ export class Hud {
       sanity: $('stat-sanity'),
       stamina: $('stat-stamina'),
       battery: $('stat-battery'),
+      health: $('stat-health'),
     };
     this.last = {};
     this.msgTimer = 0;
@@ -48,13 +49,14 @@ export class Hud {
     this.last[name] = v;
     this.last[name + 'faded'] = faded;
     const el = this.bars[name];
-    el.querySelector('.fill').style.transform = `scaleX(${v / 100})`;
+    el.querySelector('.fill').style.transform = `scaleX(${Math.max(0, Math.min(100, v)) / 100})`;
     el.classList.toggle('faded', !!faded);
-    if (name === 'sanity') el.classList.toggle('low', v < 30);
+    if (name === 'sanity' || name === 'health') el.classList.toggle('low', v < 30);
   }
 
   update(dt, player, runTime, extra, showFps) {
     this.setBar('sanity', player.sanity, false);
+    this.setBar('health', player.health, !extra.health && player.health >= 99.5);
     this.setBar('stamina', player.stamina, player.stamina >= 99.5);
     this.setBar('battery', player.battery, !player.flashlight && player.battery >= 99.5);
     if (this.last.bottles !== player.bottles) {
@@ -72,10 +74,10 @@ export class Hud {
       this.recTime.textContent = `${h}:${m}:${s}`;
     }
 
-    const earsOn = !!extra.ears;
-    this.ears.classList.toggle('show', earsOn);
-    this.ears.classList.toggle('covered', earsOn && player.coveringEars);
-    if (earsOn) this.ears.textContent = player.coveringEars ? 'KEEP MOVING' : 'COVER YOUR EARS';
+    const warnOn = !!extra.warn;
+    this.ears.classList.toggle('show', warnOn);
+    this.ears.classList.toggle('covered', warnOn && player.coveringEars);
+    if (warnOn) this.ears.textContent = player.coveringEars ? extra.warnCovered : extra.warn;
 
     if (this.msgTimer > 0) {
       this.msgTimer -= dt;

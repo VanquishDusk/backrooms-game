@@ -4,6 +4,7 @@ import { EDGE_OPEN, EDGE_WALL } from '../../world/GridMap.js';
 import { wallpaperTexture, carpetTexture, ceilingTexture } from '../../world/textures.js';
 import { MAX_DYN_LIGHTS } from '../../world/materials.js';
 import { Stalker } from '../../entities/Stalker.js';
+import { PropKit, nearDoor } from '../../world/props.js';
 import { generateLevel0, ZONE } from './generate.js';
 
 // Level 0 — "The Lobby" / "The Yellow Hell".
@@ -43,6 +44,7 @@ export class Level0 {
       pits: layout.pits,
       textures: this.textures,
       shared,
+      dampAt: (x, z) => this.dampAt(x, z),
     });
     this.world.setExit(layout.exitEdge);
     scene.add(this.world.group);
@@ -56,6 +58,8 @@ export class Level0 {
     this.activeDyn = [];
 
     this.buildBottles();
+    this.props = new PropKit((x, z) => this.world.sampleLight(x, z));
+    this.buildConstruction();
     this.stalker = new Stalker(scene, this.world, this.rng.fork('stalker'));
 
     // Director state.
@@ -113,6 +117,44 @@ export class Level0 {
       this.scene.add(g);
       return { mesh: g, x: b.x, z: b.z, taken: false };
     });
+  }
+
+  // The construction pocket is dry; everywhere else the carpet is soaked.
+  dampAt(x, z) {
+    const c = this.layout.construction;
+    if (!c) return 1;
+    const d = Math.hypot(x - c.x, z - c.z);
+    return Math.min(1, Math.max(0, (d - (c.r - 3)) / 6));
+  }
+
+  buildConstruction() {
+    const { construction, door02, map } = this.layout;
+    this.door02 = null;
+    if (!construction) return;
+    const kit = this.props;
+    const rng = this.rng.fork('construction');
+    const cells = rng.shuffle([...construction.cells]);
+    const makers = [
+      (x, z) => kit.bucket(x, z),
+      (x, z, r) => kit.sawhorse(x, z, r),
+      (x, z, r) => kit.drywall(x, z, r),
+      (x, z, r) => kit.ladder(x, z, r),
+      (x, z, r) => kit.tarp(x, z, r),
+    ];
+    this.propGroup = new THREE.Group();
+    const count = Math.min(cells.length, rng.int(7, 11));
+    for (let i = 0; i < count; i++) {
+      const [cx, cy] = cells[i];
+      const [wx, wz] = map.cellCenter(cx, cy);
+      const x = wx + rng.range(-0.6, 0.6), z = wz + rng.range(-0.6, 0.6);
+      this.propGroup.add(rng.pick(makers)(x, z, rng.range(0, Math.PI * 2)));
+      if (rng.chance(0.4)) this.propGroup.add(kit.bucket(x + rng.range(-0.5, 0.5), z + rng.range(-0.5, 0.5)));
+    }
+    if (door02) {
+      this.door02 = kit.door(map, door02.edge, door02.side, { panel: 0xeeeae0, inset: 0xe2ded2, frame: 0xd8d4c4 });
+      this.propGroup.add(this.door02.group);
+    }
+    this.scene.add(this.propGroup);
   }
 
   // ---- Per-frame ---------------------------------------------------------
@@ -195,8 +237,26 @@ export class Level0 {
     }
     if (de < 0.22 && !player.falling) {
       this.done = true;
-      ctx.onEscape('level1');
+      ctx.onEscape('level1', 'noclip');
       return;
+    }
+
+    // The quiet, dry, half-built rooms — and the door in them.
+    if (zone === ZONE.CONSTRUCTION && !this.constructionHint) {
+      this.constructionHint = true;
+      hud.message('The buzzing is quieter here. The carpet is dry.', 4);
+    }
+    if (this.door02 && !player.falling) {
+      const dd = Math.hypot(player.pos.x - this.door02.x, player.pos.z - this.door02.z);
+      if (dd < 5 && !this.doorHint) {
+        this.doorHint = true;
+        hud.message('A door. In Level 0?', 3);
+      }
+      if (nearDoor(this.door02, player.pos.x, player.pos.z)) {
+        this.done = true;
+        ctx.onEscape('level0_2', 'door');
+        return;
+      }
     }
 
     // The figure.
@@ -431,6 +491,8 @@ export class Level0 {
         const e = map.edge(x, y, dir);
         if (map.isBoundaryEdge(e) || map.getEdge(e) !== want) continue;
         if (e.h === exitE.h && e.x === exitE.x && e.y === exitE.y) continue;
+        const de2 = this.layout.door02?.edge;
+        if (de2 && e.h === de2.h && e.x === de2.x && e.y === de2.y) continue;
         if (x >= pitRoom.x - 1 && x <= pitRoom.x + pitRoom.w && y >= pitRoom.y - 1 && y <= pitRoom.y + pitRoom.h) continue;
         // Corners of the edge must not hold a pillar.
         const c1 = `${e.x},${e.y}`;
@@ -481,7 +543,9 @@ export class Level0 {
 
   audioMix(player) {
     const lightHum = this.globalLight;
-    const hum = this.humMute > 0 ? 0.004 : (0.075 + this.spikeLevel * 0.55) * (0.15 + 0.85 * lightHum);
+    // The buzz quiets toward the construction pocket.
+    const quiet = 0.25 + 0.75 * this.dampAt(player.pos.x, player.pos.z);
+    const hum = this.humMute > 0 ? 0.004 : (0.075 * quiet + this.spikeLevel * 0.55) * (0.15 + 0.85 * lightHum);
     let exitGain = 0, exitPan = 0;
     if (this.exitDist < 32) {
       const ex = this.world.exit;
@@ -521,10 +585,16 @@ export class Level0 {
   }
 
   hudInfo() {
-    return { ears: this.spikeLevel > 0.1 };
+    return {
+      warn: this.spikeLevel > 0.1 ? 'COVER YOUR EARS' : null,
+      warnCovered: 'KEEP MOVING',
+      coverLabel: 'EARS',
+      health: false,
+    };
   }
 
   dispose() {
+    this.disposed = true;
     this.scene.remove(this.world.group);
     this.world.dispose();
     this.stalker.dispose(this.scene);
@@ -532,6 +602,8 @@ export class Level0 {
     for (const g of this.bottleGeos) g.dispose();
     for (const m of this.bottleMats) m.dispose();
     for (const t of Object.values(this.textures)) t.dispose();
+    if (this.propGroup) this.scene.remove(this.propGroup);
+    this.props.dispose();
   }
 }
 
@@ -545,6 +617,7 @@ export const LEVEL0 = {
   name: 'Level 0',
   title: 'The Lobby',
   nickname: 'The Yellow Hell',
+  difficulty: 1,
   next: 'level1',
   create: (ctx) => new Level0(ctx),
 };

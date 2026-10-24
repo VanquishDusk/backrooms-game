@@ -22,6 +22,8 @@ export class Player {
     this.stamina = 100;
     this.staminaLock = 0;
     this.sanity = 100;
+    this.health = 100;
+    this.hurtAgo = 99;
     this.battery = 100;
     this.flashlight = false;
     this.bottles = 0;
@@ -36,6 +38,20 @@ export class Player {
     this.frozen = false;
   }
 
+  // Stats that travel with you between levels.
+  carry() {
+    return { sanity: this.sanity, health: this.health, battery: this.battery, bottles: this.bottles };
+  }
+
+  restore(c) {
+    if (c) Object.assign(this, c);
+  }
+
+  damage(amount) {
+    this.health = Math.max(0, this.health - amount);
+    this.hurtAgo = 0;
+  }
+
   get speed() {
     return this.vel.length();
   }
@@ -43,6 +59,8 @@ export class Player {
   // Returns a list of events ('step', 'step-run', 'exhausted').
   update(dt, input, world, settings) {
     const events = [];
+    this.hurtAgo += dt;
+    if (this.hurtAgo > 6 && this.health < 100) this.health = Math.min(100, this.health + 1.5 * dt);
 
     const look = input.consumeLook();
     if (!this.frozen) {
@@ -101,6 +119,10 @@ export class Player {
     this.pos.x += this.vel.x * dt;
     this.pos.z += this.vel.y * dt;
     world.collide(this.pos, this.radius);
+    if (world.groundAt) {
+      const ground = world.groundAt(this.pos.x, this.pos.z);
+      this.pos.y += (ground - this.pos.y) * Math.min(1, dt * 12);
+    }
 
     const sp = this.speed;
     this.bobAmp += ((sp > 0.3 ? Math.min(1, sp / RUN + 0.35) : 0) - this.bobAmp) * Math.min(1, dt * 8);

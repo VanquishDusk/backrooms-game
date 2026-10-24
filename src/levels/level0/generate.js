@@ -4,7 +4,7 @@ import { createNoise2D } from '../../core/rng.js';
 // Level 0 layout generator. Everything here comes from the seed, so the
 // same seed always rebuilds the same Yellow Hell.
 
-export const ZONE = { NORMAL: 0, DARK: 1, RED: 2, PITS: 3 };
+export const ZONE = { NORMAL: 0, DARK: 1, RED: 2, PITS: 3, CONSTRUCTION: 4 };
 
 const COLS = 56;
 const ROWS = 56;
@@ -184,6 +184,47 @@ export function generateLevel0(rng) {
     }
   }
   const exitEdge = rng.pick(exitCands);
+  const sameEdge = (a, b) => a && b && a.h === b.h && a.x === b.x && a.y === b.y;
+
+  // Sometimes the buzzing quiets, the carpet dries out and the rooms look
+  // like they're under construction. Somewhere in there is a door to Level 0.2.
+  let construction = null, door02 = null;
+  if (rng.chance(0.7)) {
+    const cands = [];
+    for (let i = 0; i < n; i++) {
+      const x = i % COLS, y = (i / COLS) | 0;
+      if (dist[i] >= maxD * 0.3 && dist[i] <= maxD * 0.8 && zone[i] === ZONE.NORMAL && x > 4 && y > 4 && x < COLS - 5 && y < ROWS - 5) cands.push(i);
+    }
+    if (cands.length) {
+      const c = rng.pick(cands);
+      const cx = c % COLS, cy = (c / COLS) | 0, r = rng.range(3, 4.5);
+      const cells = [];
+      for (let y = 0; y < ROWS; y++) {
+        for (let x = 0; x < COLS; x++) {
+          const i = map.idx(x, y);
+          if (Math.hypot(x - cx, y - cy) > r || (zone[i] !== ZONE.NORMAL && zone[i] !== ZONE.DARK)) continue;
+          zone[i] = ZONE.CONSTRUCTION;
+          cells.push([x, y]);
+        }
+      }
+      construction = { x: (cx + 0.5) * CELL, z: (cy + 0.5) * CELL, r: r * CELL, cells };
+      const doorCands = [];
+      for (const [x, y] of cells) {
+        for (let d = 0; d < 4; d++) {
+          const e = map.edge(x, y, d);
+          if (map.getEdge(e) === EDGE_WALL && !sameEdge(e, exitEdge)) doorCands.push({ edge: e, side: { x, y } });
+        }
+      }
+      if (doorCands.length) door02 = rng.pick(doorCands);
+    }
+  }
+  for (const l of lights) {
+    const [lx, ly] = map.cellAt(l.x, l.z);
+    if (zone[map.idx(lx, ly)] !== ZONE.CONSTRUCTION) continue;
+    l.state = rng.chance(0.25) ? 'off' : 'on';
+    l.power = 0.85;
+    l.color = [1, 1, 0.92];
+  }
 
   // Almond Water, scattered.
   const bottles = [];
@@ -191,7 +232,7 @@ export function generateLevel0(rng) {
   for (let tries = 0; tries < 2000 && bottles.length < nBottles; tries++) {
     const x = rng.int(0, COLS - 1), y = rng.int(0, ROWS - 1);
     const i = map.idx(x, y);
-    if (zone[i] === ZONE.PITS || dist[i] < 3) continue;
+    if (zone[i] === ZONE.PITS || zone[i] === ZONE.CONSTRUCTION || dist[i] < 3) continue;
     if (bottles.some((b) => b.cx === x && b.cy === y)) continue;
     bottles.push({ cx: x, cy: y, x: (x + 0.5) * CELL + rng.range(-0.8, 0.8), z: (y + 0.5) * CELL + rng.range(-0.8, 0.8) });
   }
@@ -211,5 +252,5 @@ export function generateLevel0(rng) {
     }
   }
 
-  return { map, zone, density, lights, pillars, pits, spawn, spawnYaw: yaw, exitEdge, bottles, pitRoom: pRoom };
+  return { map, zone, density, lights, pillars, pits, spawn, spawnYaw: yaw, exitEdge, bottles, pitRoom: pRoom, construction, door02 };
 }
