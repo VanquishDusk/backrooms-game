@@ -97,6 +97,7 @@ export class Input {
         const slot = code === 'Digit1' || code === 'Numpad1' ? 0 : code === 'Digit2' || code === 'Numpad2' ? 1 : -1;
         if (slot >= 0) this.actions.push(`${e.shiftKey ? 'drop' : 'use'}${slot}`);
         if (code === 'Tab' || code === 'KeyI' || code === 'KeyB') this.actions.push('bag');
+        if (code === 'KeyV') this.actions.push('photo');
       }
       if (this.enabled && code === 'Tab') e.preventDefault();
       this.keys.add(code);

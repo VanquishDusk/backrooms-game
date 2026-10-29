@@ -7,6 +7,7 @@ import { LEVEL2 } from './level2/Level2.js';
 import { LEVEL3 } from './level3/Level3.js';
 import { LEVEL4 } from './level4/Level4.js';
 import { LEVEL5 } from './level5/Level5.js';
+import { LEVEL63 } from './level63/Level63.js';
 
 // Every playable level registers here. A level definition is:
 //
@@ -42,12 +43,15 @@ export const LEVELS = {
   [LEVEL3.id]: LEVEL3,
   [LEVEL4.id]: LEVEL4,
   [LEVEL5.id]: LEVEL5,
+  [LEVEL63.id]: LEVEL63,
 };
 
 // Names for levels that exits point at but that aren't built yet.
 export const UPCOMING = {
   level6: 'LEVEL 6 — LIGHTS OUT',
   level9: 'LEVEL 9 — THE SUBURBS',
+  level39: 'LEVEL 39',
+  level797: 'LEVEL 797',
   level71: 'LEVEL 71',
 };
 

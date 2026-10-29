@@ -8,6 +8,8 @@ import { load, save } from './storage.js';
 import { createSharedUniforms } from '../world/materials.js';
 import { Hud } from '../ui/Hud.js';
 import { Backpack } from './Backpack.js';
+import { Camcorder } from './Camcorder.js';
+import { Archive } from '../ui/Archive.js';
 import { LEVELS, FIRST_LEVEL, UPCOMING } from '../levels/registry.js';
 
 const $ = (id) => document.getElementById(id);
@@ -68,6 +70,8 @@ export class Game {
     this.applyQuality();
     this.bindUi();
     this.backpack = new Backpack(this);
+    this.camcorder = new Camcorder(this);
+    this.archive = new Archive(this);
     this.updateTouchUi();
     this.showRecords();
     this.showUnlocked();
@@ -277,12 +281,19 @@ export class Game {
       onCaught: (stalker, cause) => runId === this.runId && this.caught(stalker, cause),
       onEscape: (target, style) => runId === this.runId && this.escape(target, style),
       placeItem: (item, x, z) => this.backpack.place(item, x, z),
+      moveIntent: () => {
+        const m = this.input.getMove();
+        return Math.hypot(m.x, m.y);
+      },
       fade: (to, dur) => this.fade(to, dur),
       hurtFlash: (a) => this.hurtFlash(a),
       vibrate: (p) => navigator.vibrate && navigator.vibrate(p),
       isOver: () => runId !== this.runId || this.state !== 'playing',
     };
     this.level = this.levelDef.create(ctx);
+    // Open-air levels see much further.
+    this.camera.far = this.level.cameraFar || 90;
+    this.camera.updateProjectionMatrix();
     const sp = this.level.spawn;
     this.player.reset(sp.x, sp.z, sp.yaw);
   }
@@ -317,11 +328,13 @@ export class Game {
       const levelSeed = this.visit === 0 ? this.seed : `${this.seed}#${this.visit}`;
       this.loadLevel(levelId, levelSeed);
       this.player.restore(carry);
+      this.stats.visits = this.stats.visits || {};
+      this.stats.visits[levelId] = (this.stats.visits[levelId] || 0) + 1;
       if (levelId !== FIRST_LEVEL && !this.stats.unlocked.includes(levelId)) {
         this.stats.unlocked.push(levelId);
-        save('stats', this.stats);
         this.showUnlocked();
       }
+      save('stats', this.stats);
       this.state = 'playing';
       this.input.enabled = true;
       this.input.clear();
@@ -350,7 +363,7 @@ export class Game {
       this.hud.setHint(
         this.input.touchMode
           ? 'STICK: MOVE  ·  DRAG ANYWHERE: LOOK'
-          : `WASD MOVE · SHIFT RUN · C ${cover} · F LIGHT · E DRINK · 1/2 USE · TAB BAG · ESC PAUSE`,
+          : `WASD MOVE · SHIFT RUN · C ${cover} · F LIGHT · E DRINK · 1/2 USE · TAB BAG · V PHOTO · ESC PAUSE`,
         10,
       );
     }, 60);
@@ -368,43 +381,9 @@ export class Game {
     this.cardTimer = setTimeout(() => card.classList.remove('show'), 3200);
   }
 
-  // Menu level select: main levels (0, 1, ...) and sublevels (0.2, 1.3, ...)
-  // in their own sections. Levels you haven't reached yet show as locked.
+  // The menu's archive of levels (tapes) refreshes with your unlocks and photos.
   showUnlocked() {
-    const box = $('unlocked-levels');
-    box.textContent = '';
-    const reached = (id) => id === FIRST_LEVEL || this.stats.unlocked.includes(id);
-    const defs = Object.values(LEVELS).sort((a, b) => a.number - b.number);
-    const sections = [
-      ['LEVELS', defs.filter((d) => Number.isInteger(d.number))],
-      ['SUBLEVELS', defs.filter((d) => !Number.isInteger(d.number))],
-    ];
-    for (const [title, list] of sections) {
-      const section = document.createElement('div');
-      section.className = 'level-section';
-      const h = document.createElement('h3');
-      h.textContent = title;
-      const grid = document.createElement('div');
-      grid.className = 'level-grid';
-      section.append(h, grid);
-      for (const def of list) {
-        const open = reached(def.id);
-        const b = document.createElement('button');
-        b.className = 'mbtn small level-btn';
-        b.disabled = !open;
-        b.innerHTML = `<span>${def.name.toUpperCase()}</span><small>${open ? def.title.toUpperCase() : 'LOCKED'}</small>`;
-        if (open) {
-          b.addEventListener('click', (e) => {
-            e.preventDefault();
-            this.audio.unlock();
-            this.audio.click();
-            this.startRun(randomSeedString(), def.id);
-          });
-        }
-        grid.appendChild(b);
-      }
-      box.appendChild(section);
-    }
+    this.archive.refresh();
   }
 
   hurtFlash(a) {
@@ -454,6 +433,7 @@ export class Game {
     $('glitch').classList.remove('on');
     this.updateTouchUi();
     this.showRecords();
+    this.showUnlocked();
     this.loadLevel(FIRST_LEVEL, randomSeedString());
     this.showScreen('menu');
   }
@@ -578,6 +558,7 @@ export class Game {
           else this.pause();
         }
         if (a === 'bag') this.backpack.toggle(!this.backpack.open);
+        if (a === 'photo') this.camcorder.request();
         if (a.startsWith('use')) this.backpack.use(Number(a.slice(3)));
         if (a.startsWith('drop')) this.backpack.drop(Number(a.slice(4)));
         if (a === 'flashlight') {
@@ -620,6 +601,7 @@ export class Game {
       }
       $('btn-ears').classList.toggle('alert', !!level.hudInfo(player).warn && !player.coveringEars);
       level.update(dt, player);
+      this.camcorder.update(dt);
       if (this.state === 'playing') this.backpack.update(dt);
       else this.backpack.close();
       this.runTime += dt;
@@ -691,6 +673,7 @@ export class Game {
     }
 
     this.renderer.render(this.scene, this.camera, this.time);
+    this.camcorder.afterRender(this.renderer.canvas);
   }
 
   // On "auto", step graphics down if the device can't keep up.

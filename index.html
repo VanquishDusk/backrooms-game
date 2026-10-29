@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Permanent+Marker&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <script type="importmap">
     { "imports": { "three": "./vendor/three.module.min.js" } }
@@ -47,6 +47,9 @@
 
   <div id="hud" class="hidden">
     <div id="rec"><span class="dot"></span>REC <span id="rec-time">00:00:00</span></div>
+    <button id="btn-cam" aria-label="Take a photo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="2" y="7" width="14" height="11" rx="1"/><path d="M16 11l6-3v9l-6-3z"/><circle cx="6" cy="10" r="1" fill="currentColor"/></svg>
+    </button>
     <button id="btn-pause" aria-label="Pause">
       <svg viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" fill="currentColor"/><rect x="14" y="4" width="4" height="16" fill="currentColor"/></svg>
     </button>
@@ -64,6 +67,7 @@
     <div id="msg"></div>
     <div id="controls-hint"></div>
     <div id="fps"></div>
+    <div id="photo-toast"><img alt=""><span></span></div>
   </div>
 
   <div id="backpack" class="hidden">
@@ -84,22 +88,66 @@
   <!-- Screens -->
   <div id="screens">
     <section class="screen" id="screen-menu">
-      <div class="menu-inner">
-        <h1 class="title">THE BACKROOMS</h1>
-        <p class="subtitle" id="menu-level">LEVEL 0 &mdash; THE LOBBY</p>
-        <p class="tagline">"If you're not careful and you noclip out of reality in the wrong areas..."</p>
-        <div class="buttons">
-          <button class="mbtn primary" id="btn-start">ENTER</button>
-          <div class="seed-row">
-            <input id="seed-input" placeholder="SEED (optional)" maxlength="16" autocomplete="off" autocapitalize="characters" spellcheck="false">
-            <button class="mbtn small" id="btn-seed">PLAY SEED</button>
+      <div class="menu-wrap">
+        <header class="menu-head">
+          <h1 class="title">THE BACKROOMS</h1>
+          <p class="tagline">"If you're not careful and you noclip out of reality in the wrong areas..."</p>
+        </header>
+        <div class="menu-grid">
+          <div class="menu-side">
+            <p class="now-showing"><span class="dot"></span>NOW SHOWING &middot; <span id="menu-level">LEVEL 0 &mdash; THE LOBBY</span></p>
+            <button class="mbtn primary big-enter" id="btn-start">ENTER</button>
+            <div class="seed-row">
+              <input id="seed-input" placeholder="SEED (optional)" maxlength="16" autocomplete="off" autocapitalize="characters" spellcheck="false">
+              <button class="mbtn small" id="btn-seed">PLAY SEED</button>
+            </div>
+            <div class="side-btns">
+              <button class="mbtn small" id="btn-howto">HOW TO SURVIVE</button>
+              <button class="mbtn small" id="btn-settings">SETTINGS</button>
+              <button class="mbtn small" id="btn-fullscreen">FULLSCREEN</button>
+            </div>
+            <p class="records" id="records"></p>
           </div>
-          <div id="unlocked-levels"></div>
-          <button class="mbtn" id="btn-howto">HOW TO SURVIVE</button>
-          <button class="mbtn" id="btn-settings">SETTINGS</button>
-          <button class="mbtn" id="btn-fullscreen">FULLSCREEN</button>
+          <div class="archive">
+            <div class="archive-head">
+              <h2>THE ARCHIVE</h2>
+              <span id="archive-count"></span>
+            </div>
+            <p class="archive-sub">Every level you find goes on a tape. Your photos become the covers.</p>
+            <div class="shelf" id="unlocked-levels"></div>
+          </div>
         </div>
-        <p class="records" id="records"></p>
+      </div>
+    </section>
+
+    <section class="screen" id="screen-tape">
+      <div class="tape-view">
+        <div class="tv">
+          <div class="tv-screen" id="tv-screen">
+            <img id="tv-img" alt="">
+            <span class="static" id="tv-static"></span>
+            <div class="tv-msg" id="tv-msg"></div>
+            <div class="tv-scan"></div>
+          </div>
+          <div class="tv-controls">
+            <button class="mbtn small" id="tv-prev" aria-label="Previous photo">&#9664;</button>
+            <span id="tv-count">0 / 0</span>
+            <button class="mbtn small" id="tv-next" aria-label="Next photo">&#9654;</button>
+            <button class="mbtn small" id="tv-save">SAVE</button>
+            <button class="mbtn small" id="tv-del">ERASE</button>
+          </div>
+        </div>
+        <div class="tape-info">
+          <div class="tape-num" id="tape-num"></div>
+          <h2 id="tape-title"></h2>
+          <div class="tape-class" id="tape-class"></div>
+          <p class="tape-blurb" id="tape-blurb"></p>
+          <p class="tape-stats" id="tape-stats"></p>
+          <div class="buttons">
+            <button class="mbtn primary" id="tape-play">PLAY THIS LEVEL</button>
+            <button class="mbtn" id="tape-back">BACK TO THE ARCHIVE</button>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -127,9 +175,9 @@
         </ul>
         <div class="controls-grid">
           <div><h3>KEYBOARD</h3>
-            <p>WASD &middot; move<br>Mouse &middot; look<br>Shift &middot; run<br>C / Space &middot; cover ears / mouth<br>F &middot; flashlight<br>E &middot; drink<br>1 / 2 &middot; use backpack item<br>Shift + 1 / 2 &middot; drop it<br>Tab &middot; open backpack<br>Esc &middot; pause</p></div>
+            <p>WASD &middot; move<br>Mouse &middot; look<br>Shift &middot; run<br>C / Space &middot; cover ears / mouth<br>F &middot; flashlight<br>E &middot; drink<br>1 / 2 &middot; use backpack item<br>Shift + 1 / 2 &middot; drop it<br>Tab &middot; open backpack<br>V &middot; take a photo<br>Esc &middot; pause</p></div>
           <div><h3>TOUCH</h3>
-            <p>Stick (bottom left) &middot; move<br>Drag anywhere else &middot; look<br>RUN &middot; toggle running<br>EARS / MOUTH &middot; hold to cover<br>LIGHT &middot; flashlight<br>Bottle &middot; drink<br>1 / 2 &middot; use backpack item<br>Tap BACKPACK &middot; open it (drop items there)</p></div>
+            <p>Stick (bottom left) &middot; move<br>Drag anywhere else &middot; look<br>RUN &middot; toggle running<br>EARS / MOUTH &middot; hold to cover<br>LIGHT &middot; flashlight<br>Bottle &middot; drink<br>1 / 2 &middot; use backpack item<br>Tap BACKPACK &middot; open it (drop items there)<br>Camera (top right) &middot; take a photo</p></div>
         </div>
         <button class="mbtn" data-back>BACK</button>
       </div>

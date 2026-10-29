@@ -288,6 +288,7 @@ export class Level5 {
       housing: lit(solidTex('#2a2c2a', 0.05)), cage: lit(solidTex('#1a1a18', 0.05)), glass: lit(solidTex('#c8d0c8', 0.04)),
       crate: lit(tx.crate), steelDoor: createWorldMaterial(shared, tx.steelDoor, SURFACE.PLAIN, [1 / 1.0, 1 / 2.1]),
       officeLight: basic({ color: 0xe8f0ff }),
+      skyGlow: basic({ color: 0xc4def8 }),
       liftDoor: lit(tx.liftDoor, 1),
     };
     this.ownMats.push(this.mats.door, this.mats.doorDark, this.mats.steelDoor);
@@ -543,10 +544,19 @@ export class Level5 {
     // Guest room doors along the corridors; one of them is dark, and goes elsewhere.
     const far = guest.filter((r) => r.state === 'locked' && this.layout.spawnDist[map.idx(r.door.x + DIRS[r.door.d][0], r.door.y + DIRS[r.door.d][1])] > 18);
     this.darkDoor = far.length ? rng.pick(far) : null;
+    // Rarer still: a plain metal door among the wooden ones, cold light under it (Level 63).
+    const metal = rng.shuffle(far.filter((r) => r !== this.darkDoor)).slice(0, rng.chance(0.3) ? 2 : 1);
+    this.metalDoors = [];
     this.letters = [];
     for (const r of guest) {
       const o = edgeFrame(map, r.door.x, r.door.y, r.door.d);
       const dark = r === this.darkDoor;
+      if (metal.includes(r)) {
+        this.buildMetalDoor(D, o);
+        const [x, , z] = D.at(o, 0, 0, 0.7);
+        this.metalDoors.push({ x, z, rot: o.rot, ex: o.x, ez: o.z });
+        continue;
+      }
       guestDoor(D, o, dark ? null : r.number, r.state, dark ? 'doorDark' : 'door');
       if (dark) {
         const [x, , z] = D.at(o, 0, 0, 0.7);
@@ -944,6 +954,8 @@ export class Level5 {
     if (this.done) return;
     this.updateDarkDoor(dt, player);
     if (this.done) return;
+    this.updateMetalDoors(dt, player);
+    if (this.done) return;
     this.updatePickups(dt, player);
     this.updateAmbient(dt, player);
 
@@ -1158,6 +1170,36 @@ export class Level5 {
       player.staminaRegenMul = 1 - k * 0.6;
       this.lastHurt = 'The heat down there takes everything, slowly.';
     } else player.staminaRegenMul = 1;
+  }
+
+  // A steel door with a porthole full of sky.
+  buildMetalDoor(D, o) {
+    for (const s of [-1, 1]) D.box('steel', o, s * 0.56, 1.12, T + 0.02, 0.1, 2.24, 0.05);
+    D.box('steel', o, 0, 2.27, T + 0.02, 1.22, 0.1, 0.05);
+    D.box('steelDoor', o, 0, 1.1, T + 0.015, 1.0, 2.2, 0.03);
+    for (const y of [0.2, 2.0]) for (let x = -0.42; x <= 0.43; x += 0.12) D.box('chrome', o, x, y, T + 0.035, 0.025, 0.025, 0.01);
+    D.cyl('chrome', o, [0, 1.6, T + 0.03], [0, 1.6, T + 0.05], 0.14, 14, { caps: true });
+    D.cyl('skyGlow', o, [0, 1.6, T + 0.05], [0, 1.6, T + 0.052], 0.105, 14, { caps: true });
+    D.box('chrome', o, 0.38, 1.0, T + 0.05, 0.05, 0.22, 0.03);
+    D.quad('skyGlow', o, [[-0.48, 0.004, T + 0.02], [0.48, 0.004, T + 0.02], [0.48, 0.004, T + 0.26], [-0.48, 0.004, T + 0.26]], [0, 1, 0]);
+    // Cold daylight spilling into the corridor.
+    const [lx, , lz] = D.at(o, 0, 0, 0.5);
+    D.light({ x: lx, z: lz, power: 0.55, color: [0.72, 0.84, 1.0], hide: true, kind: 'skydoor' });
+  }
+
+  updateMetalDoors(dt, player) {
+    for (const m of this.metalDoors) {
+      const d = Math.hypot(player.pos.x - m.x, player.pos.z - m.z);
+      if (d < 1.0) {
+        this.done = true;
+        this.ctx.onEscape('level63', 'door');
+        return;
+      }
+      if (d < 3 && !m.told) {
+        m.told = true;
+        this.ctx.hud.message('A plain metal door, out of place among the wood. Cool air and daylight leak around it. You can hear wind.', 4);
+      }
+    }
   }
 
   updateDarkDoor(dt, player) {

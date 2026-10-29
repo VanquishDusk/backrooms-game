@@ -1,0 +1,13 @@
+// What the archive says about each level once you've found it.
+export const LEVEL_INFO = {
+  level0: 'Mono-yellow wallpaper, damp carpet, the hum of fluorescent lights. Six hundred million square miles of empty rooms, and something that watches.',
+  level0_2: 'Level 0, remodelled: a half-built maze of plaster and dust that falls apart once you are inside.',
+  level1: 'A vast concrete warehouse with lights that sometimes die. Crates of supplies, puddles, fog, and the hallway out that follows the pipes.',
+  level1_3: 'The Ward: hospital corridors with Detox Zones that heal you, unless the Decay found them first.',
+  level1_5: 'Inverted: everything in negative. Quiet whispers mean she is close. Do not look away from her.',
+  level2: 'Abandoned Utility Halls: narrow grey tunnels of pipes and steam, dead lights, locked doors and whole sections that black out.',
+  level3: 'Electrical Station: brick corridors, sealed galleries, switchgear that sparks, Sanctums that keep you safe. The way on is an old freight lift.',
+  level4: 'Abandoned Office: an empty office floor that goes on and on. Almond Water everywhere. Don\'t look out of the windows.',
+  level5: 'Terror Hotel: endless 1920s corridors, a ballroom where the music never stops, and a boiler room that gets hotter the deeper you go.',
+  level63: 'Tranquility: wooden bridges and platforms high in the sky over an endless void, ringed by shifting walls of vines. Sit at a Meditation Point and breathe.',
+};

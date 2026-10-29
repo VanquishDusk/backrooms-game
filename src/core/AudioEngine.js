@@ -213,6 +213,7 @@ export class AudioEngine {
 
   stopAmbience() {
     if (this.jazzOut) this.jazzOut.gain.setValueAtTime(0, this.ctx.currentTime);
+    if (this.windOut) this.windOut.gain.setValueAtTime(0, this.ctx.currentTime);
     if (!this.ambienceOn) return;
     this.ambienceOn = false;
     for (const n of this.amb) {
@@ -243,6 +244,7 @@ export class AudioEngine {
     this.droneGain.gain.setTargetAtTime(s.drone, t, 0.3);
     this.machineGain.gain.setTargetAtTime(s.machine || 0, t, 0.2);
     this.updateJazz(s.jazz || 0, s.jazzMuffle ?? 6000);
+    this.updateWind(s.wind || 0);
     if (this.machinePan) this.machinePan.pan.setTargetAtTime(s.machinePan || 0, t, 0.1);
     this.muffle.frequency.setTargetAtTime(s.ears ? 380 : 20000, t, 0.06);
 
@@ -727,6 +729,76 @@ export class AudioEngine {
   // bass, Rhodes-ish comping, brushes and ride, and a lazy sax-like line over
   // a ii-V-I loop in F. Notes are scheduled a little ahead while it's audible.
 
+  // Open-air wind: low rushing noise that swells and settles by itself.
+  updateWind(level) {
+    const ctx = this.ctx;
+    if (!this.windOut) {
+      if (level < 0.001) return;
+      this.windOut = ctx.createGain();
+      this.windOut.gain.value = 0;
+      const src = this.noiseSource(true);
+      const lp = ctx.createBiquadFilter();
+      lp.type = 'lowpass';
+      lp.frequency.value = 420;
+      lp.Q.value = 0.7;
+      const swell = ctx.createGain();
+      swell.gain.value = 0.6;
+      // Slow gusting: an LFO on the filter and the level.
+      const lfo = ctx.createOscillator();
+      lfo.frequency.value = 0.07;
+      const lfoF = ctx.createGain();
+      lfoF.gain.value = 260;
+      lfo.connect(lfoF).connect(lp.frequency);
+      const lfo2 = ctx.createOscillator();
+      lfo2.frequency.value = 0.13;
+      const lfoG = ctx.createGain();
+      lfoG.gain.value = 0.35;
+      lfo2.connect(lfoG).connect(swell.gain);
+      src.connect(lp).connect(swell).connect(this.windOut).connect(this.master);
+      src.start();
+      lfo.start();
+      lfo2.start();
+    }
+    this.windOut.gain.setTargetAtTime(level, ctx.currentTime, 0.5);
+  }
+
+  // A gust passing through: rising, whistling, gone.
+  gust(pan = 0, vol = 0.2, dur = 3) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    const s = this.noiseSource();
+    const bp = this.ctx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.Q.value = 1.4;
+    bp.frequency.setValueAtTime(300, t);
+    bp.frequency.linearRampToValueAtTime(900 + Math.random() * 500, t + dur * 0.45);
+    bp.frequency.linearRampToValueAtTime(350, t + dur);
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(vol, t + dur * 0.4);
+    g.gain.linearRampToValueAtTime(0.0001, t + dur);
+    s.connect(bp).connect(g).connect(this.out(pan));
+    s.start(t, Math.random() * 2, dur + 0.1);
+  }
+
+  // Leaves and vines dragging over each other, far off.
+  rustle(pan = 0, vol = 0.15, dur = 2.5) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    for (let k = 0; k < 14; k++) {
+      const at = t + Math.random() * dur;
+      const s = this.noiseSource();
+      const hp = this.ctx.createBiquadFilter();
+      hp.type = 'bandpass';
+      hp.frequency.value = 1800 + Math.random() * 2500;
+      hp.Q.value = 0.9;
+      const g = this.ctx.createGain();
+      this.env(g, at, vol * (0.4 + Math.random() * 0.6), 0.02, 0.12 + Math.random() * 0.2);
+      s.connect(hp).connect(g).connect(this.out(pan));
+      s.start(at, Math.random() * 2, 0.4);
+    }
+  }
+
   updateJazz(level, muffle) {
     const ctx = this.ctx;
     if (!this.jazzOut) {
@@ -1035,6 +1107,35 @@ export class AudioEngine {
     g.gain.exponentialRampToValueAtTime(0.0001, t + 0.6);
     s.connect(f).connect(g).connect(this.master);
     s.start(t, Math.random() * 2, 0.7);
+  }
+
+  // Camcorder: a mechanical clack and a short whirr.
+  shutter(vol = 0.3) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    for (const [dt, f] of [[0, 2400], [0.06, 1600]]) {
+      const s = this.noiseSource();
+      const bp = this.ctx.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.value = f;
+      bp.Q.value = 2;
+      const g = this.ctx.createGain();
+      this.env(g, t + dt, vol, 0.002, 0.05);
+      s.connect(bp).connect(g).connect(this.master);
+      s.start(t + dt, Math.random() * 2, 0.08);
+    }
+    const o = this.ctx.createOscillator();
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(140, t + 0.08);
+    o.frequency.linearRampToValueAtTime(90, t + 0.4);
+    const lp = this.ctx.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = 600;
+    const g = this.ctx.createGain();
+    this.env(g, t + 0.08, vol * 0.25, 0.03, 0.3);
+    o.connect(lp).connect(g).connect(this.master);
+    o.start(t + 0.08);
+    o.stop(t + 0.5);
   }
 
   // A heavy swing through the air.
