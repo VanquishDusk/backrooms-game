@@ -175,7 +175,7 @@ export function generateLevel601(rng) {
 
   // Ceiling lights: a grid of troffers over the shop, a line down the hallway.
   const lights = [];
-  const light = (x, z, extra = {}) => lights.push({ x, z, color: [1, 0.97, 0.9], power: 1.05, state: 'on', ...extra });
+  const light = (x, z, extra = {}) => lights.push({ x, z, color: [1, 0.95, 0.86], power: 1.2, state: 'on', ...extra });
   for (let y = STORE_TOP + 1; y < ROWS; y += 3) for (let x = 1; x < COLS; x += 3) light((x + 0.5) * CELL, (y + 0.5) * CELL);
   for (let x = HALL.x0 + 1; x <= HALL.x1; x += 3) light((x + 0.5) * CELL, (HALL.row + 1) * CELL, { hall: true, state: x > HALL.loopAt ? 'off' : 'on', dark: x > HALL.loopAt });
   for (let y = HALL.row + 3; y < STORE_TOP; y += 3) light(3 * CELL, (y + 0.5) * CELL, { hall: true });

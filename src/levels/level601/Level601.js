@@ -2,7 +2,6 @@ import * as THREE from 'three';
 import { GridWorld } from '../../world/GridWorld.js';
 import { EDGE_OPEN, EDGE_WALL, DIRS } from '../../world/GridMap.js';
 import { SURFACE } from '../../world/materials.js';
-import { officeCarpetTexture, dropCeilingTexture } from '../../world/textures.js';
 import { disposeTextures } from '../../world/props.js';
 import { EntityManager } from '../../entities/lib/index.js';
 import { generateLevel601, CELL, HEIGHT, KIND, HALL, STORE_TOP, COLS, ROWS } from './layout.js';
@@ -65,8 +64,8 @@ export class Level601 {
     const T = (this.T = libraryTextures(renderer, this.own));
     this.textures = {
       wall: T.wall,
-      floor: officeCarpetTexture(renderer, '#4f4b47'),
-      ceiling: dropCeilingTexture(renderer),
+      floor: T.carpet,
+      ceiling: T.ceiling,
       floors: { back: { map: T.backCarpet, scale: 1 / 2.5, surface: SURFACE.FLOOR } },
       walls: { hall: T.hallWall, sage: { map: T.sage, scale: 1 } },
     };
@@ -925,14 +924,16 @@ export class Level601 {
       this.fog.set(this.area === 'end' ? 0xe6eef4 : 0xf6f8f2);
       return { fogColor: this.fog, fogDensity: this.area === 'end' ? 0.0022 : 0.0045, warp: insane * 0.6, aberr: 0.12, grain: 0.04, soften: this.area === 'end' ? 0.15 : 0.45 };
     }
-    this.fog.set(0xbdb6a6);
     const hall = this.area === 'hall';
+    // Warm, clean light; the far end of the shop fades into it.
+    this.fog.set(hall ? 0xc8bea4 : 0xd8cbae);
     return {
       fogColor: this.fog,
-      fogDensity: hall ? 0.032 : 0.013,
+      fogDensity: hall ? 0.022 : 0.0062,
       warp: insane * insane * 1.2,
-      aberr: 0.2 + insane * 0.8,
-      grain: 0.06,
+      aberr: 0.12 + insane * 0.8,
+      grain: 0.04,
+      soften: 0.12,
     };
   }
 

@@ -218,6 +218,8 @@ export class AudioEngine {
     if (this.jazzOut) this.jazzOut.gain.setValueAtTime(0, this.ctx.currentTime);
     if (this.windOut) this.windOut.gain.setValueAtTime(0, this.ctx.currentTime);
     if (this.wavesOut) this.wavesOut.gain.setValueAtTime(0, this.ctx.currentTime);
+    if (this.fallsOut) this.fallsOut.gain.setValueAtTime(0, this.ctx.currentTime);
+    if (this.chorusOut) this.chorusOut.gain.setValueAtTime(0, this.ctx.currentTime);
     if (this.piano) this.piano.reset();
     if (this.band) this.band.reset();
     if (!this.ambienceOn) return;
@@ -252,6 +254,8 @@ export class AudioEngine {
     this.updateJazz(s.jazz || 0, s.jazzMuffle ?? 6000);
     this.updateWind(s.wind || 0);
     this.updateWaves(s.waves || 0, s.wavesPan || 0);
+    if (s.falls || this.fallsOut) this.updateFalls(s.falls || 0, s.fallsPan || 0);
+    if (s.chorus || this.chorusOut) this.updateChorus(s.chorus || 0);
     if (s.piano || this.piano) {
       if (!this.piano) this.piano = new Piano(this.ctx, this.master, this.noise);
       this.piano.update(s.piano || 0, s.pianoOpts || {});
@@ -1026,6 +1030,106 @@ export class AudioEngine {
     g.gain.exponentialRampToValueAtTime(0.0001, t + 0.5);
     s.connect(bp).connect(g).connect(this.master);
     s.start(t, Math.random(), 0.6);
+  }
+
+  // A waterfall: a steady, bright roar.
+  updateFalls(level, pan) {
+    const ctx = this.ctx;
+    if (!this.fallsOut) {
+      if (level < 0.001) return;
+      this.fallsOut = ctx.createGain();
+      this.fallsOut.gain.value = 0;
+      this.fallsPan = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
+      const src = this.noiseSource(true);
+      const lp = ctx.createBiquadFilter();
+      lp.type = 'lowpass';
+      lp.frequency.value = 2400;
+      const hp = ctx.createBiquadFilter();
+      hp.type = 'highpass';
+      hp.frequency.value = 140;
+      const low = this.noiseSource(true);
+      const llp = ctx.createBiquadFilter();
+      llp.type = 'lowpass';
+      llp.frequency.value = 180;
+      const lg = ctx.createGain();
+      lg.gain.value = 1.4;
+      src.connect(hp).connect(lp).connect(this.fallsOut);
+      low.connect(llp).connect(lg).connect(this.fallsOut);
+      if (this.fallsPan) this.fallsOut.connect(this.fallsPan).connect(this.master);
+      else this.fallsOut.connect(this.master);
+      src.start();
+      low.start();
+    }
+    const t = ctx.currentTime;
+    this.fallsOut.gain.setTargetAtTime(level, t, 0.4);
+    if (this.fallsPan) this.fallsPan.pan.setTargetAtTime(Math.max(-1, Math.min(1, pan)), t, 0.2);
+  }
+
+  // The cacophony: a wordless choir, slightly out of tune, and a bed of
+  // whispering that never quite resolves into words.
+  updateChorus(level) {
+    const ctx = this.ctx;
+    if (!this.chorusOut) {
+      if (level < 0.001) return;
+      this.chorusOut = ctx.createGain();
+      this.chorusOut.gain.value = 0;
+      this.chorusOut.connect(this.master);
+      const form = ctx.createBiquadFilter();
+      form.type = 'bandpass';
+      form.frequency.value = 800;
+      form.Q.value = 1.2;
+      const fl = ctx.createOscillator();
+      fl.frequency.value = 0.07;
+      const flg = ctx.createGain();
+      flg.gain.value = 350;
+      fl.connect(flg).connect(form.frequency);
+      fl.start();
+      form.connect(this.chorusOut);
+      this.chorusVoices = [];
+      for (const [m, det] of [[57, -9], [60, 6], [64, -4], [69, 11], [52, 3], [72, -14]]) {
+        const o = ctx.createOscillator();
+        o.type = 'sawtooth';
+        o.frequency.value = 440 * Math.pow(2, (m - 69) / 12);
+        o.detune.value = det;
+        const vib = ctx.createOscillator();
+        vib.frequency.value = 4 + Math.random() * 2;
+        const vg = ctx.createGain();
+        vg.gain.value = 9;
+        vib.connect(vg).connect(o.detune);
+        const g = ctx.createGain();
+        g.gain.value = 0.03;
+        // Each voice swells in and out on its own.
+        const sw = ctx.createOscillator();
+        sw.frequency.value = 0.05 + Math.random() * 0.1;
+        const swg = ctx.createGain();
+        swg.gain.value = 0.025;
+        sw.connect(swg).connect(g.gain);
+        o.connect(g).connect(form);
+        o.start();
+        vib.start();
+        sw.start();
+        this.chorusVoices.push(o);
+      }
+      const n = this.noiseSource(true);
+      const bp = ctx.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.value = 2600;
+      bp.Q.value = 2.5;
+      const ng = ctx.createGain();
+      ng.gain.value = 0.25;
+      const trem = ctx.createOscillator();
+      trem.frequency.value = 6.3;
+      const tg = ctx.createGain();
+      tg.gain.value = 0.2;
+      trem.connect(tg).connect(ng.gain);
+      n.connect(bp).connect(ng).connect(this.chorusOut);
+      n.start();
+      trem.start();
+    }
+    const t = ctx.currentTime;
+    this.chorusOut.gain.setTargetAtTime(level, t, 0.8);
+    // The worse it gets, the more out of tune.
+    for (const [i, o] of this.chorusVoices.entries()) o.detune.setTargetAtTime((i % 2 ? 1 : -1) * level * 120, t, 2);
   }
 
   // Slow breathing, close by.

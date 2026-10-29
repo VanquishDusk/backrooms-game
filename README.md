@@ -2,7 +2,7 @@
 
 A replayable 3D horror game set in the Backrooms, playable in the browser on desktop and mobile.
 
-Playable now: **Level 0 — "The Lobby" / "The Yellow Hell"**, its sub-level **Level 0.2 — "The Remodel"**, **Level 1 — "The Habitable Zone"**, **Level 1.3**, **Level 1.5 — "Inverted"**, **Level 2 — "Abandoned Utility Halls"**, **Level 3 — "Electrical Station"**, **Level 4 — "Abandoned Office"**, **Level 5 — "Terror Hotel"**, **Level 6 — "Lights Out"**, **Level 7 — "Thalassophobia"**, **Level 63 — "Tranquility"**, **Level 94 — "Motion"** and **Level 601 — "The End"**. More levels will follow.
+Playable now: **Level 0 — "The Lobby" / "The Yellow Hell"**, its sub-level **Level 0.2 — "The Remodel"**, **Level 1 — "The Habitable Zone"**, **Level 1.3**, **Level 1.5 — "Inverted"**, **Level 2 — "Abandoned Utility Halls"**, **Level 3 — "Electrical Station"**, **Level 4 — "Abandoned Office"**, **Level 5 — "Terror Hotel"**, **Level 6 — "Lights Out"**, **Level 7 — "Thalassophobia"**, **Level 14 — "Paradise"**, **Level 63 — "Tranquility"**, **Level 94 — "Motion"** and **Level 601 — "The End"**. More levels will follow.
 
 ## Play
 
@@ -244,6 +244,21 @@ Reached by the stairwell deep in Level 6.
   - Keep going **west** across the sea, far enough, and you reach **Level 880**.
 - Levels 8, 83 and 880 are coming soon.
 
+## Level 14 — Paradise (Survival Difficulty: Paradise)
+
+Isn't it pretty? You should visit sometime.
+
+- **Ways in:** look out of one of Level 4's windows for too long and, sometimes, what's out there isn't a thing but a place, and you step through. Or fall off the edge of Level 63: sometimes you land softly on red leaves instead of waking up somewhere you know.
+- **The forest:** endless tall bare trunks reaching up at an enormous moon and a sky full of stars and a band of milky way. Crimson leaves underfoot, short red grass wet with dew, leaves drifting down, motes of light, violet and blue fog banks drifting between the trees.
+- **The waterfalls:** every so often a great cliff of wet rock, three falls crashing into a black pool that reflects the moon, mist rising off it.
+- **The cacophony:** the forest whispers to you, kindly ("You'll be happy here. Everyone else is."). Underneath, a wordless choir, slightly out of tune, which gets louder and more out of tune as your mind goes. Your **sanity drains everywhere**, faster the lower it is. Covering your ears slows it. The **roar of a waterfall drowns the choir out**: close to the falling water your sanity comes back, and you can drink from the pool.
+- **Your mind leaking:** below half sanity your feet drift towards the guests, and your view sways. Very low, you start to float.
+- **The guests:** a clearing where people lie peacefully in the soft soil in a ring, bones glistening in the moonlight, pale flowers growing out of them. It pulls you in and slows you down. Stand still in the middle and you lie down with them.
+- **The children:** pale, hollow-eyed figures standing in rows, heads thrown back, howling at the moon. Don't get close, don't stare at them, and don't shine a light at them. When the howling stops, every head turns, and the nearest come for you in jerky bursts. They won't go near the waterfalls. Weapons stun them.
+- **Ways out (you won't have to worry about that):**
+  - The **cave behind the biggest waterfall**: cold and quiet, your thoughts come back, and the rock turns to concrete. **Level 1**.
+  - Swim out to the **deep middle of the pool** and go under: **Level 7**.
+
 ## Level 63 — Tranquility (Survival Difficulty 0)
 
 Reached through the rare metal doors in Level 5.
@@ -253,7 +268,7 @@ Reached through the rare metal doors in Level 5.
 - **The sky:** deep blue with cumulus clouds that form, drift through and thin away. The sun crosses the sky, sets and rises again, but it never gets dark.
 - **Meditation Points:** round platforms with a single bench at the end of a bridge. It's quieter there. Stand still by the bench to sit down: your sanity and health come back quickly and your thoughts settle. Move to stand up.
 - **Climbing:** walk into a ladder to climb it. On monkey bars you hang on for as long as your stamina lasts; let it run out and you fall.
-- **Falling:** step off an edge with no railing, or lose your grip, and you fall into the void. It isn't fatal: you lose consciousness and wake up somewhere safer (Level 4 or Level 1).
+- **Falling:** step off an edge with no railing, or lose your grip, and you fall into the void. It isn't fatal: you lose consciousness and wake up somewhere safer (Level 4 or Level 1). Usually.
 - **Entities:** none. Only wind, creaking rope and the distant rustle of the vines.
 
 ## Level 601 — The End (Survival Difficulty unknown)
@@ -407,6 +422,7 @@ src/levels/level6/            Level 6 (maze generator, darkness, shifting halls,
 src/levels/level7/            Level 7 (layout and sea floor, the room/sea/scenery builders, the serpent, swimming/boat/fight runtime)
 src/levels/level94/           Level 94 (terrain and sky, town and props kit, castle interior, Animations, Robo-Men, the King, day/night)
 src/levels/level601/          Level 601 (shop layout, shop and computer dressing, the field and the house, the host, the acts)
+src/levels/level14/           Level 14 (streamed forest, sky, waterfall cliff and pool, guests, children, the cacophony)
 src/levels/level63/           Level 63 generator (platforms, bridges, ladders, monkey bars, Meditation Points) and runtime (sky, clouds, vines, climbing, falling)
 ```
 

@@ -802,6 +802,7 @@ export class Level4 {
     this.updateLights(dt, player);
     this.updateSources(dt, player);
     this.updateTraps(dt, player);
+    if (this.done) return;
     this.updateCrates(player);
     this.updateAmbient(dt, player);
 
@@ -987,6 +988,13 @@ export class Level4 {
       t.stare = looking ? t.stare + dt : Math.max(0, t.stare - dt * 0.8);
       t.fig.material.opacity = Math.max(0, Math.min(0.75, (t.stare - 1.2) * 0.6));
       if (t.stare > 0.7) warn = true;
+      if (t.stare > 2.6 && !t.sprung && this.rng.chance(0.35) && !this.done) {
+        // Sometimes what's out there isn't a thing. It's a place, and it's beautiful.
+        this.done = true;
+        ctx.hud.message('Through the glass: a forest under the stars, leaves the colour of wine. It\'s so pretty. You don\'t remember stepping through.', 5);
+        ctx.onEscape('level14', 'noclip');
+        return;
+      }
       if (t.stare > 2.6) {
         t.sprung = true;
         t.fig.material.opacity = 0.95;

@@ -663,7 +663,7 @@ export function buildFort(M, L, rng, own) {
 
 // ---- What lies on the sea floor -------------------------------------------------------
 
-function skeletonGeo() {
+export function skeletonGeo() {
   const parts = [];
   parts.push(put(new THREE.SphereGeometry(0.11, 8, 6), 0, 0.09, 0.82, 0, 0, 0, 1, 0.9, 1.1));
   parts.push(put(new THREE.BoxGeometry(0.08, 0.05, 0.1), 0, 0.05, 0.94));

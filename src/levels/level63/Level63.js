@@ -634,8 +634,14 @@ export class Level63 {
       }
       if (this.fallTime > 2.4) {
         this.done = true;
-        ctx.hud.message('You lose consciousness, and wake up somewhere else.', 4);
-        ctx.onEscape(this.rng.pick(WAKE), 'walk');
+        // Sometimes you don't wake up anywhere you know. Somewhere prettier.
+        if (this.rng.chance(0.25)) {
+          ctx.hud.message('You fall, and fall, and land softly on a bed of red leaves under the stars.', 5);
+          ctx.onEscape('level14', 'walk');
+        } else {
+          ctx.hud.message('You lose consciousness, and wake up somewhere else.', 4);
+          ctx.onEscape(this.rng.pick(WAKE), 'walk');
+        }
         return;
       }
     }

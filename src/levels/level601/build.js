@@ -42,7 +42,55 @@ export function libraryTextures(renderer, own) {
   const T = {};
   T.oak = canvasTex(256, 256, (ctx, w, h) => grain(ctx, w, h, '#b98d5a', 140), own);
   T.oakDark = canvasTex(128, 128, (ctx, w, h) => grain(ctx, w, h, '#7a5634', 60, 0.25), own);
-  T.oakBack = canvasTex(128, 128, (ctx, w, h) => grain(ctx, w, h, '#9a7248', 60, 0.2), own);
+  T.oakBack = canvasTex(128, 128, (ctx, w, h) => grain(ctx, w, h, '#8e6844', 60, 0.2), own);
+  T.oakEdge = canvasTex(64, 64, (ctx, w, h) => grain(ctx, w, h, '#c99c64', 30, 0.15), own);
+  T.cream = canvasTex(16, 16, (ctx, w, h) => {
+    ctx.fillStyle = '#efe6cc';
+    ctx.fillRect(0, 0, w, h);
+  }, own);
+  // Clean beige ceiling tiles: two by two to a texture, faint pinholes.
+  T.ceiling = canvasTex(256, 256, (ctx, w, h) => {
+    ctx.fillStyle = '#cdc3ab';
+    ctx.fillRect(0, 0, w, h);
+    for (let i = 0; i < 3000; i++) {
+      ctx.fillStyle = `rgba(120,110,90,${(Math.random() * 0.18).toFixed(3)})`;
+      ctx.fillRect(Math.random() * w, Math.random() * h, 1, 1);
+    }
+    ctx.fillStyle = '#e2dccc';
+    for (const p of [0, w / 2]) {
+      ctx.fillRect(p, 0, 3, h);
+      ctx.fillRect(0, p, w, 3);
+    }
+    ctx.fillStyle = 'rgba(80,70,50,0.25)';
+    for (const p of [3, w / 2 + 3]) {
+      ctx.fillRect(p, 0, 1, h);
+      ctx.fillRect(0, p, w, 1);
+    }
+  }, own);
+  T.carpet = canvasTex(256, 256, (ctx, w, h) => {
+    ctx.fillStyle = '#3c3b3d';
+    ctx.fillRect(0, 0, w, h);
+    for (let i = 0; i < 14000; i++) {
+      const c = Math.random();
+      ctx.fillStyle = c < 0.5 ? `rgba(20,20,24,${(Math.random() * 0.4).toFixed(2)})` : c < 0.9 ? `rgba(110,108,112,${(Math.random() * 0.25).toFixed(2)})` : `rgba(70,80,110,${(Math.random() * 0.3).toFixed(2)})`;
+      ctx.fillRect(Math.random() * w, Math.random() * h, 1.5, 1.5);
+    }
+  }, own);
+  T.signs = canvasTex(512, 512, (ctx, w, h) => {
+    const words = ['FICTION', 'THE END', 'BIOGRAPHY', 'TRAVEL', 'THE END', 'CHILDREN', 'HISTORY', 'HOME'];
+    words.forEach((t, i) => {
+      const y = i * 64;
+      ctx.fillStyle = i % 4 === 1 ? '#1a1a1a' : '#2a5a3a';
+      ctx.fillRect(0, y, w, 64);
+      ctx.fillStyle = i % 4 === 1 ? '#efe25a' : '#f2ecd8';
+      ctx.font = 'bold 40px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(t, w / 2, y + 34);
+      ctx.fillStyle = 'rgba(255,255,255,0.15)';
+      ctx.fillRect(0, y + 2, w, 3);
+    });
+  }, own, false);
   T.slat = canvasTex(128, 128, (ctx, w, h) => {
     grain(ctx, w, h, '#c08a4a', 50);
     for (let y = 0; y < h; y += 16) {
@@ -269,7 +317,7 @@ export function lettersGeometry(text, height, depth = 0.06) {
 
 // Shelving: `len` long (local x), double- or single-sided (back at -z).
 function shelfUnit(b, cx, cz, len, rot, sides) {
-  const D = sides === 2 ? 1.0 : 0.5, Ht = 2.25;
+  const D = sides === 2 ? 1.0 : 0.5, Ht = 2.35;
   // One-sided shelving stands with its back to the wall (local -z).
   const off = sides === 2 ? 0 : -0.28;
   const P = (lx, lz) => [cx + lx * Math.cos(rot) + (lz + off) * Math.sin(rot), cz - lx * Math.sin(rot) + (lz + off) * Math.cos(rot)];
@@ -277,12 +325,20 @@ function shelfUnit(b, cx, cz, len, rot, sides) {
     const [x, z] = P(lx, lz);
     b.at(name, x, z).box(x, y, z, sx, sy, sz, rot, 1);
   };
-  box('oakDark', 0, 0.06, 0, len, 0.12, D - 0.06);
-  box('oakBack', 0, 1.16, sides === 2 ? 0 : -D / 2 + 0.015, len, 2.1, 0.03);
-  box('oak', 0, Ht - 0.02, 0, len + 0.04, 0.04, D);
-  const units = Math.max(1, Math.round(len / 1.0));
-  for (let k = 0; k <= units; k++) box('oak', -len / 2 + (k * len) / units, Ht / 2, 0, 0.04, Ht, D);
-  for (let k = 1; k <= 6; k++) box('oak', 0, 0.12 + k * 0.3, 0, len - 0.02, 0.025, D - 0.04);
+  // A recessed dark toe-kick, a back panel, a crown on top.
+  box('dark', 0, 0.05, 0, len - 0.04, 0.1, D - 0.14);
+  box('oakBack', 0, 1.2, sides === 2 ? 0 : -D / 2 + 0.015, len, 2.2, 0.03);
+  box('oak', 0, Ht - 0.03, 0, len + 0.06, 0.06, D + 0.04);
+  box('oakDark', 0, Ht - 0.075, 0, len + 0.02, 0.03, D);
+  // Uprights every 60 cm, so it reads as rows of cubbies.
+  const units = Math.max(1, Math.round(len / 0.62));
+  for (let k = 0; k <= units; k++) box(k === 0 || k === units ? 'oak' : 'oakEdge', -len / 2 + (k * len) / units, Ht / 2, 0, k === 0 || k === units ? 0.05 : 0.03, Ht, D);
+  for (let k = 0; k <= 6; k++) {
+    const y = 0.12 + k * 0.32;
+    box('oak', 0, y, 0, len - 0.02, 0.025, D - 0.04);
+    // The darker front lip of each shelf.
+    for (const s of sides === 2 ? [-1, 1] : [1]) box('oakDark', 0, y + 0.02, s * (D / 2 - 0.02), len - 0.04, 0.045, 0.02);
+  }
 }
 
 // A tall tapering slatwall display.
@@ -381,7 +437,7 @@ export function buildLibrary(L, shared, T, own) {
     return m;
   };
   const M = {
-    oak: mat(T.oak, 1 / 1.2), oakDark: mat(T.oakDark, 1 / 0.8), oakBack: mat(T.oakBack, 1 / 1.2), slat: mat(T.slat, [1, 1 / 1.6]), beige: mat(T.beige, 2),
+    oak: mat(T.oak, 1 / 1.2), oakDark: mat(T.oakDark, 1 / 0.8), oakBack: mat(T.oakBack, 1 / 1.2), oakEdge: mat(T.oakEdge, 1 / 0.5), cream: mat(T.cream, 1), slat: mat(T.slat, [1, 1 / 1.6]), beige: mat(T.beige, 2),
     dark: mat(T.dark, 1), pink: mat(T.pink, 1), blue: mat(T.blue, 1), sage: mat(T.sage, 1), yellow: mat(T.yellow, 1), metal: mat(T.metal, 2), vent: mat(T.vent, 1 / 0.6),
   };
   const b = new ChunkedBuilders(14);
@@ -419,7 +475,9 @@ export function buildLibrary(L, shared, T, own) {
   // The yellow bulkhead across the back of the shop.
   const bz = BULKHEAD * CELL;
   const bx0 = 8 * CELL, bx1 = 56 * CELL;
-  b.at('yellow', (bx0 + bx1) / 2, bz).aabb(bx0, H - 0.7, bz - 0.35, bx1, H, bz + 0.35, 1);
+  b.at('yellow', (bx0 + bx1) / 2, bz).aabb(bx0, H - 0.95, bz - 0.5, bx1, H, bz + 0.5, 1);
+  b.at('oakDark', (bx0 + bx1) / 2, bz).aabb(bx0 - 0.02, H - 0.98, bz + 0.48, bx1 + 0.02, H - 0.93, bz + 0.53, 1);
+  b.at('cream', (bx0 + bx1) / 2, bz).aabb(bx0 - 0.02, H - 0.98, bz - 0.53, bx1 + 0.02, H - 0.93, bz - 0.48, 1);
   // Glass front doors (white light behind them) in the south wall.
   const sz = ROWS * CELL - 0.09;
   for (let k = 0; k < 3; k++) {
@@ -429,6 +487,45 @@ export function buildLibrary(L, shared, T, own) {
     b.at('metal', dx, sz).box(dx, 1.0, sz - 0.09, 1.6, 0.04, 0.04);
   }
   for (const g of b.finish(group, M)) own.geos.push(g);
+
+  // Downlights under the bulkhead, glowing.
+  const dlMat = new THREE.MeshBasicMaterial({ color: 0xfff6dc });
+  own.mats.push(dlMat);
+  const dlGeo = new THREE.CircleGeometry(0.11, 16).rotateX(Math.PI / 2);
+  own.geos.push(dlGeo);
+  for (let x = bx0 + 1.2; x < bx1; x += 2.4) {
+    const d = new THREE.Mesh(dlGeo, dlMat);
+    d.position.set(x, H - 0.955, bz);
+    group.add(d);
+  }
+  // Hanging signs over the aisles, on thin wires.
+  const signMat = new THREE.MeshBasicMaterial({ map: T.signs });
+  const wireMat = new THREE.MeshBasicMaterial({ color: 0x2a2a2a });
+  own.mats.push(signMat, wireMat);
+  const wireGeo = new THREE.CylinderGeometry(0.006, 0.006, 0.6, 4);
+  own.geos.push(wireGeo);
+  const signRows = [46.5, 58.5, 70.5];
+  const signCols = [9, 22, 41, 54];
+  let si = 0;
+  for (const r of signRows) for (const c of signCols) {
+    const g = new THREE.PlaneGeometry(1.5, 0.19);
+    const k = si++ % 8;
+    const uv = g.attributes.uv;
+    for (let i = 0; i < uv.count; i++) uv.setY(i, (7 - k + uv.getY(i)) / 8);
+    own.geos.push(g);
+    const m = new THREE.Mesh(g, signMat);
+    // Facing down the aisle.
+    m.position.set(c * CELL, H - 0.75, r * CELL);
+    m.rotation.y = Math.PI / 2 + (si % 2) * 0.03;
+    const back = m.clone();
+    back.rotation.y += Math.PI;
+    group.add(m, back);
+    for (const sz of [-0.6, 0.6]) {
+      const w = new THREE.Mesh(wireGeo, wireMat);
+      w.position.set(c * CELL, H - 0.35, r * CELL + sz);
+      group.add(w);
+    }
+  }
 
   // Glass panes: just light.
   const glassMat = new THREE.MeshBasicMaterial({ map: T.glass, color: 0xffffff });
@@ -535,7 +632,7 @@ export function setLetters(lib, text, own) {
   g.clear();
   const geo = lettersGeometry(text, 0.42, 0.05);
   const m = new THREE.Mesh(geo, lib.letterMat);
-  m.position.set(32 * CELL, HEIGHT - 0.58, BULKHEAD * CELL + 0.36);
+  m.position.set(32 * CELL, HEIGHT - 0.7, BULKHEAD * CELL + 0.54);
   g.add(m);
   void own;
 }
