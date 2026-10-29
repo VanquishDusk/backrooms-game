@@ -73,7 +73,7 @@ export function openPlan(D, fr) {
   const { o, L, W } = fr;
   for (let x = -L / 2 + 1.6; x < L / 2 - 1.4; x += 3.2) {
     for (let z = -W / 2 + 1.6; z < W / 2 - 1.4; z += 3.2) {
-      if (!D.rng.chance(0.6) || !D.free(o, x - 1.25, z - 1.25, x + 1.25, z + 1.25)) continue;
+      if (!D.rng.chance(0.18) || !D.free(o, x - 1.25, z - 1.25, x + 1.25, z + 1.25)) continue;
       // A cross of partitions making four desks.
       D.box('partition', o, x, 0.65, z, 2.4, 1.3, 0.06);
       D.box('partition', o, x, 0.65, z, 0.06, 1.3, 2.4);

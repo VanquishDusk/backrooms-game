@@ -1579,11 +1579,11 @@ export function officeCarpetTexture(renderer, color = '#555c68') {
   // Carpet tiles, laid quarter-turned so their pile catches the light differently.
   for (let y = 0; y < 2; y++) {
     for (let x = 0; x < 2; x++) {
-      ctx.fillStyle = (x + y) % 2 ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.04)';
+      ctx.fillStyle = (x + y) % 2 ? 'rgba(255,255,255,0.008)' : 'rgba(0,0,0,0.01)';
       ctx.fillRect(x * S / 2, y * S / 2, S / 2, S / 2);
     }
   }
-  ctx.fillStyle = 'rgba(20,22,28,0.25)';
+  ctx.fillStyle = 'rgba(20,22,28,0.08)';
   ctx.fillRect(0, 0, S, 1);
   ctx.fillRect(0, S / 2, S, 1);
   ctx.fillRect(0, 0, 1, S);

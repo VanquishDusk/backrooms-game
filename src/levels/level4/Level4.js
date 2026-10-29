@@ -111,14 +111,15 @@ export class Level4 {
       if (out.lantern) this.lanterns.push(out.lantern);
     }
     this.planCorridors(D, drng.fork('corridors'));
+    this.planOutsideWalls(D);
 
     // ---- Textures and the world -------------------------------------------------
     this.textures = {
       wall: officeWallTexture(renderer),
-      floor: officeCarpetTexture(renderer),
+      floor: officeCarpetTexture(renderer, '#40474f'),
       ceiling: dropCeilingTexture(renderer),
       floors: {
-        corr: { map: officeCarpetTexture(renderer, '#5a5850'), scale: 1 / 2, surface: SURFACE.FLOOR },
+        corr: { map: officeCarpetTexture(renderer, '#464b52'), scale: 1 / 2, surface: SURFACE.FLOOR },
         vinyl: { map: greyTileFloorTexture(renderer), scale: 1 / 1.2 },
         core: { map: utilityFloorTexture(renderer), scale: 1 / 2 },
       },
@@ -148,7 +149,8 @@ export class Level4 {
       textures: this.textures,
       shared,
       texScale: { wall: [1 / 2.5, 1 / H], floor: 1 / 2, ceiling: 1 / 1.2 },
-      panelSize: [0.6, 1.22],
+      panelSize: [0.6, 0.6],
+      pillars: layout.pillars,
       panelDrop: 0.01,
       floorStyle: (x, y) => {
         const i = map.idx(x, y);
@@ -186,6 +188,9 @@ export class Level4 {
       crate: lit(this.textures.crate), concrete: lit(this.textures.floors.core.map, 1 / 1.5),
       vendfront: basic({ map: this.textures.vending, color: 0xd8dce0 }),
       outside: basic({ map: this.textures.outside }),
+      daylight: basic({ map: daylightTexture() }),
+      curtain: lit(solidTex('#c8906a', 0.1)),
+      vent: lit(ventTexture()),
     };
 
     // ---- Build -----------------------------------------------------------------------------
@@ -278,6 +283,36 @@ export class Level4 {
     take(10, (s) => this.corridorItems.push({ type: 'board', f: s.f, tile: rng.int(0, 2) }));
   }
 
+  // Outside walls: pilasters between the windows, a radiator under each.
+  planOutsideWalls(D) {
+    const { map, zone, windows } = this.layout;
+    const cs = map.cellSize, N = map.cols;
+    this.pilasters = [];
+    const edgeCell = (x, y) => map.inBounds(x, y) && zone[map.idx(x, y)] !== ZONE.CORE;
+    for (let k = 1; k < N; k++) {
+      // Along each of the four outside walls, at every cell boundary.
+      for (const [x, z, rot, a, b] of [
+        [k * cs, T, 0, [k - 1, 0], [k, 0]], [k * cs, N * cs - T, Math.PI, [k - 1, N - 1], [k, N - 1]],
+        [T, k * cs, Math.PI / 2, [0, k - 1], [0, k]], [N * cs - T, k * cs, -Math.PI / 2, [N - 1, k - 1], [N - 1, k]],
+      ]) {
+        if (!edgeCell(...a) || !edgeCell(...b) || k % 2) continue;
+        const f = { x, z, rot };
+        D.solidRect(f, -0.25, 0, 0.25, 0.24);
+        this.pilasters.push(f);
+      }
+    }
+    for (const w of windows) {
+      const [cx, cz] = map.cellCenter(w.x, w.y);
+      const n = [-DIRS[w.dir][0], -DIRS[w.dir][1]];
+      const f = { x: cx + DIRS[w.dir][0] * (cs / 2 - T), z: cz + DIRS[w.dir][1] * (cs / 2 - T), rot: Math.atan2(n[0], n[1]) };
+      w.f = f;
+      if (D.free(f, -0.7, 0, 0.7, 0.14)) {
+        D.solidRect(f, -0.7, 0, 0.7, 0.14);
+        w.radiator = true;
+      }
+    }
+  }
+
   // ---- Build ------------------------------------------------------------------------
 
   buildDoorways() {
@@ -329,7 +364,7 @@ export class Level4 {
     for (const w of this.layout.windows) {
       const [cx, cz] = map.cellCenter(w.x, w.y);
       const n = [-DIRS[w.dir][0], -DIRS[w.dir][1]];
-      const f = { x: cx + DIRS[w.dir][0] * (cs / 2 - T), z: cz + DIRS[w.dir][1] * (cs / 2 - T), rot: Math.atan2(n[0], n[1]) };
+      const f = w.f;
       const W = 1.7, y0 = 0.85, y1 = 2.2;
       // Aluminium frame, sill, mullion.
       D.box('frame', f, 0, y0 - 0.03, 0.06, W + 0.12, 0.06, 0.14);
@@ -337,8 +372,27 @@ export class Level4 {
       for (const s of [-1, 1]) D.box('frame', f, s * (W / 2 + 0.03), (y0 + y1) / 2, 0.02, 0.05, y1 - y0, 0.05);
       D.box('frame', f, 0, (y0 + y1) / 2, 0.02, 0.04, y1 - y0, 0.04);
       const pts = [[-W / 2, y0, 0.005], [W / 2, y0, 0.005], [W / 2, y1, 0.005], [-W / 2, y1, 0.005]];
-      if (!w.trap) {
+      if (w.radiator) {
+        // A panel radiator under the sill.
+        D.box('enamel', f, 0, 0.42, 0.07, 1.36, 0.55, 0.08);
+        for (let x = -0.62; x <= 0.63; x += 0.09) D.box('enamel', f, x, 0.42, 0.115, 0.03, 0.5, 0.012);
+        D.cyl('enamel', f, [-0.72, 0.2, 0.07], [-0.72, 0, 0.07], 0.015, 5);
+      }
+      if (!w.black) {
+        // Faded peach curtains pulled to the sides.
+        for (const s of [-1, 1]) {
+          D.box('curtain', f, s * (W / 2 + 0.2), (y0 + y1) / 2 + 0.05, 0.06, 0.32, y1 - y0 + 0.4, 0.05);
+          for (let k = 0; k < 3; k++) D.cyl('curtain', f, [s * (W / 2 + 0.08 + k * 0.1), y0 - 0.15, 0.09], [s * (W / 2 + 0.08 + k * 0.1), y1 + 0.25, 0.09], 0.03, 5);
+        }
+        D.box('frame', f, 0, y1 + 0.3, 0.06, W + 0.9, 0.03, 0.03);
+      }
+      if (w.black) {
         D.quad('blackout', f, pts, [0, 0, 1]);
+        continue;
+      }
+      if (!w.trap) {
+        // Daylight, washed out to white: nothing to see.
+        D.quad('daylight', f, pts, [0, 0, 1]);
         continue;
       }
       // A trap: a clear pane onto somewhere bright.
@@ -378,6 +432,27 @@ export class Level4 {
 
   buildCorridorItems() {
     const D = this.dresser;
+    const H = this.map.height;
+    for (const f of this.pilasters) D.box('wall', f, 0, H / 2, 0.12, 0.5, H, 0.24, ['bottom', 'top']);
+    // The ceiling: air diffusers and return grilles among the tiles.
+    const { map, zone } = this.layout;
+    const r = this.drng.fork('vents');
+    for (let y = 0; y < map.rows; y++) {
+      for (let x = 0; x < map.cols; x++) {
+        if (zone[map.idx(x, y)] === ZONE.CORE) continue;
+        const t = r.next();
+        if (t > 0.4) continue;
+        const [cx, cz] = map.cellCenter(x, y);
+        const along = r.chance(0.5);
+        const [w, d] = t < 0.25 ? (along ? [1.2, 0.14] : [0.14, 1.2]) : [0.55, 0.55];
+        const ox = r.chance(0.5) ? 0.6 : -0.6, oz = r.chance(0.5) ? 0.6 : -0.6;
+        const x0 = cx + ox - w / 2, x1 = cx + ox + w / 2, z0 = cz + oz - d / 2, z1 = cz + oz + d / 2;
+        const y0 = H - 0.004;
+        const u = t < 0.25 ? 0.5 : 0;
+        this.cb.at('vent', cx, cz).quad([x0, y0, z0], [x1, y0, z0], [x1, y0, z1], [x0, y0, z1], [0, -1, 0],
+          [u, 0], [u + 0.5, 0], [u + 0.5, along || t >= 0.25 ? 1 : 1], [u, 1]);
+      }
+    }
     for (const it of this.corridorItems) {
       const f = it.f;
       switch (it.type) {
@@ -976,11 +1051,11 @@ export class Level4 {
 
   atmosphere(dt, player) {
     const [r, g, b] = this.world.sampleLight(player.pos.x, player.pos.z);
-    const target = new THREE.Color(0.03 + r * 0.42, 0.03 + g * 0.43, 0.03 + b * 0.44);
+    const target = new THREE.Color(0.03 + r * 0.36, 0.03 + g * 0.37, 0.035 + b * 0.4);
     this.fogColor.lerp(target, Math.min(1, dt * 2));
     const lum = (r + g + b) / 3;
     this.lum += (lum - this.lum) * Math.min(1, dt * 3);
-    this.fogDensity += (0.02 + (1 - Math.min(1, this.lum * 2)) * 0.02 - this.fogDensity) * Math.min(1, dt * 2);
+    this.fogDensity += (0.024 + (1 - Math.min(1, this.lum * 2)) * 0.025 - this.fogDensity) * Math.min(1, dt * 2);
     const insanity = 1 - player.sanity / 100;
     const hurt = Math.max(0, Math.min(1, 1 - player.health / 100));
     return {
@@ -988,7 +1063,7 @@ export class Level4 {
       fogDensity: this.fogDensity,
       warp: insanity * insanity * 1.2 + hurt * 0.3,
       aberr: 0.25 + insanity * 1.4 + hurt * 1.2,
-      grain: 0.045 + insanity * 0.06,
+      grain: 0.06 + insanity * 0.06,
     };
   }
 
@@ -1006,6 +1081,38 @@ export class Level4 {
     for (const m of this.ownMats) m.dispose();
     disposeTextures(this.textures);
   }
+}
+
+// Overexposed daylight: white, a little cooler at the top.
+function daylightTexture() {
+  const c = document.createElement('canvas');
+  c.width = c.height = 64;
+  const ctx = c.getContext('2d');
+  const g = ctx.createLinearGradient(0, 0, 0, 64);
+  g.addColorStop(0, '#e4ecf4');
+  g.addColorStop(1, '#fbfbf6');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 64, 64);
+  return new THREE.CanvasTexture(c);
+}
+
+// Ceiling vents: left half a square return grille, right half a linear slot diffuser.
+function ventTexture() {
+  const c = document.createElement('canvas');
+  c.width = 128;
+  c.height = 64;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#c8c8c2';
+  ctx.fillRect(0, 0, 128, 64);
+  ctx.fillStyle = '#2a2c2e';
+  ctx.fillRect(4, 4, 56, 56);
+  ctx.fillStyle = '#9a9c98';
+  for (let i = 8; i < 60; i += 6) ctx.fillRect(4, i, 56, 2);
+  ctx.fillStyle = '#1e2022';
+  ctx.fillRect(66, 4, 58, 56);
+  ctx.fillStyle = '#8a8c88';
+  for (let i = 70; i < 124; i += 7) ctx.fillRect(i, 4, 2, 56);
+  return new THREE.CanvasTexture(c);
 }
 
 function ekey(e) {

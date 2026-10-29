@@ -569,7 +569,7 @@ export class GridWorld {
       m.makeTranslation(l.x, H - this.panelDrop, l.z);
       if (l.rotate) m.multiply(new THREE.Matrix4().makeRotationY(Math.PI / 2));
       // Layer-1 (emergency) lights have their own fixtures; hide the panel.
-      if (l.layer === 1) m.makeScale(0, 0, 0);
+      if (l.layer === 1 || l.hide) m.makeScale(0, 0, 0);
       mesh.setMatrixAt(i, m);
       mesh.setColorAt(i, c.setRGB(...this.panelColor(l, 1)));
     });

@@ -155,11 +155,13 @@ Reached through Level 2's red hazard-taped door. You arrive in front of it, and 
 Reached by Level 3's freight lift or Level 2's wooden office door. It's the safe one.
 
 - **The office:** an empty office floor that goes on and on.
-  - Long, straight carpeted corridors under drop ceilings and humming fluorescent troffers.
+  - Huge open-plan floors with square columns, dark blue-grey carpet and a white tile ceiling full of vents and square light panels, many of them off.
+  - The perimeter is bright with washed-out daylight through windows hung with faded peach curtains, radiators beneath and pilasters between. The middle of each floor stays gloomy.
+  - Long, straight carpeted corridors.
   - Off-white walls with grey baseboards and office doors standing open.
   - Rooms with almost nothing in them: a desk and chair here, a filing cabinet there, a chair facing the wall.
   - Some open-plan floors keep a few cubicles. There are conference rooms, break rooms with a counter, a microwave and a table, and storage rooms full of stacked chairs.
-- **Windows:** the outside walls have windows, nearly all blacked out with taped plastic sheeting. The few that aren't show a hazy, too-bright city. **Don't stand and look out of them:** you'll get a warning to look away, and then something looks back.
+- **Windows:** most just show white daylight with nothing beyond it, and some are blacked out with taped plastic sheeting. A few show a hazy, too-bright city. **Don't stand and look out of them:** you'll get a warning to look away, and then something looks back.
 - **Almond Water is everywhere:**
   - Vending machines and water coolers fill your bottles. They run out eventually.
   - Drinking fountains restore sanity straight away.

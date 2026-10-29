@@ -105,7 +105,8 @@ export function generateLevel4(rng) {
       for (const [x, y] of cells) roomOf[idx(x, y)] = room.id;
       rooms.push(room);
     };
-    const open = w * h >= 20 && rng.chance(0.3);
+    // Big open-plan floors are the norm; some blocks are cut into offices.
+    const open = w * h >= 12 && rng.chance(0.6);
     split(b.x0, b.y0, b.x1, b.y1, open ? 9 : 0);
   }
   // Stray room cells (from corridor stubs) join the nearest room or become one.
@@ -194,13 +195,16 @@ export function generateLevel4(rng) {
       if (zone[idx(x, y)] === ZONE.CORE) continue;
       for (let d = 0; d < 4; d++) {
         const nx = x + DIRS[d][0], ny = y + DIRS[d][1];
-        if (map.inBounds(nx, ny) || !rng.chance(0.7)) continue;
-        windows.push({ x, y, dir: d, edge: map.edge(x, y, d), trap: false });
+        if (map.inBounds(nx, ny) || !rng.chance(0.85)) continue;
+        windows.push({ x, y, dir: d, edge: map.edge(x, y, d), trap: false, black: rng.chance(0.3) });
       }
     }
   }
   rng.shuffle(windows);
-  for (const w of windows.slice(0, 6)) w.trap = true;
+  for (const w of windows.slice(0, 6)) {
+    w.trap = true;
+    w.black = false;
+  }
 
   // ---- Spawn: the middle of a long corridor --------------------------------------------------
   const corr = [];
@@ -257,18 +261,34 @@ export function generateLevel4(rng) {
       const r = roomOf[i];
       if ((x + y) % 2 && (zone[i] === ZONE.CORR || rooms[r].cells.length > 2)) continue;
       const r2 = rng.next();
-      let state = r2 < 0.05 ? 'off' : r2 < 0.09 ? 'flicker' : 'on';
+      let state = r2 < (zone[i] === ZONE.CORR ? 0.12 : 0.3) ? 'off' : r2 < (zone[i] === ZONE.CORR ? 0.16 : 0.34) ? 'flicker' : 'on';
       if (r >= 0 && dark.has(r)) state = 'off';
       const rotate = zone[i] === ZONE.CORR ? map.canMove(x, y, 2) || map.canMove(x, y, 3) : (x % 2 === 0);
-      lights.push({ x: cx, z: cz, color: [0.94, 0.97, 1.0], power: 1.15, state, rotate, panelTint: [0.96, 0.98, 1], room: r });
+      lights.push({ x: cx, z: cz, color: [0.94, 0.97, 1.0], power: 0.8, state, rotate, panelTint: [0.96, 0.98, 1], room: r });
     }
   }
-  // Trap windows let in a warm, inviting light.
+  // Daylight through every window that isn't blacked out: the edges of
+  // each floor are bright, the middle is gloomy.
   for (const w of windows) {
-    if (!w.trap) continue;
+    if (w.black) continue;
     const [cx, cz] = map.cellCenter(w.x, w.y);
-    lights.push({ x: cx + DIRS[w.dir][0] * 0.9, z: cz + DIRS[w.dir][1] * 0.9, color: [1, 0.85, 0.6], power: 0.9, state: 'on', layer: 0, window: true });
+    lights.push({
+      x: cx + DIRS[w.dir][0] * 0.95, z: cz + DIRS[w.dir][1] * 0.95,
+      color: w.trap ? [1, 0.85, 0.6] : [0.92, 0.95, 1.0], power: w.trap ? 0.9 : 1.05, state: 'on', window: true, hide: true,
+    });
   }
 
-  return { map, zone, roomOf, rooms, cores, doors, windows, slots, lights, spawn, spawnYaw, spawnDist, darkRooms: dark, xs, ys };
+  // Square columns through the open floors.
+  const pillars = [];
+  for (const r of rooms) {
+    if (r.kind !== 'open') continue;
+    const set = new Set(r.cells.map(([x, y]) => `${x},${y}`));
+    for (const [x, y] of r.cells) {
+      if ((x - r.x0) % 3 !== 2 || (y - r.y0) % 3 !== 2) continue;
+      if (![[x, y], [x + 1, y], [x, y + 1], [x + 1, y + 1]].every(([a, b]) => set.has(`${a},${b}`))) continue;
+      pillars.push({ x: (x + 1) * CELL, z: (y + 1) * CELL, size: 0.5 });
+    }
+  }
+
+  return { map, zone, roomOf, rooms, cores, doors, windows, slots, lights, pillars, spawn, spawnYaw, spawnDist, darkRooms: dark, xs, ys };
 }
