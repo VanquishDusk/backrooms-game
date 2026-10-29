@@ -2,7 +2,7 @@
 
 A replayable 3D horror game set in the Backrooms, playable in the browser on desktop and mobile.
 
-Playable now: **Level 0 — "The Lobby" / "The Yellow Hell"**, its sub-level **Level 0.2 — "The Remodel"**, **Level 1 — "The Habitable Zone"**, **Level 1.3**, **Level 1.5 — "Inverted"**, **Level 2 — "Abandoned Utility Halls"**, **Level 3 — "Electrical Station"**, **Level 4 — "Abandoned Office"** and **Level 5 — "Terror Hotel"**. More levels will follow.
+Playable now: **Level 0 — "The Lobby" / "The Yellow Hell"**, its sub-level **Level 0.2 — "The Remodel"**, **Level 1 — "The Habitable Zone"**, **Level 1.3**, **Level 1.5 — "Inverted"**, **Level 2 — "Abandoned Utility Halls"**, **Level 3 — "Electrical Station"**, **Level 4 — "Abandoned Office"**, **Level 5 — "Terror Hotel"** and **Level 63 — "Tranquility"**. More levels will follow.
 
 ## Play
 
@@ -202,10 +202,28 @@ Reached by Level 4's stairwells and elevators, or one of Level 3's freight lifts
   - **Elevators:** bronze art deco doors with a floor dial above. Floors 1 to 12 take you to another elevator elsewhere in the hotel. One goes down to **Level 3**. One goes to **13**: don't. Some dials twitch towards 13 now and then.
   - The **maintenance lift** in the boiler room. Not recommended.
   - A **dark wooden door** with no number among the guest rooms: **Level 9**.
+  - Rarely, a **plain metal door** among the wooden ones, with a porthole full of sky and cold daylight leaking under it: **Level 63**.
   - Stairs by the **furnace**, in the deepest boiler hall, go down to **Level 6**.
 - Levels 6 and 9 are coming soon.
 
-The main menu has a **Levels** section (0, 1, …) and a **Sublevels** section (0.2, 1.3, …). Each level unlocks there once you reach it.
+## Level 63 — Tranquility (Survival Difficulty 0)
+
+Reached through the rare metal doors in Level 5.
+
+- **High in the sky:** weathered wooden platforms on stilts, joined by sagging rope bridges and plank bridges with railings, ladders up to a second tier of smaller decks, and **monkey bars** across some gaps. Below, nothing: an endless blue void with clouds drifting beneath you.
+- **The vines:** huge green walls of vine rise out of the void in the distance, and keep unravelling and knitting themselves into new patterns.
+- **The sky:** deep blue with cumulus clouds that form, drift through and thin away. The sun crosses the sky, sets and rises again, but it never gets dark.
+- **Meditation Points:** round platforms with a single bench at the end of a bridge. It's quieter there. Stand still by the bench to sit down: your sanity and health come back quickly and your thoughts settle. Move to stand up.
+- **Climbing:** walk into a ladder to climb it. On monkey bars you hang on for as long as your stamina lasts; let it run out and you fall.
+- **Falling:** step off an edge with no railing, or lose your grip, and you fall into the void. It isn't fatal: you lose consciousness and wake up somewhere safer (Level 4 or Level 1).
+- **Entities:** none. Only wind, creaking rope and the distant rustle of the vines.
+
+## The archive and the camera
+
+The main menu's **Archive** shows every level as a VHS tape on a shelf, with your newest photo of it as the cover. Levels you haven't found yet are blank tapes marked **???** until you reach them. Pick a tape to watch your footage of that level (step through it, save a photo to your device or erase it), read about the level, see how often you've been there, and play it.
+
+Press **V** (or the camera button at the top right) to take a photo. It comes out like old camcorder footage: low resolution, smeared colour, tracking noise, a date and time burned into the corner. Photos are kept in your browser.
+
 
 Every run comes from a seed, which shows on the pause, death and escape screens. Type a seed on the main menu to replay a layout.
 
@@ -262,6 +280,7 @@ Open **`entities.html`** to inspect them. Pick an entity, switch poses (idle, mo
 | Use backpack item | 1 / 2 | Slot buttons above the bottle |
 | Drop backpack item | Shift + 1 / 2, or DROP in the backpack | DROP in the backpack |
 | Open the backpack | Tab (or I, B) | Tap BACKPACK under the stats |
+| Take a photo | V | Camera button (top right) |
 | Pause | Esc | Pause button |
 
 ## The backpack
@@ -301,6 +320,10 @@ src/entities/lib/             reusable entity library: Entity base (AI helpers, 
 entities.html                 entity viewer
 src/core/items.js             backpack items (Almond Water, batteries, first aid, meat, pipe, flare)
 src/core/Backpack.js          the backpack: HUD strip, panel, using/dropping, items on the floor, the pipe and the flare
+src/core/Camcorder.js         the camera: grabs the frame and runs it through the VHS filter
+src/core/photos.js            photo storage (IndexedDB)
+src/ui/Archive.js             the main menu's archive of levels (tapes) and the tape viewer
+src/ui/levelInfo.js           what the archive says about each level
 src/world/scatter.js          scatter backpack items across a level
 src/levels/registry.js        list of levels + the level interface
 src/levels/level0/            Level 0 generator and runtime (events, hazards, exits)
@@ -312,6 +335,7 @@ src/levels/level2/            Level 2 generator and runtime
 src/levels/level3/            Level 3 generator, room dressing (generator/boiler rooms, assembly hall, Sanctums, Base Gamma, galleries) and runtime
 src/levels/level4/            Level 4 generator (corridor grid, rooms, service cores), furniture and runtime (moving exits, trap windows)
 src/levels/level5/            Level 5 generator (hotel, ballroom, boiler room maze), hotel and boiler room dressing, runtime (elevators, stairs, heat)
+src/levels/level63/           Level 63 generator (platforms, bridges, ladders, monkey bars, Meditation Points) and runtime (sky, clouds, vines, climbing, falling)
 ```
 
 All textures and sounds are generated in code, so there are no asset files.
