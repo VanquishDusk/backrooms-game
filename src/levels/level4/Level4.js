@@ -546,6 +546,9 @@ export class Level4 {
       { type: 'dark', target: 'level6' },
     ];
     if (this.rng.chance(0.4)) want.push({ type: 'basement', target: 'level71', deep: true });
+    // Rarely, a door with a neon EXIT sign over it, and white light behind
+    // it, as if it led out of the Backrooms. It doesn't.
+    if (this.rng.chance(0.3)) want.push({ type: 'neon', target: 'level601' });
     this.exits = [];
     const usedCores = new Set();
     for (const w of want) {
@@ -655,7 +658,35 @@ export class Level4 {
       hinge.add(leaf);
       group.add(hinge);
       parts.hinge = hinge;
-      if (w.type === 'dark') {
+      if (w.type === 'neon') {
+        // Daylight behind: a box of white.
+        const box = new THREE.BoxGeometry(1.4, 2.4, 2.2);
+        box.translate(0, 1.2, -1.15);
+        this.ownGeos.push(box);
+        group.add(new THREE.Mesh(box, this.basicMat(0xf6f8f6, THREE.BackSide)));
+        const c = document.createElement('canvas');
+        c.width = 128;
+        c.height = 56;
+        const g2 = c.getContext('2d');
+        g2.fillStyle = '#140404';
+        g2.fillRect(0, 0, 128, 56);
+        g2.font = 'bold 40px sans-serif';
+        g2.textAlign = 'center';
+        g2.textBaseline = 'middle';
+        g2.shadowColor = '#ff2a1a';
+        g2.shadowBlur = 12;
+        g2.fillStyle = '#ffd0c8';
+        g2.fillText('EXIT', 64, 30);
+        const tex = new THREE.CanvasTexture(c);
+        this.textures.neonExit = tex;
+        const nm = new THREE.MeshBasicMaterial({ map: tex });
+        this.ownMats.push(nm);
+        const glow = new THREE.Mesh(new THREE.PlaneGeometry(0.46, 0.2), nm);
+        this.ownGeos.push(glow.geometry);
+        glow.position.set(0, 2.42, T + 0.025);
+        group.add(glow);
+        parts.neon = glow;
+      } else if (w.type === 'dark') {
         // Darkness behind: a box that swallows the light.
         const box = new THREE.BoxGeometry(1.4, 2.4, 2.2);
         box.translate(0, 1.2, -1.15);
@@ -822,6 +853,7 @@ export class Level4 {
       if (p.hinge) p.hinge.rotation.y = -ex.open * 1.35;
       if (p.button) p.button.material.color.setRGB(1, 0.55 + 0.2 * Math.sin(this.time * 4), 0.15);
       if (p.exitGlow) p.exitGlow.material.color.setRGB(0.02, Math.random() < 0.03 ? 0.6 : 0.1, 0.04);
+      if (p.neon) p.neon.material.color.setScalar(Math.random() < 0.02 ? 0.4 : 1);
       if (p.bulb && ex.type === 'basement') p.bulb.visible = Math.sin(this.time * 13) + Math.sin(this.time * 3.1) > -0.6;
       if (ex.open > 0.15 && !ex.dinged && ex.type === 'elevator') {
         ex.dinged = true;
@@ -1040,7 +1072,7 @@ export class Level4 {
   audioMix(player) {
     let exitGain = 0, exitPan = 0, exitType = 'hum';
     for (const ex of this.exits) {
-      if (ex.type !== 'elevator' && ex.type !== 'dark') continue;
+      if (ex.type !== 'elevator' && ex.type !== 'dark' && ex.type !== 'neon') continue;
       const d = Math.hypot(ex.x - player.pos.x, ex.z - player.pos.z);
       if (d > 20) continue;
       const g = (0.2 / (1 + (d / 4) ** 2)) * Math.pow(0.5, this.map.wallsBetween(player.pos.x, player.pos.z, ex.x + ex.nx * 0.5, ex.z + ex.nz * 0.5, 3));

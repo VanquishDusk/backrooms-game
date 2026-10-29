@@ -1,5 +1,7 @@
 // Every sound is synthesized with WebAudio — no audio files to load.
 
+import { Piano } from './piano.js';
+
 export class AudioEngine {
   constructor() {
     this.ctx = null;
@@ -215,6 +217,7 @@ export class AudioEngine {
     if (this.jazzOut) this.jazzOut.gain.setValueAtTime(0, this.ctx.currentTime);
     if (this.windOut) this.windOut.gain.setValueAtTime(0, this.ctx.currentTime);
     if (this.wavesOut) this.wavesOut.gain.setValueAtTime(0, this.ctx.currentTime);
+    if (this.piano) this.piano.reset();
     if (!this.ambienceOn) return;
     this.ambienceOn = false;
     for (const n of this.amb) {
@@ -247,6 +250,10 @@ export class AudioEngine {
     this.updateJazz(s.jazz || 0, s.jazzMuffle ?? 6000);
     this.updateWind(s.wind || 0);
     this.updateWaves(s.waves || 0, s.wavesPan || 0);
+    if (s.piano || this.piano) {
+      if (!this.piano) this.piano = new Piano(this.ctx, this.master, this.noise);
+      this.piano.update(s.piano || 0, s.pianoOpts || {});
+    }
     if (this.machinePan) this.machinePan.pan.setTargetAtTime(s.machinePan || 0, t, 0.1);
     this.muffle.frequency.setTargetAtTime(s.ears ? 380 : s.underwater ? 650 : 20000, t, 0.06);
 
@@ -892,6 +899,22 @@ export class AudioEngine {
     e.connect(ef).connect(eg).connect(this.out(-pan * 0.5));
     e.start(t + 0.35, Math.random(), 1);
     this.thud(pan, vol * 0.4);
+  }
+
+  // A key on an old keyboard.
+  keyclick(vol = 0.08) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    const s = this.noiseSource();
+    const bp = this.ctx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.frequency.value = 2500 + Math.random() * 1500;
+    bp.Q.value = 2;
+    const g = this.ctx.createGain();
+    this.env(g, t, vol, 0.001, 0.035);
+    s.connect(bp).connect(g).connect(this.master);
+    s.start(t, Math.random() * 2, 0.06);
+    this.thud(0, vol * 0.25);
   }
 
   // Coming up for air.

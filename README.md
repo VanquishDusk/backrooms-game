@@ -2,7 +2,7 @@
 
 A replayable 3D horror game set in the Backrooms, playable in the browser on desktop and mobile.
 
-Playable now: **Level 0 — "The Lobby" / "The Yellow Hell"**, its sub-level **Level 0.2 — "The Remodel"**, **Level 1 — "The Habitable Zone"**, **Level 1.3**, **Level 1.5 — "Inverted"**, **Level 2 — "Abandoned Utility Halls"**, **Level 3 — "Electrical Station"**, **Level 4 — "Abandoned Office"**, **Level 5 — "Terror Hotel"**, **Level 6 — "Lights Out"**, **Level 7 — "Thalassophobia"** and **Level 63 — "Tranquility"**. More levels will follow.
+Playable now: **Level 0 — "The Lobby" / "The Yellow Hell"**, its sub-level **Level 0.2 — "The Remodel"**, **Level 1 — "The Habitable Zone"**, **Level 1.3**, **Level 1.5 — "Inverted"**, **Level 2 — "Abandoned Utility Halls"**, **Level 3 — "Electrical Station"**, **Level 4 — "Abandoned Office"**, **Level 5 — "Terror Hotel"**, **Level 6 — "Lights Out"**, **Level 7 — "Thalassophobia"**, **Level 63 — "Tranquility"** and **Level 601 — "The End"**. More levels will follow.
 
 ## Play
 
@@ -172,6 +172,7 @@ Reached by Level 3's freight lift or Level 2's wooden office door. It's the safe
   - Stairwells down to **Level 5**.
   - Elevators to **Level 5**, and sometimes one back to **Level 3**. The display over the door shows which.
   - A dark doorway under a dead EXIT sign to **Level 6**.
+  - Rarely, a door with a glowing neon **EXIT** sign and white daylight behind it, as if it led out of the Backrooms. It leads to **Level 601**.
   - Rarely, a **basement** stairway to **Level 71**.
   - **Exits move:** once you've seen one, lose sight of it and it may be gone when you come back, standing at another core instead.
 - Levels 6 and 71 are coming soon.
@@ -254,6 +255,21 @@ Reached through the rare metal doors in Level 5.
 - **Climbing:** walk into a ladder to climb it. On monkey bars you hang on for as long as your stamina lasts; let it run out and you fall.
 - **Falling:** step off an edge with no railing, or lose your grip, and you fall into the void. It isn't fatal: you lose consciousness and wake up somewhere safer (Level 4 or Level 1).
 - **Entities:** none. Only wind, creaking rope and the distant rustle of the vines.
+
+## Level 601 — The End (Survival Difficulty unknown)
+
+Reached through the rare neon EXIT door in Level 4.
+
+- **The bookshop:** a huge, bright, almost silent bookshop that looks like the way out. Drop ceiling full of fluorescent panels, dark carpet, row after row of empty oak shelving, tall slatted A-frame displays, sage-green pillars covered in yellow THE END posters and sticky notes, curved service desks with old beige computers, and a yellow bulkhead at the back with metal letters: **THE END**. The glass front doors show only white.
+- **Sound:** a slow piano somewhere, the whole time, and the buzz of the computers. Nothing else. There's no boss music and no boss health bar: the level just doesn't let you go.
+- **Your flashlight doesn't work here.** Only the computers do.
+- **You can't die here.** If the Partygoers get you, your mind goes or the host catches you, you wake up at the front desk (or at the start of the hallway) and carry on.
+- **How it goes:**
+  1. The front desk computer tells you which desk to go to. One computer is awake, its cursor blinking. Stand at it and it types for you, slowly. Partygoers come out of the shelves while it does.
+  2. When it finishes, the screen fills with white: a **field** of long grass under a white sky, low hills, and a vending machine standing on its own. Reach the machine and use it (it gives you Almond Water), and the library comes back for you.
+  3. Each time you come back, the shop is worse: lights out, **walls appearing** behind you where there weren't any, then **people you can't quite perceive** standing in the aisles (they fade as you get close), and something very tall in a black suit watching you from the end of an aisle, gone when you approach. The bulkhead reads **THE END IS NEAR**. The field gets worse too: the machine moves when you look away, shelves and ceiling tiles stand in the grass, and yellow figures creep closer whenever you're not looking.
+  4. After the third time: **THE END IS HERE.** Every screen says it. The **host** walks after you, steadily, everywhere, and a door at the back of the shop opens onto a hallway that loops forever. Halfway along, a passage leads off each side; follow the **piano** (it comes from the right way). Three right turns and there's a neon EXIT at the end of the hallway.
+- **The way out:** sunlight, real sunlight, and a house on a hill with its porch light on and its door open. The piano finishes. **Welcome home** to **Level 94** (coming soon).
 
 ## The archive and the camera
 
@@ -374,6 +390,7 @@ src/levels/level4/            Level 4 generator (corridor grid, rooms, service c
 src/levels/level5/            Level 5 generator (hotel, ballroom, boiler room maze), hotel and boiler room dressing, runtime (elevators, stairs, heat)
 src/levels/level6/            Level 6 (maze generator, darkness, shifting halls, hallucinations, exits)
 src/levels/level7/            Level 7 (layout and sea floor, the room/sea/scenery builders, the serpent, swimming/boat/fight runtime)
+src/levels/level601/          Level 601 (shop layout, shop and computer dressing, the field and the house, the host, the acts)
 src/levels/level63/           Level 63 generator (platforms, bridges, ladders, monkey bars, Meditation Points) and runtime (sky, clouds, vines, climbing, falling)
 ```
 
@@ -385,4 +402,4 @@ All textures and sounds are generated in code, so there are no asset files.
 2. Grid-style levels can reuse `GridMap` and `GridWorld` with their own generator, textures and lighting.
 3. Register the level in `src/levels/registry.js`.
 
-Levels hand off with `ctx.onEscape(targetId, 'noclip' | 'door' | 'walk')`, and player stats carry over. An exit that targets a level that isn't built yet shows a "coming soon" screen, using the names in `UPCOMING`. Level 4's and Level 5's exits already target `level9` and `level71`, Level 6's target `level129` and `level6_1`, and Level 7's target `level8`, `level9`, `level83` and `level880`.
+Levels hand off with `ctx.onEscape(targetId, 'noclip' | 'door' | 'walk')`, and player stats carry over. An exit that targets a level that isn't built yet shows a "coming soon" screen, using the names in `UPCOMING`. Level 4's and Level 5's exits already target `level9` and `level71`, Level 6's target `level129` and `level6_1`, Level 7's target `level8`, `level9`, `level83` and `level880`, and Level 601's targets `level94`.
