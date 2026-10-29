@@ -261,11 +261,7 @@ export class Level02 {
     const { ctx, map } = this;
     const hud = ctx.hud;
 
-    if (t > 0.6 && this.once('intro')) hud.message('Dry carpet. Fresh paint. Your phone picks up Wi-Fi.', 4.5);
-    if (t > START_DELAY - 3 && this.once('creak')) {
-      ctx.audio.creak(0, 0.5);
-      hud.message('Something creaks overhead.', 2.5);
-    }
+    if (t > START_DELAY - 3 && this.once('creak')) ctx.audio.creak(0, 0.5);
     if (t > START_DELAY && this.once('start')) {
       ctx.audio.crash(0, 0.4);
       hud.message("It's coming apart. Find the door back to Level 0.", 5);
@@ -311,7 +307,7 @@ export class Level02 {
     }
     if (charging && player.battery < 100) {
       player.battery = Math.min(100, player.battery + 12 * dt);
-      if (this.once('outlet')) hud.message('A working outlet. Your flashlight charges.', 3);
+      if (this.once('outlet')) hud.message('Outlet: your flashlight is charging.', 2.5);
     }
 
     // Almond Water.
@@ -339,7 +335,6 @@ export class Level02 {
 
     // The door back.
     const dd = Math.hypot(player.pos.x - this.door.x, player.pos.z - this.door.z);
-    if (dd < 6 && this.once('door')) hud.message('Light under a door. You can hear the hum.', 3);
     if (nearDoor(this.door, player.pos.x, player.pos.z)) {
       this.done = true;
       ctx.onEscape('level0', 'door');
@@ -444,7 +439,6 @@ export class Level02 {
     player.sanity = Math.min(100, player.sanity + BOTTLE_SANITY);
     player.health = Math.min(100, player.health + 15);
     this.ctx.audio.drink();
-    this.ctx.hud.message('You feel a little clearer.', 2);
   }
 
   // ---- Values the game reads every frame ---------------------------------

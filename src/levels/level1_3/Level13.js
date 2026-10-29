@@ -20,15 +20,6 @@ const DECAY_CHANCE = 0.65;
 const BOTTLE_SANITY = 35;
 const MAX_BOTTLES = 6;
 
-const DOCTOR_LINES = [
-  "You're safe here. Sit down, let me look at that.",
-  "Don't step into a Detox Zone until we've set it. Bones heal crooked otherwise.",
-  'It burns. That means it is working.',
-  'Everyone is welcome. The worst cases go first, that is all.',
-  'When you are ready, either end of the hallway will take you back to Level 1.',
-  'Drink some water. Real water. We have plenty.',
-];
-
 const DOCUMENTS = [
   'AUTOPSY NOTES, Dr. Reathe: "Each victim suffered a systemic, extreme, lethal overproduction or overreaction, as if their bodies had been given instructions a hundred times as extreme as they should have been."',
   'SCOUT\'S LOG: "I lowered about a yard of fishing line into the nearest pit. Less than a foot of it came back. This was absolutely Decay."',
@@ -106,7 +97,6 @@ export class Level13 {
     this.burnTimer = 0;
     this.nextAmbient = 2;
     this.nextBeat = 0;
-    this.doctorCooldown = 0;
     this.fallTime = -1;
     this.fogColor = new THREE.Color(0.9, 0.9, 0.88);
     this.fogDensity = this.decayed ? 0.03 : 0.014;
@@ -393,13 +383,8 @@ export class Level13 {
     const hud = ctx.hud;
     const p = player.pos;
 
-    if (this.time > 0.8 && this.once('intro')) {
-      hud.message(this.decayed
-        ? 'White tile, gone black in places. The air is humid and rotten.'
-        : 'Blinding, spotless white. It smells sharply of cleaning chemicals.', 4.5);
-    }
     if (this.decayed && this.time > 6 && this.once('intro2')) {
-      hud.message(this.doomedLeft ? 'The far left end of the hallway is going dark.' : 'The far right end of the hallway is going dark.', 4);
+      hud.message(this.doomedLeft ? 'The left end is being swallowed. Head for the right end.' : 'The right end is being swallowed. Head for the left end.', 4);
     }
 
     this.updateLights(dt, player);
@@ -464,7 +449,7 @@ export class Level13 {
           ctx.hurtFlash(0.12);
           if (player.health < 99) ctx.audio.sizzle(0.06);
         }
-        if (this.once('detox')) hud.message('A Detox Zone. It burns as it heals.', 3.5);
+        if (this.once('detox')) hud.message('Detox Zone: stand here to heal.', 3);
       } else {
         player.damage(17 * dt);
         if (this.burnTimer <= 0) {
@@ -473,7 +458,7 @@ export class Level13 {
           ctx.audio.sizzle(0.35);
           ctx.vibrate(80);
         }
-        if (this.once('rotdetox')) hud.message('The burning doesn\'t stop. Your skin bubbles and tears. GET OUT.', 3.5);
+        if (this.once('rotdetox')) hud.message('This Detox Zone is hurting you. Get out!', 3.5);
       }
     }
 
@@ -500,12 +485,6 @@ export class Level13 {
       d.read = true;
       ctx.audio.click();
       hud.message(d.text, Math.min(10, 3 + d.text.length / 22));
-    }
-    this.doctorCooldown -= dt;
-    for (const d of this.doctors) {
-      if (Math.hypot(d.x - p.x, d.z - p.z) > 2.6 || this.doctorCooldown > 0) continue;
-      this.doctorCooldown = 6;
-      hud.message(`"${this.rng.pick(DOCTOR_LINES)}"`, 4);
     }
 
     this.updateAmbient(dt, player);
@@ -568,7 +547,6 @@ export class Level13 {
         if (m.flat) {
           if (this.once('flatline')) {
             ctx.audio.beep(pan, vol * 1.4, 4, 880);
-            ctx.hud.message('A monitor in the dark, holding one long note.', 3);
           }
         } else if (!this.decayed) {
           ctx.audio.beep(pan, vol);
@@ -604,7 +582,6 @@ export class Level13 {
     player.bottles--;
     player.sanity = Math.min(100, player.sanity + BOTTLE_SANITY);
     this.ctx.audio.drink();
-    this.ctx.hud.message('You feel a little clearer.', 2);
   }
 
   // ---- Values the game reads every frame ---------------------------------

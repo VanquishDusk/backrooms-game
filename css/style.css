@@ -287,8 +287,14 @@ button { font-family: inherit; }
 #level-card .lc-title { font-size: clamp(22px, 4vw, 32px); letter-spacing: 4px; }
 #level-card .lc-diff { font-size: clamp(16px, 3vw, 22px); letter-spacing: 3px; color: var(--fg-dim); margin-top: 4px; }
 
-#unlocked-levels { display: flex; flex-direction: column; gap: 10px; }
+#unlocked-levels { display: flex; flex-direction: column; gap: 10px; text-align: left; }
 #unlocked-levels:empty { display: none; }
+.level-section h3 { font-size: 20px; letter-spacing: 3px; color: var(--fg-dim); margin: 4px 0 6px; }
+.level-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.level-btn { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; }
+.level-btn small { font-size: 15px; letter-spacing: 1px; opacity: 0.75; }
+.level-btn:disabled { opacity: 0.35; cursor: default; border-style: dashed; }
+.level-btn:disabled:hover { border-color: rgba(236, 227, 176, 0.35); color: var(--fg); }
 #flash { z-index: 9; background: #fff; opacity: 0; mix-blend-mode: screen; }
 
 #glitch {

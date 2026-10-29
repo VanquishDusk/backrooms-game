@@ -76,7 +76,7 @@ One long, blinding-white tiled hallway with branching paths to 16 large rooms: D
   - One end of the hallway is already being swallowed.
 - **Exit:** noclip into either end of the main hallway to return to Level 1.
 
-Levels you've reached can be started directly from the main menu.
+The main menu has a **Levels** section (0, 1, …) and a **Sublevels** section (0.2, 1.3, …). Each level unlocks there once you reach it.
 
 Every run comes from a seed, which shows on the pause, death and escape screens. Type a seed on the main menu to replay a layout.
 

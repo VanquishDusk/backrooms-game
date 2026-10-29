@@ -9,7 +9,7 @@ import {
 } from '../../world/textures.js';
 import { PropKit, disposeTextures, mergeGeometries } from '../../world/props.js';
 import { Hound } from '../../entities/Hound.js';
-import { generateLevel1, ZONE, SECTOR, SECTOR_NAMES } from './generate.js';
+import { generateLevel1, ZONE, SECTOR } from './generate.js';
 
 // Level 1 — "The Habitable Zone".
 //
@@ -630,12 +630,6 @@ export class Level1 {
     this.here = { zone, sector };
     const safe = zone === ZONE.CORRIDOR || zone === ZONE.ROOM || zone === ZONE.EXIT;
 
-    if (this.time > 0.8 && this.once('intro')) hud.message('Concrete. Damp air. Quieter than Level 0.', 4);
-    if (this.time > 6 && this.once('intro2')) hud.message('There is a note on the table.', 3);
-    if (this.lastSector !== sector && this.time > 2) {
-      if (this.once('sector' + sector) && sector !== SECTOR.AQUILA) hud.message(`${SECTOR_NAMES[sector].toUpperCase()} SECTOR`, 2.5);
-      this.lastSector = sector;
-    }
 
     this.updateBlackout(dt, player, safe);
     this.updateLights(dt, player);
@@ -644,7 +638,6 @@ export class Level1 {
     // Garden: sweet air, and it gets into you.
     if (sector === SECTOR.GARDEN) {
       this.gardenExposure = Math.min(1.5, this.gardenExposure + dt / 14);
-      if (this.once('garden')) hud.message('Grass, vines, sunlight from nowhere. The air is sweet. Too sweet.', 4.5);
     } else {
       this.gardenExposure = Math.max(0, this.gardenExposure - dt / 10);
     }
@@ -711,7 +704,6 @@ export class Level1 {
     if (this.world.exit) {
       const dw = this.world.distanceToExit(player.pos.x, player.pos.z);
       this.whiteMat.uniforms.prox.value = Math.max(0, 1 - dw / 6) * 0.4;
-      if (dw < 6 && this.once('white')) hud.message('A white wall. Spotless. Nothing in Level 1 is this clean.', 3.5);
       if (dw < 0.22) {
         this.done = true;
         ctx.onEscape('level1_3', 'noclip');
@@ -724,8 +716,6 @@ export class Level1 {
     const t = (player.pos.x - e.ax) * e.dx + (player.pos.z - e.az) * e.dz; // metres along it
     this.exitProgress = zone === ZONE.EXIT ? Math.max(0, t / (e.cs * (e.L - 1))) : 0;
     if (zone === ZONE.EXIT) {
-      if (this.once('exit1')) hud.message('Pipes. More of them the further you go.', 3.5);
-      if (this.exitProgress > 0.5 && this.once('exit2')) hud.message('The dials are all twitching now. Something hisses ahead.', 3.5);
       if (this.exitProgress > 0.97) {
         this.done = true;
         ctx.onEscape('level2', 'walk');
@@ -766,7 +756,7 @@ export class Level1 {
         b.phase = 'dark';
         b.t = 0;
         ctx.audio.thud(0, 0.5);
-        ctx.hud.message(this.once('bo') ? 'The lights died. Something moves in the halls. Get into a corridor.' : 'Blackout.', 4);
+        ctx.hud.message('Blackout. Get into a corridor.', 3);
       }
     } else if (b.phase === 'dark') {
       this.globalLight += (0.025 - this.globalLight) * Math.min(1, dt * 8);
@@ -783,7 +773,6 @@ export class Level1 {
       if (b.t > 1.5) {
         this.blackout = null;
         this.nextBlackout = this.rng.range(70, 130);
-        ctx.hud.message('The lights stutter back on.', 2.5);
       }
     }
   }
@@ -834,7 +823,6 @@ export class Level1 {
       this.nextStretch -= dt;
       if (this.nextStretch <= 0 && zone === ZONE.HALL && player.speed > 1 && !this.blackout) {
         this.stretch = { t: 0, dur: 7 };
-        if (this.once('stretch')) this.ctx.hud.message('The hall seems to stretch away from you.', 3.5);
       }
       return;
     }
@@ -979,7 +967,6 @@ export class Level1 {
         if (d < 16) this.ctx.audio.tink(this.panTo(player, w.x, w.z), 0.2 * (1 - d / 16));
       }
       const d = Math.hypot(w.x - player.pos.x, w.z - player.pos.z);
-      if (d < 2.5 && this.once('worker')) this.ctx.hud.message("The worker doesn't look up. It doesn't stop.", 3);
     }
     for (const dial of this.dials) {
       const jitter = Math.sin(this.time * (3 + dial.k * 14) + dial.phase) * (0.1 + dial.k * 0.6) + (Math.random() - 0.5) * dial.k * 0.3;
@@ -1058,7 +1045,6 @@ export class Level1 {
     player.bottles--;
     player.sanity = Math.min(100, player.sanity + BOTTLE_SANITY);
     this.ctx.audio.drink();
-    this.ctx.hud.message('You feel a little clearer.', 2);
   }
 
   // ---- Values the game reads every frame ---------------------------------

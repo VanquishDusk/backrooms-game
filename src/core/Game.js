@@ -336,9 +336,7 @@ export class Game {
 
       if (levelId === FIRST_LEVEL) {
         if (carry) {
-          this.hud.message('Back in the Yellow Hell. The buzzing never stopped.', 4);
         } else {
-          this.hud.message('You noclipped out of reality.', 3.5);
           setTimeout(() => runId === this.runId && this.hud.message('Find a flickering wall. Throw yourself through it.', 5), 4200);
         }
       }
@@ -365,22 +363,42 @@ export class Game {
     this.cardTimer = setTimeout(() => card.classList.remove('show'), 3200);
   }
 
+  // Menu level select: main levels (0, 1, ...) and sublevels (0.2, 1.3, ...)
+  // in their own sections. Levels you haven't reached yet show as locked.
   showUnlocked() {
     const box = $('unlocked-levels');
     box.textContent = '';
-    for (const id of this.stats.unlocked) {
-      const def = LEVELS[id];
-      if (!def) continue;
-      const b = document.createElement('button');
-      b.className = 'mbtn';
-      b.textContent = `${def.name.toUpperCase()} — ${def.title.toUpperCase()}`;
-      b.addEventListener('click', (e) => {
-        e.preventDefault();
-        this.audio.unlock();
-        this.audio.click();
-        this.startRun(randomSeedString(), id);
-      });
-      box.appendChild(b);
+    const reached = (id) => id === FIRST_LEVEL || this.stats.unlocked.includes(id);
+    const defs = Object.values(LEVELS).sort((a, b) => a.number - b.number);
+    const sections = [
+      ['LEVELS', defs.filter((d) => Number.isInteger(d.number))],
+      ['SUBLEVELS', defs.filter((d) => !Number.isInteger(d.number))],
+    ];
+    for (const [title, list] of sections) {
+      const section = document.createElement('div');
+      section.className = 'level-section';
+      const h = document.createElement('h3');
+      h.textContent = title;
+      const grid = document.createElement('div');
+      grid.className = 'level-grid';
+      section.append(h, grid);
+      for (const def of list) {
+        const open = reached(def.id);
+        const b = document.createElement('button');
+        b.className = 'mbtn small level-btn';
+        b.disabled = !open;
+        b.innerHTML = `<span>${def.name.toUpperCase()}</span><small>${open ? def.title.toUpperCase() : 'LOCKED'}</small>`;
+        if (open) {
+          b.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.audio.unlock();
+            this.audio.click();
+            this.startRun(randomSeedString(), def.id);
+          });
+        }
+        grid.appendChild(b);
+      }
+      box.appendChild(section);
     }
   }
 

@@ -244,13 +244,11 @@ export class Level0 {
     // The quiet, dry, half-built rooms — and the door in them.
     if (zone === ZONE.CONSTRUCTION && !this.constructionHint) {
       this.constructionHint = true;
-      hud.message('The buzzing is quieter here. The carpet is dry.', 4);
     }
     if (this.door02 && !player.falling) {
       const dd = Math.hypot(player.pos.x - this.door02.x, player.pos.z - this.door02.z);
       if (dd < 5 && !this.doorHint) {
         this.doorHint = true;
-        hud.message('A door. In Level 0?', 3);
       }
       if (nearDoor(this.door02, player.pos.x, player.pos.z)) {
         this.done = true;
@@ -265,7 +263,6 @@ export class Level0 {
       if (ev === 'vanish') ctx.audio.staticBurst(0.35, 0.18);
       if (ev === 'hunt') {
         ctx.audio.whisper(0, 0.4);
-        hud.message('Something is following you.', 3);
       }
       if (ev === 'caught') {
         this.done = true;
@@ -294,7 +291,6 @@ export class Level0 {
     player.sanity = Math.max(1, player.sanity - 20);
     this.ctx.fade(0, 1.6);
     this.ctx.audio.thud(0, 0.5);
-    this.ctx.hud.message('You wake up somewhere else. The carpet is wet.', 4);
   }
 
   drink(player) {
@@ -306,7 +302,6 @@ export class Level0 {
     this.drankOnce = true;
     player.sanity = Math.min(100, player.sanity + BOTTLE_SANITY);
     this.ctx.audio.drink();
-    this.ctx.hud.message('You feel a little clearer.', 2);
   }
 
   // ---- Lights ------------------------------------------------------------
@@ -444,7 +439,6 @@ export class Level0 {
         break;
       case 'voice':
         ctx.audio.voice(side(), 0.12);
-        if (rng.chance(0.4)) ctx.hud.message('...was that your name?', 3);
         break;
       case 'scratch':
         this.scratchSeq = { pan: side(), left: rng.int(3, 6), t: 0 };
