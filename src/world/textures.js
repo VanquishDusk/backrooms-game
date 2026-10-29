@@ -1531,3 +1531,339 @@ export function liftPanelTexture(renderer) {
   blotches(ctx, S, S, 8, '15,8,3', 0.4);
   return finish(c, renderer);
 }
+
+// ---- Level 4 -------------------------------------------------------------
+
+// Off-white office wall: flat paint, scuffs at chair height, a dark grey
+// vinyl baseboard. Spans the wall height once (use [u, 1/height]).
+export function officeWallTexture(renderer, base = '#d9d8d0') {
+  const W = 256, H = 512;
+  const c = document.createElement('canvas');
+  c.width = W;
+  c.height = H;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = base;
+  ctx.fillRect(0, 0, W, H);
+  blotches(ctx, W, H, 8, '160,158,145', 0.12);
+  blotches(ctx, W, H, 14, '245,245,238', 0.12);
+  speckle(ctx, Math.max(W, H), 4000, '140,138,125', 0.07, 1.2);
+  // Scuffs where chairs and trolleys hit.
+  for (let i = 0; i < 18; i++) {
+    ctx.fillStyle = `rgba(90,88,80,${(0.05 + Math.random() * 0.12).toFixed(3)})`;
+    ctx.fillRect(Math.random() * W, H * (0.62 + Math.random() * 0.2), 4 + Math.random() * 30, 1 + Math.random() * 2);
+  }
+  // Baseboard.
+  ctx.fillStyle = '#3c3e40';
+  ctx.fillRect(0, H - 18, W, 18);
+  ctx.fillStyle = 'rgba(255,255,255,0.12)';
+  ctx.fillRect(0, H - 18, W, 2);
+  return finish(c, renderer);
+}
+
+// Blue-grey commercial loop-pile carpet tile with a faint grid and stains.
+export function officeCarpetTexture(renderer, color = '#555c68') {
+  const S = 512;
+  const [c, ctx] = makeCanvas(S);
+  ctx.fillStyle = color;
+  ctx.fillRect(0, 0, S, S);
+  const img = ctx.getImageData(0, 0, S, S);
+  const d = img.data;
+  for (let i = 0; i < d.length; i += 4) {
+    const n = (Math.random() - 0.5) * 30;
+    const fleck = Math.random() < 0.04 ? 30 : Math.random() < 0.05 ? -25 : 0;
+    d[i] += n + fleck;
+    d[i + 1] += n + fleck;
+    d[i + 2] += n * 1.1 + fleck;
+  }
+  ctx.putImageData(img, 0, 0);
+  // Carpet tiles, laid quarter-turned so their pile catches the light differently.
+  for (let y = 0; y < 2; y++) {
+    for (let x = 0; x < 2; x++) {
+      ctx.fillStyle = (x + y) % 2 ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.04)';
+      ctx.fillRect(x * S / 2, y * S / 2, S / 2, S / 2);
+    }
+  }
+  ctx.fillStyle = 'rgba(20,22,28,0.25)';
+  ctx.fillRect(0, 0, S, 1);
+  ctx.fillRect(0, S / 2, S, 1);
+  ctx.fillRect(0, 0, 1, S);
+  ctx.fillRect(S / 2, 0, 1, S);
+  blotches(ctx, S, S, 6, '30,28,22', 0.18);
+  return finish(c, renderer);
+}
+
+// 2x2 ft acoustic ceiling tiles in a white tee-bar grid, a few stained.
+export function dropCeilingTexture(renderer) {
+  const S = 512;
+  const [c, ctx] = makeCanvas(S);
+  ctx.fillStyle = '#d4d4ce';
+  ctx.fillRect(0, 0, S, S);
+  // Fissured mineral-fibre texture.
+  for (let i = 0; i < 2500; i++) {
+    ctx.fillStyle = `rgba(110,108,100,${(Math.random() * 0.35).toFixed(3)})`;
+    ctx.fillRect(Math.random() * S, Math.random() * S, 1 + Math.random() * 4, 1);
+  }
+  speckle(ctx, S, 9000, '140,138,128', 0.3, 1.2);
+  // A faint water stain on one tile (the texture repeats, so keep it subtle).
+  for (let i = 0; i < 1; i++) {
+    const x = (Math.floor(Math.random() * 2) + 0.5) * S / 2, y = (Math.floor(Math.random() * 2) + 0.5) * S / 2;
+    const g = ctx.createRadialGradient(x, y, 5, x, y, 70 + Math.random() * 40);
+    g.addColorStop(0, 'rgba(150,120,70,0.14)');
+    g.addColorStop(0.8, 'rgba(150,120,70,0.06)');
+    g.addColorStop(1, 'rgba(150,120,70,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(x - 128, y - 128, 256, 256);
+  }
+  ctx.fillStyle = '#f0f0ea';
+  for (const p of [0, S / 2]) {
+    ctx.fillRect(p - 4, 0, 8, S);
+    ctx.fillRect(0, p - 4, S, 8);
+  }
+  ctx.fillRect(S - 4, 0, 4, S);
+  ctx.fillRect(0, S - 4, S, 4);
+  ctx.fillStyle = 'rgba(0,0,0,0.18)';
+  for (const p of [0, S / 2]) {
+    ctx.fillRect(p + 4, 0, 1, S);
+    ctx.fillRect(0, p + 4, S, 1);
+  }
+  return finish(c, renderer);
+}
+
+// Blacked-out window: black plastic sheeting taped over the glass.
+export function blackoutTexture(renderer) {
+  const S = 256;
+  const [c, ctx] = makeCanvas(S);
+  ctx.fillStyle = '#0c0c0e';
+  ctx.fillRect(0, 0, S, S);
+  // Creases and sheen.
+  for (let i = 0; i < 30; i++) {
+    ctx.strokeStyle = `rgba(90,90,100,${(Math.random() * 0.2).toFixed(3)})`;
+    ctx.lineWidth = 1 + Math.random() * 2;
+    ctx.beginPath();
+    const x = Math.random() * S, y = Math.random() * S;
+    ctx.moveTo(x, y);
+    ctx.quadraticCurveTo(x + (Math.random() - 0.5) * 120, y + (Math.random() - 0.5) * 120, x + (Math.random() - 0.5) * 200, y + (Math.random() - 0.5) * 200);
+    ctx.stroke();
+  }
+  // Grey duct tape round the edge and across.
+  ctx.fillStyle = 'rgba(150,150,145,0.9)';
+  for (const [x, y, w, h] of [[0, 0, S, 14], [0, S - 14, S, 14], [0, 0, 14, S], [S - 14, 0, 14, S]]) ctx.fillRect(x, y, w, h);
+  ctx.save();
+  ctx.translate(S / 2, S / 2);
+  ctx.rotate(0.7);
+  ctx.fillRect(-S, -6, S * 2, 12);
+  ctx.restore();
+  return finish(c, renderer);
+}
+
+// What a trap window shows: a pale, too-bright view of an empty city at
+// dusk, slightly wrong (no lights in any window, a sun that's too big).
+export function outsideViewTexture() {
+  const W = 512, H = 512;
+  const c = document.createElement('canvas');
+  c.width = W;
+  c.height = H;
+  const ctx = c.getContext('2d');
+  const sky = ctx.createLinearGradient(0, 0, 0, H);
+  sky.addColorStop(0, '#9fb4c8');
+  sky.addColorStop(0.55, '#e8dcc0');
+  sky.addColorStop(1, '#c8b896');
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, W, H);
+  const sun = ctx.createRadialGradient(W * 0.62, H * 0.42, 10, W * 0.62, H * 0.42, 120);
+  sun.addColorStop(0, 'rgba(255,250,230,1)');
+  sun.addColorStop(0.3, 'rgba(255,240,200,0.7)');
+  sun.addColorStop(1, 'rgba(255,240,200,0)');
+  ctx.fillStyle = sun;
+  ctx.fillRect(0, 0, W, H);
+  // Rows of identical office blocks into the haze.
+  for (let row = 0; row < 4; row++) {
+    const base = H * (0.62 + row * 0.1);
+    const k = 1 - row * 0.2;
+    ctx.fillStyle = `rgba(${120 * k + 60},${118 * k + 60},${112 * k + 55},${0.55 + row * 0.15})`;
+    for (let x = -20; x < W; x += 40 + row * 10) {
+      const h = 60 + ((x * 7919 + row * 131) % 90);
+      ctx.fillRect(x, base - h, 30 + row * 8, h + 200);
+    }
+  }
+  const haze = ctx.createLinearGradient(0, H * 0.4, 0, H);
+  haze.addColorStop(0, 'rgba(230,220,200,0)');
+  haze.addColorStop(1, 'rgba(230,220,200,0.45)');
+  ctx.fillStyle = haze;
+  ctx.fillRect(0, 0, W, H);
+  return finish(c, null);
+}
+
+// A vending machine front: lit panel of Almond Water bottles.
+export function vendingTexture() {
+  const W = 256, H = 512;
+  const c = document.createElement('canvas');
+  c.width = W;
+  c.height = H;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#1e3a5a';
+  ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#e8eef0';
+  ctx.fillRect(14, 14, 160, 330);
+  for (let r = 0; r < 6; r++) {
+    ctx.fillStyle = '#9aa0a4';
+    ctx.fillRect(14, 64 + r * 50, 160, 3);
+    for (let k = 0; k < 5; k++) {
+      ctx.fillStyle = '#e8dcc0';
+      ctx.fillRect(22 + k * 31, 30 + r * 50, 16, 32);
+      ctx.fillStyle = '#c8a050';
+      ctx.fillRect(22 + k * 31, 42 + r * 50, 16, 8);
+      ctx.fillStyle = '#2a6aa0';
+      ctx.fillRect(25 + k * 31, 26 + r * 50, 10, 5);
+    }
+  }
+  ctx.fillStyle = '#0e1c2c';
+  ctx.fillRect(186, 40, 56, 120);
+  ctx.fillStyle = '#40ff60';
+  ctx.font = 'bold 14px monospace';
+  ctx.fillText('0.00', 194, 64);
+  for (let i = 0; i < 9; i++) {
+    ctx.fillStyle = '#c0c4c8';
+    ctx.fillRect(194 + (i % 3) * 14, 80 + Math.floor(i / 3) * 18, 10, 12);
+  }
+  ctx.fillStyle = '#0a0a0a';
+  ctx.fillRect(30, 380, 130, 70);
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 22px sans-serif';
+  ctx.fillText('ALMOND', 22, 488);
+  ctx.fillText('WATER', 120, 488);
+  return finish(c, null);
+}
+
+// Whiteboard with half-erased writing; cork board with pinned notices; a
+// bland corporate poster. Three tiles in a row.
+export function officeBoardsTexture(renderer) {
+  const T = 256;
+  const c = document.createElement('canvas');
+  c.width = T * 3;
+  c.height = T / 2;
+  const ctx = c.getContext('2d');
+  // Whiteboard.
+  ctx.fillStyle = '#eef0ee';
+  ctx.fillRect(0, 0, T, T / 2);
+  for (let i = 0; i < 9; i++) {
+    ctx.strokeStyle = `rgba(${Math.random() < 0.5 ? '40,60,140' : '60,60,60'},${(0.1 + Math.random() * 0.3).toFixed(2)})`;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    let x = 14 + Math.random() * 40, y = 16 + i * 12;
+    ctx.moveTo(x, y);
+    for (let k = 0; k < 10; k++) {
+      x += 8 + Math.random() * 14;
+      ctx.lineTo(x, y + (Math.random() - 0.5) * 6);
+    }
+    ctx.stroke();
+  }
+  blotches(ctx, T, T / 2, 6, '160,170,180', 0.15);
+  ctx.fillStyle = '#9a9ea0';
+  ctx.fillRect(0, T / 2 - 6, T, 6);
+  // Cork board.
+  ctx.fillStyle = '#a07a4a';
+  ctx.fillRect(T, 0, T, T / 2);
+  speckle(ctx, T * 3, 3000, '60,40,20', 0.25);
+  for (let i = 0; i < 6; i++) {
+    const x = T + 12 + (i % 3) * 80 + Math.random() * 10, y = 10 + Math.floor(i / 3) * 58 + Math.random() * 6;
+    ctx.fillStyle = ['#f4f0e0', '#f0e68c', '#e8f0f8'][i % 3];
+    ctx.fillRect(x, y, 56, 46);
+    ctx.fillStyle = 'rgba(40,40,40,0.5)';
+    for (let k = 0; k < 4; k++) ctx.fillRect(x + 6, y + 10 + k * 8, 40 - (k % 2) * 12, 2);
+    ctx.fillStyle = '#c82020';
+    ctx.beginPath();
+    ctx.arc(x + 28, y + 4, 3, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.strokeStyle = '#6a5030';
+  ctx.lineWidth = 6;
+  ctx.strokeRect(T + 3, 3, T - 6, T / 2 - 6);
+  // Poster: a blue sky and one word.
+  const g = ctx.createLinearGradient(0, 0, 0, T / 2);
+  g.addColorStop(0, '#4a7ab0');
+  g.addColorStop(1, '#a8c8e0');
+  ctx.fillStyle = g;
+  ctx.fillRect(T * 2, 0, T, T / 2);
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 26px serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('TEAMWORK', T * 2.5, T / 2 - 22);
+  ctx.font = '10px serif';
+  ctx.fillText('Together, we go further.', T * 2.5, T / 2 - 8);
+  ctx.strokeStyle = '#1a1a1a';
+  ctx.lineWidth = 6;
+  ctx.strokeRect(T * 2 + 3, 3, T - 6, T / 2 - 6);
+  return finish(c, renderer);
+}
+
+// Brushed stainless steel (elevator doors, fountains).
+export function brushedSteelTexture(renderer) {
+  const S = 256;
+  const [c, ctx] = makeCanvas(S);
+  ctx.fillStyle = '#9ea2a4';
+  ctx.fillRect(0, 0, S, S);
+  for (let y = 0; y < S; y++) {
+    ctx.fillStyle = `rgba(${Math.random() < 0.5 ? '255,255,255' : '0,0,0'},${(Math.random() * 0.06).toFixed(3)})`;
+    ctx.fillRect(0, y, S, 1);
+  }
+  blotches(ctx, S, S, 6, '60,62,64', 0.12);
+  return finish(c, renderer);
+}
+
+// Level 4 signs, eight tiles: STAIRS, EXIT (green), ELEVATOR, BASEMENT,
+// M.E.G. OUTPOST, and three room numbers.
+export const L4_SIGNS = 8;
+export function level4SignTexture(renderer) {
+  const T = 128, W = T * L4_SIGNS;
+  const c = document.createElement('canvas');
+  c.width = W;
+  c.height = T / 2;
+  const ctx = c.getContext('2d');
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const sign = (k, bg, fg, text, font = 'bold 20px sans-serif') => {
+    ctx.fillStyle = bg;
+    ctx.fillRect(k * T, 0, T, T / 2);
+    ctx.fillStyle = fg;
+    ctx.font = font;
+    ctx.fillText(text, k * T + T / 2, T / 4 + 1);
+  };
+  sign(0, '#2a2c30', '#e8e8e0', 'STAIRS');
+  sign(1, '#0a3a1a', '#40e070', 'EXIT', 'bold 28px sans-serif');
+  sign(2, '#2a2c30', '#e8e8e0', 'ELEVATOR', 'bold 17px sans-serif');
+  sign(3, '#2a2c30', '#e8c060', 'BASEMENT', 'bold 17px sans-serif');
+  sign(4, '#e8e4d8', '#1a3a7a', 'M.E.G. OUTPOST', 'bold 14px sans-serif');
+  for (let k = 0; k < 3; k++) sign(5 + k, '#b8b4a8', '#2a2a2a', `4${Math.floor(Math.random() * 9)}${Math.floor(Math.random() * 10)}`, 'bold 24px sans-serif');
+  return finish(c, renderer);
+}
+
+// Wood veneer office door with a steel kick plate and a narrow wired
+// glass vision panel (or none).
+export function officeDoorTexture(renderer, glass = true, tone = '#8a6440') {
+  const W = 128, H = 256;
+  const c = document.createElement('canvas');
+  c.width = W;
+  c.height = H;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = tone;
+  ctx.fillRect(0, 0, W, H);
+  for (let x = 0; x < W; x += 2) {
+    ctx.fillStyle = `rgba(40,20,5,${(Math.random() * 0.15).toFixed(3)})`;
+    ctx.fillRect(x, 0, 1, H);
+  }
+  if (glass) {
+    ctx.fillStyle = '#1a1c1e';
+    ctx.fillRect(W * 0.62, 30, 22, 90);
+    ctx.strokeStyle = 'rgba(160,160,160,0.4)';
+    for (let k = 0; k < 90; k += 8) {
+      ctx.beginPath();
+      ctx.moveTo(W * 0.62, 30 + k);
+      ctx.lineTo(W * 0.62 + 22, 30 + k);
+      ctx.stroke();
+    }
+  }
+  ctx.fillStyle = '#9a9ea0';
+  ctx.fillRect(0, H - 26, W, 26);
+  return finish(c, renderer);
+}

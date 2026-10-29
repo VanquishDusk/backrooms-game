@@ -2,7 +2,7 @@
 
 A replayable 3D horror game set in the Backrooms, playable in the browser on desktop and mobile.
 
-Playable now: **Level 0 — "The Lobby" / "The Yellow Hell"**, its sub-level **Level 0.2 — "The Remodel"**, **Level 1 — "The Habitable Zone"**, **Level 1.3**, **Level 1.5 — "Inverted"**, **Level 2 — "Abandoned Utility Halls"** and **Level 3 — "Electrical Station"**. More levels will follow.
+Playable now: **Level 0 — "The Lobby" / "The Yellow Hell"**, its sub-level **Level 0.2 — "The Remodel"**, **Level 1 — "The Habitable Zone"**, **Level 1.3**, **Level 1.5 — "Inverted"**, **Level 2 — "Abandoned Utility Halls"**, **Level 3 — "Electrical Station"** and **Level 4 — "Abandoned Office"**. More levels will follow.
 
 ## Play
 
@@ -114,7 +114,7 @@ Reached by following Level 1's pipe hallway until it narrows into a maintenance 
 - **Doors:** steel maintenance doors sit at the back of dead ends and in plant-room walls. Almost all are locked. A rare few are unlocked, and each looks and sounds different:
   - **Faded green with a chalk "1"**, under a lone bulb, with water dripping nearby. It leads back to **Level 1**.
   - **Rust red with hazard tape and a lightning bolt**, with a pulsing red lamp and arcing electricity. It leads on to **Level 3**.
-  - **Sometimes, a wooden office door with a brass "4"**, with warm light spilling under it and a scrap of carpet in front. It leads to **Level 4** (coming soon).
+  - **Sometimes, a wooden office door with a brass "4"**, with warm light spilling under it and a scrap of carpet in front. It leads to **Level 4**.
 - **Supply crates** sit in some dead ends: Almond Water, batteries, first aid, junk, or a burst of steam.
 
 ## Level 3 — Electrical Station (Survival Difficulty 4)
@@ -148,7 +148,31 @@ Reached through Level 2's red hazard-taped door. You arrive in front of it, and 
   - **Purple discoloration** tints your vision and drains your sanity.
   - The heat makes your stamina recover more slowly.
 - **Entities:** Hounds and Skin-Stealers.
-- **Exit:** an old **freight lift**, a wood-panelled car with a scissor gate, a LIFT sign and a floor dial. Its motor hums and its bell rings now and then. Step inside to go down to **Level 4** (coming soon).
+- **Exit:** an old **freight lift**, a wood-panelled car with a scissor gate, a LIFT sign and a floor dial. Its motor hums and its bell rings now and then. Step inside to go down to **Level 4**.
+
+## Level 4 — Abandoned Office (Survival Difficulty 1)
+
+Reached by Level 3's freight lift or Level 2's wooden office door. It's the safe one.
+
+- **The office:** an empty office floor that goes on and on.
+  - Long, straight carpeted corridors under drop ceilings and humming fluorescent troffers.
+  - Off-white walls with grey baseboards and office doors standing open.
+  - Rooms with almost nothing in them: a desk and chair here, a filing cabinet there, a chair facing the wall.
+  - Some open-plan floors keep a few cubicles. There are conference rooms, break rooms with a counter, a microwave and a table, and storage rooms full of stacked chairs.
+- **Windows:** the outside walls have windows, nearly all blacked out with taped plastic sheeting. The few that aren't show a hazy, too-bright city. **Don't stand and look out of them:** you'll get a warning to look away, and then something looks back.
+- **Almond Water is everywhere:**
+  - Vending machines and water coolers fill your bottles. They run out eventually.
+  - Drinking fountains restore sanity straight away.
+- **Communities:** a **M.E.G. outpost** (a banner, supplies, bunks and a note) and a **wanderers' camp** (sleeping bags, a lantern and a note).
+- **Entities:** very few. A Hound somewhere, sometimes a Duller, and maybe a Smiler in one of the dark rooms. Your sanity barely drains here.
+- **Sound:** fluorescent hum, the air handling, a phone ringing somewhere, a distant elevator bell.
+- **Exits** are in the closed service cores:
+  - Stairwells down to **Level 5**.
+  - Elevators to **Level 5**, and sometimes one back to **Level 3**. The display over the door shows which.
+  - A dark doorway under a dead EXIT sign to **Level 6**.
+  - Rarely, a **basement** stairway to **Level 71**.
+  - **Exits move:** once you've seen one, lose sight of it and it may be gone when you come back, standing at another core instead.
+- Levels 5, 6 and 71 are coming soon.
 
 The main menu has a **Levels** section (0, 1, …) and a **Sublevels** section (0.2, 1.3, …). Each level unlocks there once you reach it.
 
@@ -156,7 +180,7 @@ Every run comes from a seed, which shows on the pause, death and escape screens.
 
 ## Entity library
 
-Reusable entities live in `src/entities/lib/`. Level 2 uses Hounds, Smilers, Skin-Stealers, Deathmoths and Clumps, and Level 3 uses Hounds and Skin-Stealers; the rest aren't placed in a level yet. Each has its own model, procedural skin, animations, sounds and AI (idle, movement, detection, attack), and they're lit by the level's lighting and your flashlight.
+Reusable entities live in `src/entities/lib/`. Level 2 uses Hounds, Smilers, Skin-Stealers, Deathmoths and Clumps, Level 3 uses Hounds and Skin-Stealers, and Level 4 uses Hounds, Dullers and Smilers; the rest aren't placed in a level yet. Each has its own model, procedural skin, animations, sounds and AI (idle, movement, detection, attack), and they're lit by the level's lighting and your flashlight.
 
 | Entity | What it does |
 |---|---|
@@ -212,7 +236,8 @@ src/world/                    reusable grid-level toolkit: GridMap (layout + pat
                               GridWorld (meshes, collision, baked lightmap, destructible cells),
                               materials (shaders), textures (procedural), props (doors, clutter, fixtures),
                               tubes (fast pipe/box geometry writer, chunked meshes),
-                              services (wall pipe bundles, ceiling runs, 45-degree corners), fixtures (tubes, bulbs, lamps)
+                              services (wall pipe bundles, ceiling runs, 45-degree corners), fixtures (tubes, bulbs, lamps),
+                              dresser (furniture placement in room frames)
 src/entities/                 Stalker (Level 0's dark figure), Hound (Level 1's blackout hunter)
 src/entities/lib/             reusable entity library: Entity base (AI helpers), humanoid rig, skins, 9 entities, EntityManager
 entities.html                 entity viewer
@@ -224,6 +249,7 @@ src/levels/level1_3/          Level 1.3 generator and runtime (Detox Zones, The 
 src/levels/level1_5/          Level 1.5 generator and runtime (the negative, the denizens, She)
 src/levels/level2/            Level 2 generator and runtime
 src/levels/level3/            Level 3 generator, room dressing (generator/boiler rooms, assembly hall, Sanctums, Base Gamma, galleries) and runtime
+src/levels/level4/            Level 4 generator (corridor grid, rooms, service cores), furniture and runtime (moving exits, trap windows)
 ```
 
 All textures and sounds are generated in code, so there are no asset files.
@@ -234,4 +260,4 @@ All textures and sounds are generated in code, so there are no asset files.
 2. Grid-style levels can reuse `GridMap` and `GridWorld` with their own generator, textures and lighting.
 3. Register the level in `src/levels/registry.js`.
 
-Levels hand off with `ctx.onEscape(targetId, 'noclip' | 'door' | 'walk')`, and player stats carry over. An exit that targets a level that isn't built yet shows a "coming soon" screen, using the names in `UPCOMING`. Level 2's office door and Level 3's lift already target `level4`.
+Levels hand off with `ctx.onEscape(targetId, 'noclip' | 'door' | 'walk')`, and player stats carry over. An exit that targets a level that isn't built yet shows a "coming soon" screen, using the names in `UPCOMING`. Level 4's exits already target `level5`, `level6` and `level71`.

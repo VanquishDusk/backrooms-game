@@ -613,6 +613,41 @@ export class AudioEngine {
     this.clank(0, vol * 0.6);
   }
 
+  // An office phone ringing somewhere: two trilling bursts.
+  phone(pan = 0, vol = 0.12) {
+    if (!this.ctx) return;
+    const t0 = this.ctx.currentTime;
+    for (const start of [0, 0.55, 2.2, 2.75]) {
+      const t = t0 + start;
+      const o = this.ctx.createOscillator();
+      o.type = 'square';
+      o.frequency.value = 820;
+      const o2 = this.ctx.createOscillator();
+      o2.type = 'square';
+      o2.frequency.value = 1020;
+      const trill = this.ctx.createOscillator();
+      trill.frequency.value = 20;
+      const tg = this.ctx.createGain();
+      tg.gain.value = 0.5;
+      const g = this.ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(vol, t + 0.02);
+      g.gain.setValueAtTime(vol, t + 0.4);
+      g.gain.linearRampToValueAtTime(0.0001, t + 0.45);
+      trill.connect(tg).connect(g.gain);
+      const lp = this.ctx.createBiquadFilter();
+      lp.type = 'lowpass';
+      lp.frequency.value = 2500;
+      o.connect(lp);
+      o2.connect(lp);
+      lp.connect(g).connect(this.out(pan));
+      for (const n of [o, o2, trill]) {
+        n.start(t);
+        n.stop(t + 0.5);
+      }
+    }
+  }
+
   // Small hammer tap.
   tink(pan = 0, vol = 0.15) {
     if (!this.ctx) return;

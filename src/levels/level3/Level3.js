@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { GridWorld } from '../../world/GridWorld.js';
-import { DIRS, EDGE_OPEN, EDGE_BARS } from '../../world/GridMap.js';
+import { DIRS, EDGE_BARS } from '../../world/GridMap.js';
 import { SURFACE, MAX_DYN_LIGHTS, createWorldMaterial } from '../../world/materials.js';
 import {
   unevenBrickTexture, glazedTileTexture, flakingCeilingTexture, greyTileFloorTexture, marbleFloorTexture,
@@ -15,7 +15,8 @@ import { planServices, buildServices } from '../../world/services.js';
 import { createNoise2D } from '../../core/rng.js';
 import { EntityManager } from '../../entities/lib/index.js';
 import { generateLevel3, KIND, CEIL } from './generate.js';
-import { Dresser, generatorRoom, boilerRoom, assemblyHall, sanctum, baseGamma, gallery } from './dress.js';
+import { Dresser, blockFurnishedSteps } from '../../world/dresser.js';
+import { generatorRoom, boilerRoom, assemblyHall, sanctum, baseGamma, gallery } from './dress.js';
 
 // Level 3 — "Electrical Station".
 //
@@ -100,7 +101,7 @@ export class Level3 {
     this.solid = solid;
 
     // ---- Plan and dress (all collision before the world is built) --------
-    const D = new Dresser({ cb: this.cb, rng: drng.fork('rooms'), map, solid, lights: layout.lights, group: this.props, ownGeos: this.ownGeos });
+    const D = new Dresser({ cb: this.cb, rng: drng.fork('rooms'), map, solid, lights: layout.lights, group: this.props, ownGeos: this.ownGeos, ceilOf: (r) => CEIL[r.type] });
     this.dresser = D;
     this.rooms = rooms.map((r) => {
       const fn = { generator: generatorRoom, boiler: boilerRoom, assembly: assemblyHall, sanctum, base: baseGamma, gallery }[r.type];
@@ -231,7 +232,8 @@ export class Level3 {
 
     const [sx, sz] = map.cellCenter(layout.spawn.x, layout.spawn.y);
     this.spawn = { x: sx - DIRS[layout.spawn.dir][0] * 0.3, z: sz - DIRS[layout.spawn.dir][1] * 0.3, yaw: layout.spawnYaw };
-    this.blockFurnishedEdges();
+    const [bsx, bsy] = map.cellAt(this.spawn.x, this.spawn.z);
+    blockFurnishedSteps(map, this.world, (i) => layout.roomId[i] >= 0, [bsx, bsy]);
     this.entities = new EntityManager({ scene, world: this.world, audio: ctx.audio, rng: this.rng.fork('entities'), shared });
     this.spawnEntities();
 
@@ -754,51 +756,6 @@ export class Level3 {
     g.visible = false;
     this.props.add(g);
     this.shadow = { g, mat, t: 0, active: false };
-  }
-
-  // Inside furnished rooms, a body can't always walk straight from one cell
-  // centre to the next (pews, conveyors, machines). Entities path cell to
-  // cell, so mark those steps as barred: invisible, see-through, and never
-  // in the collision (that's already built).
-  blockFurnishedEdges() {
-    const { map, roomId } = this.layout;
-    const W = this.world;
-    const blocked = [];
-    const walk = (sx, sz, tx, tz) => {
-      const p = { x: sx, z: sz };
-      W.collide(p, 0.32);
-      for (let i = 0; i < 120; i++) {
-        const dx = tx - p.x, dz = tz - p.z, l = Math.hypot(dx, dz);
-        if (l < 0.05) break;
-        const st = Math.min(0.05, l);
-        p.x += (dx / l) * st;
-        p.z += (dz / l) * st;
-        W.collide(p, 0.32);
-      }
-      return Math.hypot(tx - p.x, tz - p.z) < 0.6;
-    };
-    for (let y = 0; y < map.rows; y++) {
-      for (let x = 0; x < map.cols; x++) {
-        if (roomId[map.idx(x, y)] < 0) continue;
-        for (const d of [0, 2]) {
-          if (!map.canMove(x, y, d)) continue;
-          const [ax, az] = map.cellCenter(x, y), [bx, bz] = map.cellCenter(x + DIRS[d][0], y + DIRS[d][1]);
-          if (!walk(ax, az, bx, bz) || !walk(bx, bz, ax, az)) {
-            const e = map.edge(x, y, d);
-            map.setEdge(e, EDGE_BARS);
-            blocked.push([e, map.idx(x, y), map.idx(x + DIRS[d][0], y + DIRS[d][1])]);
-          }
-        }
-      }
-    }
-    // Never cut anything off: reopen blocked steps on the edge of what's reachable.
-    const [sx, sy] = map.cellAt(this.spawn.x, this.spawn.z);
-    for (let pass = 0; pass < 40; pass++) {
-      const dist = map.bfs(sx, sy);
-      const reopen = blocked.filter(([e, a, b]) => map.getEdge(e) === EDGE_BARS && (dist[a] >= 0) !== (dist[b] >= 0));
-      if (!reopen.length) break;
-      for (const [e] of reopen) map.setEdge(e, EDGE_OPEN);
-    }
   }
 
   // ---- Entities ---------------------------------------------------------------------
