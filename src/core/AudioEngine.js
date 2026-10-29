@@ -248,7 +248,7 @@ export class AudioEngine {
     this.updateWind(s.wind || 0);
     this.updateWaves(s.waves || 0, s.wavesPan || 0);
     if (this.machinePan) this.machinePan.pan.setTargetAtTime(s.machinePan || 0, t, 0.1);
-    this.muffle.frequency.setTargetAtTime(s.ears ? 380 : 20000, t, 0.06);
+    this.muffle.frequency.setTargetAtTime(s.ears ? 380 : s.underwater ? 650 : 20000, t, 0.06);
 
     // Heartbeat when the mind starts to slip.
     if (s.sanity < 40 && t > this.nextBeat) {
@@ -795,6 +795,121 @@ export class AudioEngine {
     const t = ctx.currentTime;
     this.wavesOut.gain.setTargetAtTime(level, t, 0.6);
     if (this.wavesPan) this.wavesPan.pan.setTargetAtTime(Math.max(-1, Math.min(1, pan)), t, 0.3);
+  }
+
+  // Something hitting the water: a harpoon, a body, a serpent.
+  splash(pan = 0, vol = 0.5, big = false) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    const dur = big ? 1.6 : 0.6;
+    const s = this.noiseSource();
+    const f = this.ctx.createBiquadFilter();
+    f.type = 'bandpass';
+    f.Q.value = 0.7;
+    f.frequency.setValueAtTime(big ? 1400 : 2200, t);
+    f.frequency.exponentialRampToValueAtTime(big ? 260 : 700, t + dur);
+    const g = this.ctx.createGain();
+    this.env(g, t, vol, 0.01, dur);
+    s.connect(f).connect(g).connect(this.out(pan));
+    s.start(t, Math.random() * 2, dur + 0.1);
+    // The plunge: a low "gloop".
+    const o = this.ctx.createOscillator();
+    o.frequency.setValueAtTime(big ? 140 : 320, t);
+    o.frequency.exponentialRampToValueAtTime(big ? 45 : 120, t + 0.25);
+    const og = this.ctx.createGain();
+    this.env(og, t, vol * 0.5, 0.005, 0.3);
+    o.connect(og).connect(this.out(pan));
+    o.start(t);
+    o.stop(t + 0.4);
+    if (big) this.thud(pan, vol * 0.6);
+  }
+
+  // A huge animal roar: layered saws through a moving formant, with grit.
+  roar(pan = 0, vol = 0.6, dur = 2.2, far = false) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    const out = this.ctx.createGain();
+    out.gain.setValueAtTime(0.0001, t);
+    out.gain.linearRampToValueAtTime(vol, t + 0.25);
+    out.gain.setValueAtTime(vol, t + dur * 0.6);
+    out.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    const lp = this.ctx.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = far ? 300 : 1800;
+    out.connect(lp).connect(this.out(pan));
+    const form = this.ctx.createBiquadFilter();
+    form.type = 'bandpass';
+    form.Q.value = 2;
+    form.frequency.setValueAtTime(260, t);
+    form.frequency.linearRampToValueAtTime(620, t + dur * 0.35);
+    form.frequency.linearRampToValueAtTime(220, t + dur);
+    form.connect(out);
+    for (const [f0, det] of [[48, 0], [49.5, 7], [97, -5]]) {
+      const o = this.ctx.createOscillator();
+      o.type = 'sawtooth';
+      o.detune.value = det;
+      o.frequency.setValueAtTime(f0 * 0.9, t);
+      o.frequency.linearRampToValueAtTime(f0 * 1.25, t + dur * 0.3);
+      o.frequency.linearRampToValueAtTime(f0 * 0.7, t + dur);
+      o.connect(form);
+      o.start(t);
+      o.stop(t + dur + 0.1);
+    }
+    const n = this.noiseSource();
+    const ng = this.ctx.createGain();
+    ng.gain.value = 0.5;
+    n.connect(ng).connect(form);
+    n.start(t, Math.random(), dur + 0.1);
+    // Throat rattle.
+    const trem = this.ctx.createOscillator();
+    trem.frequency.value = 17;
+    const tg = this.ctx.createGain();
+    tg.gain.value = 0.35;
+    trem.connect(tg).connect(out.gain);
+    trem.start(t);
+    trem.stop(t + dur + 0.1);
+  }
+
+  gunshot(pan = 0, vol = 0.5) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    const s = this.noiseSource();
+    const f = this.ctx.createBiquadFilter();
+    f.type = 'lowpass';
+    f.frequency.setValueAtTime(5000, t);
+    f.frequency.exponentialRampToValueAtTime(300, t + 0.4);
+    const g = this.ctx.createGain();
+    this.env(g, t, vol, 0.002, 0.45);
+    s.connect(f).connect(g).connect(this.out(pan));
+    s.start(t, Math.random(), 0.6);
+    // The crack echoing off the ceiling.
+    const e = this.noiseSource();
+    const ef = this.ctx.createBiquadFilter();
+    ef.type = 'bandpass';
+    ef.frequency.value = 900;
+    const eg = this.ctx.createGain();
+    this.env(eg, t + 0.35, vol * 0.25, 0.01, 0.9);
+    e.connect(ef).connect(eg).connect(this.out(-pan * 0.5));
+    e.start(t + 0.35, Math.random(), 1);
+    this.thud(pan, vol * 0.4);
+  }
+
+  // Coming up for air.
+  gasp() {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    const s = this.noiseSource();
+    const bp = this.ctx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.frequency.setValueAtTime(900, t);
+    bp.frequency.linearRampToValueAtTime(1600, t + 0.35);
+    bp.Q.value = 1.2;
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(0.3, t + 0.08);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.5);
+    s.connect(bp).connect(g).connect(this.master);
+    s.start(t, Math.random(), 0.6);
   }
 
   // Slow breathing, close by.

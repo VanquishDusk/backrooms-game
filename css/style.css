@@ -312,6 +312,36 @@ button { font-family: inherit; }
 #stat-stamina .fill { background: #9fc7d0; }
 #stat-battery .fill { background: #e6e6e6; }
 .stat.faded { opacity: 0; }
+#stat-breath .fill { background: #8fd0e8; }
+#stat-warmth .fill { background: #e8a070; }
+#stat-hull .fill { background: #c8b090; }
+.stat.low .fill { background: var(--bad); }
+
+/* A boss's health, top centre. */
+#boss {
+  position: absolute;
+  top: calc(var(--safe-t) + 54px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(420px, 60vw);
+  text-align: center;
+  font-size: 15px;
+  letter-spacing: 3px;
+  opacity: 0;
+  transition: opacity 0.6s;
+  pointer-events: none;
+}
+#boss.show { opacity: 1; }
+#boss label { display: block; margin-bottom: 4px; color: #e8c8b0; text-shadow: 0 0 6px rgba(0, 0, 0, 0.8); }
+#boss .bar { height: 7px; background: rgba(0, 0, 0, 0.55); border: 1px solid rgba(236, 200, 176, 0.5); }
+#boss .fill { height: 100%; background: #b03a28; transform-origin: left; transition: transform 0.3s; }
+
+#btn-act {
+  position: fixed;
+  right: calc(var(--safe-r) + 172px);
+  bottom: calc(var(--safe-b) + 16px);
+  border-color: rgba(243, 190, 140, 0.7);
+}
 .stat-line { font-size: 16px; opacity: 0.85; }
 
 #crosshair {

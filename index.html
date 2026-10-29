@@ -25,6 +25,7 @@
     <div id="joy-base"><div id="joy-knob"></div></div>
   </div>
   <div id="touch-buttons" class="hidden">
+    <button class="tbtn big hidden" id="btn-act" aria-label="Action"><svg viewBox="0 0 24 24"><path d="M3 21L19 5M15 4l5 0 0 5M8 13l3 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span id="act-label"></span></button>
     <button class="tbtn slot disabled" id="btn-slot0" aria-label="Use backpack slot 1"><span>1</span></button>
     <button class="tbtn slot disabled" id="btn-slot1" aria-label="Use backpack slot 2"><span>2</span></button>
     <button class="tbtn slot disabled" id="btn-slot2" aria-label="Use backpack slot 3"><span>3</span></button>
@@ -49,6 +50,7 @@
 
   <div id="hud" class="hidden">
     <div id="rec"><span class="dot"></span>REC <span id="rec-time">00:00:00</span></div>
+    <div id="boss"><label></label><div class="bar"><div class="fill"></div></div></div>
     <button id="btn-cam" aria-label="Take a photo">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="2" y="7" width="14" height="11" rx="1"/><path d="M16 11l6-3v9l-6-3z"/><circle cx="6" cy="10" r="1" fill="currentColor"/></svg>
     </button>
@@ -60,6 +62,9 @@
       <div class="stat" id="stat-health"><label>HEALTH</label><div class="bar"><div class="fill"></div></div></div>
       <div class="stat" id="stat-stamina"><label>STAMINA</label><div class="bar"><div class="fill"></div></div></div>
       <div class="stat" id="stat-battery"><label>BATTERY</label><div class="bar"><div class="fill"></div></div></div>
+      <div class="stat hidden" id="stat-breath"><label>BREATH</label><div class="bar"><div class="fill"></div></div></div>
+      <div class="stat hidden" id="stat-warmth"><label>WARMTH</label><div class="bar"><div class="fill"></div></div></div>
+      <div class="stat hidden" id="stat-hull"><label>BOAT HULL</label><div class="bar"><div class="fill"></div></div></div>
       <button id="bag" aria-label="Open backpack"><label>BACKPACK <small id="bag-key">TAB</small></label>
         <div class="bag-slots"><div class="bag-slot" id="bag-slot0"><span class="empty">EMPTY</span></div><div class="bag-slot" id="bag-slot1"><span class="empty">EMPTY</span></div><div class="bag-slot" id="bag-slot2"><span class="empty">EMPTY</span></div><div class="bag-slot" id="bag-slot3"><span class="empty">EMPTY</span></div></div>
       </button>
@@ -176,6 +181,7 @@
           <li><b>Level 4</b> (Level 3's lift): a safe, empty office. Fill up on Almond Water at coolers, vending machines and fountains. Don't look out of windows that aren't blacked out. If you lose sight of an exit, it may move.</li>
           <li><b>Level 5</b> (Level 4's stairs and elevators): the Terror Hotel. Deathmoths circle the lights. The grand stair goes back up. Elevators go to other floors, one to Level 3; never ride to 13. Eat at the Homely Hotel and keep some meat for the cat. The boiler room's pipes carry Almond Water, but the deeper you go the hotter it gets.</li>
           <li><b>Level 6</b> (stairs by Level 5's furnace): total darkness, and your lights won't work. Keep moving; listen for waves to find the stairwell. Don't run over the wires. Wrong turns can close behind you.</li>
+          <li><b>Level 7</b> (the stairwell in Level 6): don't go near the doorway unless you mean to. In the sea you swim where you look; hold C / Space (UP) to rise. Watch your breath and your warmth. Find the boat: steer it, and throw harpoons (click, R or THROW) at the serpent's head when it surfaces. Stay away from Fort Surrender.</li>
           <li><b>Level 63</b> (a rare metal door in Level 5): high in the sky and completely safe. Sit at a Meditation Point to clear your head. Monkey bars only hold as long as your stamina. Falling isn't fatal; you wake up somewhere else.</li>
           <li>Press <b>V</b> (or the camera button) to take a photo. Your photos become the covers of your tapes in the menu's <b>Archive</b>.</li>
           <li><b>Level 0.2</b> falls apart once you're inside. Find the door back to Level 0 before the collapse reaches it. Cover your mouth in the dust. Outlets charge your flashlight.</li>

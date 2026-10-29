@@ -2,7 +2,7 @@
 
 A replayable 3D horror game set in the Backrooms, playable in the browser on desktop and mobile.
 
-Playable now: **Level 0 — "The Lobby" / "The Yellow Hell"**, its sub-level **Level 0.2 — "The Remodel"**, **Level 1 — "The Habitable Zone"**, **Level 1.3**, **Level 1.5 — "Inverted"**, **Level 2 — "Abandoned Utility Halls"**, **Level 3 — "Electrical Station"**, **Level 4 — "Abandoned Office"**, **Level 5 — "Terror Hotel"**, **Level 6 — "Lights Out"** and **Level 63 — "Tranquility"**. More levels will follow.
+Playable now: **Level 0 — "The Lobby" / "The Yellow Hell"**, its sub-level **Level 0.2 — "The Remodel"**, **Level 1 — "The Habitable Zone"**, **Level 1.3**, **Level 1.5 — "Inverted"**, **Level 2 — "Abandoned Utility Halls"**, **Level 3 — "Electrical Station"**, **Level 4 — "Abandoned Office"**, **Level 5 — "Terror Hotel"**, **Level 6 — "Lights Out"**, **Level 7 — "Thalassophobia"** and **Level 63 — "Tranquility"**. More levels will follow.
 
 ## Play
 
@@ -219,7 +219,29 @@ Reached by the stairs by the furnace (or the maintenance lift) in Level 5's boil
   - A **stairwell** deep inside goes to **Level 7**. Listen for faint waves: they get louder, and pull to one side, along the way that actually leads there.
   - Rarely, a huge **frost-covered metal door**, so cold you feel it before you find it: **Level 129**.
   - **Wires** strung across the floor at ankle height. Walk carefully and you'll usually step over; run and you'll trip and fall right through into **Level 6.1**.
-- Levels 7, 129 and 6.1 are coming soon.
+- Levels 129 and 6.1 are coming soon.
+
+## Level 7 — Thalassophobia (Survival Difficulty 4)
+
+Reached by the stairwell deep in Level 6.
+
+- **The entrance room:** a flooded living room high up inside a huge concrete pillar: a bookcase, a coffee table, an armchair, chests of drawers stacked against the wall with pot plants on top, a buzzing fluorescent lamp, and a few centimetres of water over the carpet. The stairs behind you go back up to **Level 6**.
+- **The doorway:** gravity is different in this room. Get close to the open door and "down" starts to mean "out": it pulls you in, the room tilts, and you fall fourteen metres into the sea.
+- **The ocean:** grey water stretching away forever under a concrete ceiling, in a dim light with no source. Giant concrete pillars rise out of the sea into the ceiling. A mountain looms in the distance.
+- **Swimming:** you swim where you look; hold **C** / **Space** (**UP** on touch) to rise. Watch **BREATH** underwater and **WARMTH**: the water is freezing and the cold kills you slowly. Get out of the water to warm up. Being out on the open sea wears on your sanity too.
+- **Depth zones:** the **Daylight Zone** (bright, sandy, empty), the **Twilight Zone** (dark, bones and rusted metal), the **Midnight Zone** (pitch black and full of skeletons; your flashlight works here) and the **Abyss**.
+- **The boat:** a small open boat floats near where you land, with a lantern at the bow and a crate of harpoons. Swim up to it to climb in. Steer with WASD / the stick (Shift for full throttle). **C** / **Space** (**JUMP**) goes over the side. It has a **hull**: hit things, get shot or get rammed and it breaks apart.
+- **The Thing on Level 7:** a sea serpent some seventy metres long, with milky eyes, a pale belly, spines down its back and spots that glow when it's angry. It stays down in the deep until you go out into open water. Then:
+  - In the boat, it circles you just under the surface, then either **charges** with its head out of the water or **rears up** over the boat, roars and crashes down where you were. Throw harpoons (**click** / **R** / **THROW**) at its head when it surfaces; body hits do half as much. Two hits and it breaks off its attack. Drive away when it rears up. Enough hits and it thrashes, screams and sinks into the deep for good. The harpoons stay stuck in it.
+  - In the water, it hunts you, and you can't fight back.
+- **Fort Surrender:** a rocky island with shacks, a log palisade, a watchtower, lanterns and a white flag. They shout at you to turn back, and shoot at anyone who comes close.
+- **Exits:**
+  - The stairs back up to **Level 6**.
+  - An **underwater cave** at the foot of the mountain, down in the Midnight Zone: **Level 8**.
+  - A **wooden door** standing on an underwater stone platform among stone columns and giant rusted pipes that rise into the ceiling. Warm light leaks out under it: **Level 9**.
+  - Dive too deep into the **Abyss** and you black out: **Level 83**.
+  - Keep going **west** across the sea, far enough, and you reach **Level 880**.
+- Levels 8, 83 and 880 are coming soon.
 
 ## Level 63 — Tranquility (Survival Difficulty 0)
 
@@ -351,6 +373,7 @@ src/levels/level3/            Level 3 generator, room dressing (generator/boiler
 src/levels/level4/            Level 4 generator (corridor grid, rooms, service cores), furniture and runtime (moving exits, trap windows)
 src/levels/level5/            Level 5 generator (hotel, ballroom, boiler room maze), hotel and boiler room dressing, runtime (elevators, stairs, heat)
 src/levels/level6/            Level 6 (maze generator, darkness, shifting halls, hallucinations, exits)
+src/levels/level7/            Level 7 (layout and sea floor, the room/sea/scenery builders, the serpent, swimming/boat/fight runtime)
 src/levels/level63/           Level 63 generator (platforms, bridges, ladders, monkey bars, Meditation Points) and runtime (sky, clouds, vines, climbing, falling)
 ```
 
@@ -362,4 +385,4 @@ All textures and sounds are generated in code, so there are no asset files.
 2. Grid-style levels can reuse `GridMap` and `GridWorld` with their own generator, textures and lighting.
 3. Register the level in `src/levels/registry.js`.
 
-Levels hand off with `ctx.onEscape(targetId, 'noclip' | 'door' | 'walk')`, and player stats carry over. An exit that targets a level that isn't built yet shows a "coming soon" screen, using the names in `UPCOMING`. Level 4's and Level 5's exits already target `level9` and `level71`, and Level 6's target `level7`, `level129` and `level6_1`.
+Levels hand off with `ctx.onEscape(targetId, 'noclip' | 'door' | 'walk')`, and player stats carry over. An exit that targets a level that isn't built yet shows a "coming soon" screen, using the names in `UPCOMING`. Level 4's and Level 5's exits already target `level9` and `level71`, Level 6's target `level129` and `level6_1`, and Level 7's target `level8`, `level9`, `level83` and `level880`.

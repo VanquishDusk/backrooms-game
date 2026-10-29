@@ -156,6 +156,7 @@ export class Game {
     });
     input.bindButton($('btn-light'), { onPress: () => input.actions.push('flashlight') });
     input.bindButton($('btn-drink'), { onPress: () => input.actions.push('drink') });
+    input.bindButton($('btn-act'), { onPress: () => input.actions.push('fire') });
     input.bindButton($('btn-ears'), {
       onPress: () => (input.earsHeld = true),
       onRelease: () => (input.earsHeld = false),
@@ -281,6 +282,7 @@ export class Game {
       onCaught: (stalker, cause) => runId === this.runId && this.caught(stalker, cause),
       onEscape: (target, style) => runId === this.runId && this.escape(target, style),
       placeItem: (item, x, z) => this.backpack.place(item, x, z),
+      move: () => this.input.getMove(),
       moveIntent: () => {
         const m = this.input.getMove();
         return Math.hypot(m.x, m.y);
@@ -575,6 +577,7 @@ export class Game {
           }
         }
         if (a === 'drink') level.drink(player);
+        if (a === 'fire') level.fire?.(player);
       }
       if (this.state !== 'playing') return;
 
@@ -673,7 +676,18 @@ export class Game {
 
     if (this.state === 'playing' || this.state === 'dying') {
       this.audio.update(level.audioMix(player));
-      this.hud.update(dt, player, this.runTime, level.hudInfo(player), this.settings.showFps);
+      const info = level.hudInfo(player);
+      this.hud.update(dt, player, this.runTime, info, this.settings.showFps);
+      // Context buttons: what the ears button does here, and an action button when there is one.
+      if (info.coverLabel !== this.coverLabel) {
+        this.coverLabel = info.coverLabel;
+        $('cover-label').textContent = info.coverLabel;
+      }
+      if ((info.act || '') !== this.actLabel) {
+        this.actLabel = info.act || '';
+        $('btn-act').classList.toggle('hidden', !info.act);
+        $('act-label').textContent = this.actLabel;
+      }
     }
 
     this.renderer.render(this.scene, this.camera, this.time);

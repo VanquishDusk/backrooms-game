@@ -40,8 +40,9 @@ export class Input {
       this.pointerLocked = document.pointerLockElement === this.canvas;
       if (!this.pointerLocked && this.onUnlock) this.onUnlock();
     });
-    canvas.addEventListener('mousedown', () => {
+    canvas.addEventListener('mousedown', (e) => {
       if (this.enabled && !this.touchMode && !this.pointerLocked) this.lockPointer();
+      else if (this.enabled && this.pointerLocked && e.button === 0) this.actions.push('fire');
     });
 
     const opts = { passive: false };
@@ -99,6 +100,7 @@ export class Input {
         if (slot >= 0) this.actions.push(`${e.shiftKey ? 'drop' : 'use'}${slot}`);
         if (code === 'Tab' || code === 'KeyI' || code === 'KeyB') this.actions.push('bag');
         if (code === 'KeyV') this.actions.push('photo');
+        if (code === 'KeyR') this.actions.push('fire');
       }
       if (this.enabled && code === 'Tab') e.preventDefault();
       this.keys.add(code);

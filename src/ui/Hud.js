@@ -13,7 +13,13 @@ export class Hud {
       stamina: $('stat-stamina'),
       battery: $('stat-battery'),
       health: $('stat-health'),
+      breath: $('stat-breath'),
+      warmth: $('stat-warmth'),
+      hull: $('stat-hull'),
     };
+    this.boss = $('boss');
+    this.bossFill = this.boss.querySelector('.fill');
+    this.bossName = this.boss.querySelector('label');
     this.last = {};
     this.msgTimer = 0;
     this.fpsAcc = 0;
@@ -57,6 +63,28 @@ export class Hud {
     this.setBar('health', player.health, !extra.health && player.health >= 99.5);
     this.setBar('stamina', player.stamina, player.stamina >= 99.5);
     this.setBar('battery', player.battery, !player.flashlight && player.battery >= 99.5);
+
+    // Level-specific bars (breath, warmth, a boat's hull) show only where they matter.
+    for (const name of ['breath', 'warmth', 'hull']) {
+      const v = extra.bars?.[name];
+      const el = this.bars[name];
+      if (v == null) {
+        if (!el.classList.contains('hidden')) el.classList.add('hidden');
+        continue;
+      }
+      el.classList.remove('hidden');
+      this.setBar(name, v, false);
+      el.classList.toggle('low', v < 25);
+    }
+    const boss = extra.boss;
+    this.boss.classList.toggle('show', !!boss);
+    if (boss) {
+      if (this.last.bossName !== boss.name) {
+        this.last.bossName = boss.name;
+        this.bossName.textContent = boss.name;
+      }
+      this.bossFill.style.transform = `scaleX(${Math.max(0, Math.min(1, boss.hp))})`;
+    }
 
     const secs = Math.floor(runTime);
     if (this.last.secs !== secs) {
