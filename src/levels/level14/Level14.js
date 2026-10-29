@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { disposeTextures } from '../../world/props.js';
 import { buildHumanoid, resetPose, walk } from '../../entities/lib/rig.js';
 import {
-  MESA, POOL, GUESTS, CHILDREN, SPAWN, FALL_ANGLE, MOON_DIR, nearest,
+  MESA, POOL, GUESTS, CHILDREN, SPAWN, DOOR, FALL_ANGLE, MOON_DIR, nearest,
   makeGround, Trees, buildGround, buildGrass, buildSky, buildCliff, buildFogBanks, buildMotes, buildGuests,
 } from './forest.js';
 
@@ -75,6 +75,7 @@ export class Level14 {
     this.spot = new THREE.SpotLight(0xfff0e0, 0, 40, 0.45, 0.5, 1.2);
     this.group.add(this.hemi, this.moon, this.moonTarget, this.spot, this.spot.target);
     this.buildChildren(rng.fork('children'));
+    this.buildDoor();
 
     this.spawn = { x: SPAWN.x, z: SPAWN.z, yaw: Math.PI / 2 + 0.4 };
     this.world = {
@@ -140,6 +141,36 @@ export class Level14 {
     this.stare = 0;
   }
 
+  // A white steel door in a white frame, light leaking round its edges,
+  // humming faintly, as if machines were running behind it.
+  buildDoor() {
+    const g = new THREE.Group();
+    const steel = new THREE.MeshLambertMaterial({ color: 0xe8ecf0, emissive: 0x202428 });
+    const light = new THREE.MeshBasicMaterial({ color: 0xf4faff });
+    this.own.mats.push(steel, light);
+    const box = (w, h, d, x, y, z, m = steel) => {
+      const geo = new THREE.BoxGeometry(w, h, d);
+      this.own.geos.push(geo);
+      const mesh = new THREE.Mesh(geo, m);
+      mesh.position.set(x, y, z);
+      g.add(mesh);
+    };
+    box(0.2, 2.9, 0.4, -0.75, 1.45, 0);
+    box(0.2, 2.9, 0.4, 0.75, 1.45, 0);
+    box(1.7, 0.2, 0.4, 0, 2.9, 0);
+    box(1.28, 2.78, 0.08, 0, 1.39, 0);
+    // The light round the edges.
+    box(1.3, 0.03, 0.1, 0, 2.79, 0.02, light);
+    box(0.03, 2.76, 0.1, 0.645, 1.39, 0.02, light);
+    box(1.3, 0.05, 0.1, 0, 0.02, 0.02, light);
+    const glow = new THREE.PointLight(0xdfeaff, 2.5, 9, 1.4);
+    glow.position.set(0, 1.2, 0.8);
+    g.add(glow);
+    g.rotation.y = 0.6;
+    this.door15 = g;
+    this.group.add(g);
+  }
+
   // ---- Landmarks: show the copies nearest you -----------------------------------------------
 
   place(player, force = false) {
@@ -153,6 +184,7 @@ export class Level14 {
     };
     set('cliff', MESA, this.cliff.group);
     set('guests', GUESTS, this.guests.group);
+    if (set('door', DOOR, this.door15)) this.door15.position.y = this.ground.heightAt(this.door15.position.x, this.door15.position.z) - 0.05;
     // The children move with their clearing only while they're at rest.
     if (this.childState === 'howl' && set('children', CHILDREN, this.childGroup)) {
       for (const c of this.children) {
@@ -449,6 +481,18 @@ export class Level14 {
 
   updateExits(dt, player) {
     const { ctx } = this;
+    const dd = nearest(DOOR, player.pos.x, player.pos.z);
+    const dl = Math.hypot(player.pos.x - dd.x, player.pos.z - dd.z);
+    if (dl < 14 && !this.told.door15) {
+      this.told.door15 = true;
+      ctx.hud.message('A white steel door, standing on its own among the trees. Cold light leaks round its edges. Behind it, very faintly, machines.', 5);
+    }
+    if (dl < 0.9) {
+      this.done = true;
+      ctx.hud.message('The singing stops the moment the door closes behind you.', 4);
+      ctx.onEscape('level15', 'door');
+      return;
+    }
     const m = nearest(MESA, player.pos.x, player.pos.z);
     const dm = Math.hypot(player.pos.x - m.x, player.pos.z - m.z);
     if (dm < MESA.r * 0.97 - 1.2) {

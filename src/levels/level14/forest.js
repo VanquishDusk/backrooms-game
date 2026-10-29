@@ -23,6 +23,8 @@ export const POOL = { x: MESA.x + toTile[0] * (MESA.r + 9), z: MESA.z + toTile[1
 export const GUESTS = { x: 62, z: 182, r: 15 };
 export const CHILDREN = { x: 104, z: 142, r: 15 };
 export const SPAWN = { x: 30, z: 112 };
+// A white steel door standing on its own among the trees (Level 15).
+export const DOOR = { x: 206, z: 196 };
 
 const smooth = (a, b, x) => {
   const t = Math.max(0, Math.min(1, (x - a) / (b - a)));
@@ -246,7 +248,7 @@ export class Trees {
   }
 
   blocked(x, z) {
-    return distTo(MESA, x, z) < MESA.r + 3 || distTo(POOL, x, z) < POOL.r + 3 || distTo(GUESTS, x, z) < GUESTS.r || distTo(CHILDREN, x, z) < CHILDREN.r + 2 || distTo(SPAWN, x, z) < 3;
+    return distTo(MESA, x, z) < MESA.r + 3 || distTo(POOL, x, z) < POOL.r + 3 || distTo(GUESTS, x, z) < GUESTS.r || distTo(CHILDREN, x, z) < CHILDREN.r + 2 || distTo(SPAWN, x, z) < 3 || distTo(DOOR, x, z) < 4;
   }
 
   build(ci, cj) {

@@ -2,7 +2,7 @@
 
 A replayable 3D horror game set in the Backrooms, playable in the browser on desktop and mobile.
 
-Playable now: **Level 0 — "The Lobby" / "The Yellow Hell"**, its sub-level **Level 0.2 — "The Remodel"**, **Level 1 — "The Habitable Zone"**, **Level 1.3**, **Level 1.5 — "Inverted"**, **Level 2 — "Abandoned Utility Halls"**, **Level 3 — "Electrical Station"**, **Level 4 — "Abandoned Office"**, **Level 5 — "Terror Hotel"**, **Level 6 — "Lights Out"**, **Level 7 — "Thalassophobia"**, **Level 14 — "Paradise"**, **Level 63 — "Tranquility"**, **Level 94 — "Motion"** and **Level 601 — "The End"**. More levels will follow.
+Playable now: **Level 0 — "The Lobby" / "The Yellow Hell"**, its sub-level **Level 0.2 — "The Remodel"**, **Level 1 — "The Habitable Zone"**, **Level 1.3**, **Level 1.5 — "Inverted"**, **Level 2 — "Abandoned Utility Halls"**, **Level 3 — "Electrical Station"**, **Level 4 — "Abandoned Office"**, **Level 5 — "Terror Hotel"**, **Level 6 — "Lights Out"**, **Level 7 — "Thalassophobia"**, **Level 14 — "Paradise"**, **Level 15 — "Futuristic Halls"**, **Level 63 — "Tranquility"**, **Level 94 — "Motion"** and **Level 601 — "The End"**. More levels will follow.
 
 ## Play
 
@@ -258,6 +258,19 @@ Isn't it pretty? You should visit sometime.
 - **Ways out (you won't have to worry about that):**
   - The **cave behind the biggest waterfall**: cold and quiet, your thoughts come back, and the rock turns to concrete. **Level 1**.
   - Swim out to the **deep middle of the pool** and go under: **Level 7**.
+  - A **white steel door** standing on its own among the trees, cold light round its edges, machines humming behind it: **Level 15**.
+
+## Level 15 — Futuristic Halls (Survival Difficulty 0)
+
+Reached through the white door in Level 14.
+
+- **The halls:** an endless grid of white barrel-vaulted halls with white steel ribs, two big steel ducts along the crown, lamps throwing light up into the vault, a polished terrazzo floor, glowing panels down one wall and mint-green tiles down the other, and a band of strange symbols along every wall. Some halls are completely dark.
+- **Behind the reinforced doors** (yellow frames, half-open steel doors, a symbol over each): a machine still making steel rods on a conveyor, a machine so big the room was built around it, wrecked and burnt machinery (with a dead Hound), laboratories, dormitories with bunks and lockers, kitchens, control rooms with walls of screens, storage. People in lab coats lie where they fell.
+- **Safe and silent:** no entities, but there's **no Almond Water anywhere**, and the dark halls wear on you.
+- **Enric:** the only other person here, in his camp in a big control room next to where you arrive. He's been here two years. Talk to him (walk up): he'll give you a bottle of Almond Water and tell you about the computers.
+- **The I.L.N.:** the computers still work. Stand at one to read it: the files are in a script nobody can read. Three of them hold pieces Enric has half translated. Read all three and they fit together into a map, and you're told roughly which way and how far to go. You'll hear a draught of wind from that direction.
+- **The way out:** a door with **no symbol** over it, and behind it a stairway up into daylight. Climb it: **you made it**. (This ends your run, as an escape.)
+
 
 ## Level 63 — Tranquility (Survival Difficulty 0)
 
@@ -423,6 +436,7 @@ src/levels/level7/            Level 7 (layout and sea floor, the room/sea/scener
 src/levels/level94/           Level 94 (terrain and sky, town and props kit, castle interior, Animations, Robo-Men, the King, day/night)
 src/levels/level601/          Level 601 (shop layout, shop and computer dressing, the field and the house, the host, the acts)
 src/levels/level14/           Level 14 (streamed forest, sky, waterfall cliff and pool, guests, children, the cacophony)
+src/levels/level15/           Level 15 (streamed vaulted halls and rooms, machines, corpses, I.L.N. computers, Enric, the way out)
 src/levels/level63/           Level 63 generator (platforms, bridges, ladders, monkey bars, Meditation Points) and runtime (sky, clouds, vines, climbing, falling)
 ```
 

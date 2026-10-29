@@ -10,7 +10,7 @@ import { Hud } from '../ui/Hud.js';
 import { Backpack } from './Backpack.js';
 import { Camcorder } from './Camcorder.js';
 import { Archive } from '../ui/Archive.js';
-import { LEVELS, FIRST_LEVEL, UPCOMING } from '../levels/registry.js';
+import { LEVELS, FIRST_LEVEL, UPCOMING, ENDINGS } from '../levels/registry.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -530,8 +530,9 @@ export class Game {
       save('stats', this.stats);
       this.endRun();
       this.state = 'escaped';
-      $('esc-title').textContent = walk ? 'YOU FOLLOWED THE PIPES' : door ? 'YOU WENT THROUGH THE DOOR' : 'YOU NOCLIPPED THROUGH';
-      $('esc-next').textContent = `${UPCOMING[target] || target.toUpperCase()} · COMING SOON`;
+      const ending = ENDINGS[target];
+      $('esc-title').textContent = ending ? ending.title : walk ? 'YOU FOLLOWED THE PIPES' : door ? 'YOU WENT THROUGH THE DOOR' : 'YOU NOCLIPPED THROUGH';
+      $('esc-next').textContent = ending ? ending.text : `${UPCOMING[target] || target.toUpperCase()} · COMING SOON`;
       $('esc-stats').textContent = `ESCAPED IN ${formatTime(time)}${best ? ' · NEW BEST' : ''} · SEED ${this.seed}`;
       this.showScreen('escaped');
     }, door ? 900 : walk ? 1800 : 2000);
