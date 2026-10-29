@@ -354,3 +354,187 @@ export const skinTone = (color) => cached('skin-' + color, () => {
   noise(ctx, 64, 64, 300, '80,50,40', 0.08);
   return tex(c);
 });
+
+// ---- Second batch -----------------------------------------------------------
+
+// Dark lacquered wood with grain and knots (Woodlins).
+export const woodSkin = () => cached('wood', () => {
+  const [c, ctx] = canvas(128);
+  ctx.fillStyle = '#4a2e18';
+  ctx.fillRect(0, 0, 128, 128);
+  for (let x = 0; x < 128; x += 2) {
+    ctx.fillStyle = `rgba(${Math.random() < 0.5 ? '20,10,4' : '120,80,40'},${(Math.random() * 0.25).toFixed(3)})`;
+    ctx.fillRect(x + Math.sin(x) * 2, 0, 1 + Math.random() * 2, 128);
+  }
+  for (let i = 0; i < 3; i++) {
+    const x = Math.random() * 128, y = Math.random() * 128;
+    ctx.strokeStyle = 'rgba(20,10,4,0.6)';
+    for (let r = 2; r < 12; r += 3) {
+      ctx.beginPath();
+      ctx.ellipse(x, y, r * 0.6, r * 1.4, 0, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+  }
+  blobs(ctx, 128, 128, 5, '255,220,170', 0.12, 10, 30);
+  return tex(c);
+});
+
+// An eyeball's white, threaded with blood vessels (Watchers).
+export const scleraSkin = () => cached('sclera', () => {
+  const [c, ctx] = canvas(256, 128);
+  ctx.fillStyle = '#e8dcd0';
+  ctx.fillRect(0, 0, 256, 128);
+  blobs(ctx, 256, 128, 10, '200,120,110', 0.35, 10, 40);
+  veins(ctx, 256, 128, 40, 'rgba(150,20,20,0.7)', 1.2);
+  veins(ctx, 256, 128, 20, 'rgba(90,10,30,0.5)', 2.2);
+  return tex(c);
+});
+
+// Chitin: grey, mottled, banded (Nguithr'xurh).
+export const chitinSkin = () => cached('chitin', () => {
+  const [c, ctx] = canvas(128);
+  ctx.fillStyle = '#6e6c66';
+  ctx.fillRect(0, 0, 128, 128);
+  blobs(ctx, 128, 128, 16, '40,38,36', 0.5, 6, 22);
+  blobs(ctx, 128, 128, 10, '170,165,150', 0.3, 6, 18);
+  for (let y = 0; y < 128; y += 16) {
+    ctx.fillStyle = 'rgba(30,28,26,0.45)';
+    ctx.fillRect(0, y, 128, 2);
+  }
+  noise(ctx, 128, 128, 1500, '20,20,20', 0.3);
+  return tex(c);
+});
+
+// A round web, seen from below (transparent).
+export const webSkin = () => cached('web', () => {
+  const [c, ctx] = canvas(256);
+  ctx.clearRect(0, 0, 256, 256);
+  ctx.strokeStyle = 'rgba(225,225,215,0.75)';
+  ctx.lineWidth = 1.2;
+  for (let k = 0; k < 18; k++) {
+    const a = (k / 18) * Math.PI * 2;
+    ctx.beginPath();
+    ctx.moveTo(128, 128);
+    ctx.lineTo(128 + Math.cos(a) * 126, 128 + Math.sin(a) * 126);
+    ctx.stroke();
+  }
+  for (let r = 10; r < 124; r += 9 + Math.random() * 3) {
+    ctx.beginPath();
+    for (let k = 0; k <= 18; k++) {
+      const a = (k / 18) * Math.PI * 2, rr = r * (0.92 + Math.random() * 0.12);
+      ctx.lineTo(128 + Math.cos(a) * rr, 128 + Math.sin(a) * rr);
+    }
+    ctx.stroke();
+  }
+  return tex(c, false);
+});
+
+// Black rubber cable sheath (Growlers).
+export const cableSkin = () => cached('cable', () => {
+  const [c, ctx] = canvas(64);
+  ctx.fillStyle = '#161616';
+  ctx.fillRect(0, 0, 64, 64);
+  for (let y = 0; y < 64; y += 8) {
+    ctx.fillStyle = 'rgba(80,80,80,0.35)';
+    ctx.fillRect(0, y, 64, 1);
+  }
+  ctx.fillStyle = 'rgba(200,190,60,0.5)';
+  ctx.fillRect(28, 0, 3, 64);
+  noise(ctx, 64, 64, 300, '90,90,90', 0.3);
+  return tex(c);
+});
+
+// Rat fur, in colours for different levels.
+export const ratFur = (variant = 'grey') => cached('rat-' + variant, () => {
+  const [c, ctx] = canvas(64);
+  const base = { grey: '#5a544c', pale: '#b8aca0', rust: '#6a4028' }[variant] || '#5a544c';
+  ctx.fillStyle = base;
+  ctx.fillRect(0, 0, 64, 64);
+  for (let i = 0; i < 700; i++) {
+    ctx.strokeStyle = `rgba(${Math.random() < 0.5 ? '20,16,12' : '200,190,170'},${(Math.random() * 0.3).toFixed(3)})`;
+    const x = Math.random() * 64, y = Math.random() * 64;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + 1, y + 3 + Math.random() * 3);
+    ctx.stroke();
+  }
+  if (variant === 'pale') blobs(ctx, 64, 64, 6, '200,110,110', 0.25, 4, 10);
+  return tex(c);
+});
+
+// Wrangler hide: overlapping scales, earth-dark, dirt in the creases.
+export const scaleSkin = () => cached('scales', () => {
+  const [c, ctx] = canvas(128);
+  ctx.fillStyle = '#3a3428';
+  ctx.fillRect(0, 0, 128, 128);
+  for (let y = -8; y < 136; y += 10) {
+    for (let x = (y / 10) % 2 ? 0 : 8; x < 136; x += 16) {
+      const g = ctx.createRadialGradient(x, y, 1, x, y, 10);
+      g.addColorStop(0, '#6a6048');
+      g.addColorStop(1, '#2a2418');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.ellipse(x, y, 8, 7, 0, 0, Math.PI);
+      ctx.fill();
+    }
+  }
+  blobs(ctx, 128, 128, 8, '90,70,40', 0.3, 10, 30);
+  return tex(c);
+});
+
+// The Wrangler's faces: a stretched human one, or an insect's.
+export const wranglerFace = (kind = 'human') => face('wrangler-' + kind, (ctx, w, h) => {
+  if (kind === 'human') {
+    ctx.fillStyle = '#c8b4a0';
+    ctx.beginPath();
+    ctx.ellipse(w / 2, h / 2, w * 0.42, h * 0.48, 0, 0, Math.PI * 2);
+    ctx.fill();
+    blobs(ctx, w, h, 6, '120,80,70', 0.25, 10, 40);
+    ctx.fillStyle = '#0a0806';
+    for (const x of [w * 0.36, w * 0.64]) {
+      ctx.beginPath();
+      ctx.ellipse(x, h * 0.42, 16, 22, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    // A calm, wide, closed smile.
+    ctx.strokeStyle = '#3a1810';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(w / 2, h * 0.58, w * 0.2, 0.2, Math.PI - 0.2);
+    ctx.stroke();
+  } else {
+    ctx.fillStyle = '#2a2a20';
+    ctx.beginPath();
+    ctx.ellipse(w / 2, h / 2, w * 0.42, h * 0.46, 0, 0, Math.PI * 2);
+    ctx.fill();
+    for (const x of [w * 0.3, w * 0.7]) {
+      const g = ctx.createRadialGradient(x, h * 0.4, 2, x, h * 0.4, 34);
+      g.addColorStop(0, '#9aa040');
+      g.addColorStop(1, '#202010');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.ellipse(x, h * 0.4, 30, 38, 0, 0, Math.PI * 2);
+      ctx.fill();
+      for (let i = 0; i < 60; i++) {
+        ctx.fillStyle = 'rgba(0,0,0,0.35)';
+        ctx.fillRect(x - 26 + Math.random() * 52, h * 0.4 - 32 + Math.random() * 64, 2, 2);
+      }
+    }
+  }
+});
+
+// Samantha: black fur (white patches are separate meshes).
+export const catFur = (color = 'black') => cached('cat-' + color, () => {
+  const [c, ctx] = canvas(64);
+  ctx.fillStyle = color === 'black' ? '#141210' : '#e8e4dc';
+  ctx.fillRect(0, 0, 64, 64);
+  for (let i = 0; i < 600; i++) {
+    ctx.strokeStyle = `rgba(${color === 'black' ? '90,85,80' : '150,140,130'},${(Math.random() * 0.3).toFixed(3)})`;
+    const x = Math.random() * 64, y = Math.random() * 64;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + 1, y + 3);
+    ctx.stroke();
+  }
+  return tex(c);
+});

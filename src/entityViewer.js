@@ -13,7 +13,8 @@ import { ENTITY_TYPES, EntityManager } from './entities/lib/index.js';
 // against you (the camera) instead. Drag to orbit, scroll/pinch to zoom.
 
 const $ = (id) => document.getElementById(id);
-const VARIANTS = { faceling: ['passive', 'hostile', 'child'], deathmoth: ['drone', 'soldier'] };
+const VARIANTS = { faceling: ['passive', 'hostile', 'child'], deathmoth: ['drone', 'soldier'], deathrat: ['grey', 'pale', 'rust'], wrangler: ['human', 'insect'] };
+const EYE_H = { clump: 0.6, hound: 0.8, deathrat: 0.25, samantha: 0.35, watcher: 1.6, wrangler: 1.2, nguithrxurh: 1.6 };
 
 const renderer = new Renderer($('view'));
 renderer.setQuality(window.matchMedia('(pointer: coarse)').matches ? 'medium' : 'high');
@@ -142,7 +143,7 @@ addEventListener('resize', () => {
   camera.updateProjectionMatrix();
 });
 
-let last = performance.now(), t = 0;
+let last = performance.now(), t = 0, speakUntil = 0;
 function frame(now) {
   requestAnimationFrame(frame);
   const dt = Math.min(0.05, (now - last) / 1000);
@@ -152,7 +153,7 @@ function frame(now) {
 
   // Camera orbits the entity (or the room centre in live mode).
   const focus = live ? center : new THREE.Vector3(entity.pos.x, 0, entity.pos.z);
-  const h = live ? 1.6 : (current === 'clump' ? 0.6 : current === 'hound' ? 0.8 : 1.2);
+  const h = live ? 1.6 : EYE_H[current] ?? 1.2;
   camera.position.set(
     focus.x + Math.sin(orbit.yaw) * Math.cos(orbit.pitch) * orbit.dist,
     h + Math.sin(orbit.pitch) * orbit.dist,
@@ -186,8 +187,12 @@ function frame(now) {
         });
         $('state').textContent = `ATTACK — ${ev.cause}`;
       }
+      if (ev.type === 'speak') {
+        $('state').textContent = ev.text;
+        speakUntil = t + 4;
+      }
     }
-    if (!res.events.some((e) => e.type === 'attack')) $('state').textContent = `STATE: ${entity.state.toUpperCase()}`;
+    if (!res.events.some((e) => e.type === 'attack' || e.type === 'speak') && t > speakUntil) $('state').textContent = `STATE: ${entity.state.toUpperCase()}`;
   } else if (entity) {
     entity.update(dt, player);
     $('state').textContent = `POSE: ${pose.toUpperCase()}`;

@@ -195,6 +195,13 @@ Reusable entities live in `src/entities/lib/`. Level 2 uses Hounds, Smilers, Ski
 | **Duller** | A washed-out grey figure that fades when still. Unpredictable moods; its touch festers (health drains for a while). |
 | **Partygoer** | Yellow, smiling =). Dances, waves, invites you over, then the smile tears wider. |
 | **Wretch** | Skinless, hunched, lopsided. Twitches and shambles until provoked (proximity or light), then charges in a zig-zag. |
+| **Woodlin** | A small jointed figure of dark lacquered wood, like a forgotten mannequin. Perfectly still while watched; look away and it clatters closer, then lunges. |
+| **Watcher** (Entity 96) | A giant floating eyeball trailing optic nerves. Glides silently; when it fixes on you its pupil swells and glows, then a beam turns you to grey dust. Break line of sight before it fires. |
+| **Nguithr'xurh** | Grey, insect-like, fourteen jointed limbs and mandibles. Hangs upside down on the ceiling beside its round web, creeps overhead, drops on you, then climbs back up. `opts.ceiling` sets the ceiling height. |
+| **Growler** | A hulk of twisted cables with fizzing copper ends. Hits incredibly hard but is dim: charges noise in a straight line, slams into walls and is stunned. |
+| **Deathrat** | Rats adapted to the Backrooms. Forage in darts, flee light and attention, bite when cornered. `grey`, `pale` (eyeless, for dark levels), `rust` (industrial). |
+| **Wrangler** | A massive scaled snake with a `human` or `insect` face. Burrows under floors and walls, surfaces near you and sways; watching it draws you toward it, then it strikes. |
+| **Samantha** (Entity 26) | A talking black-and-white cat with green eyes and sharp teeth. Follows you and asks for meat; feed her (`player.meat`) for a psychic reading and some sanity. Provoke her (light in her eyes, running at her) or don't pay, and she attacks. Emits `{ type: 'speak', text }` events. |
 
 To use them in a level:
 

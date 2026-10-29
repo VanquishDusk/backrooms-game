@@ -648,6 +648,78 @@ export class AudioEngine {
     }
   }
 
+  // A rat's squeak: a quick chirp or two.
+  squeak(pan = 0, vol = 0.12) {
+    if (!this.ctx) return;
+    const t0 = this.ctx.currentTime;
+    for (let i = 0; i < 1 + Math.floor(Math.random() * 3); i++) {
+      const t = t0 + i * 0.09;
+      const o = this.ctx.createOscillator();
+      o.type = 'sine';
+      const f = 2600 + Math.random() * 1400;
+      o.frequency.setValueAtTime(f, t);
+      o.frequency.exponentialRampToValueAtTime(f * 1.35, t + 0.04);
+      o.frequency.exponentialRampToValueAtTime(f * 0.9, t + 0.07);
+      const g = this.ctx.createGain();
+      this.env(g, t, vol, 0.004, 0.06);
+      o.connect(g).connect(this.out(pan));
+      o.start(t);
+      o.stop(t + 0.1);
+    }
+  }
+
+  // A cat: a meow (or, angry, a yowl).
+  meow(pan = 0, vol = 0.2, angry = false) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    const dur = angry ? 1.1 : 0.55;
+    const o = this.ctx.createOscillator();
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(angry ? 380 : 520, t);
+    o.frequency.linearRampToValueAtTime(angry ? 640 : 820, t + dur * 0.35);
+    o.frequency.linearRampToValueAtTime(angry ? 300 : 460, t + dur);
+    const f = this.ctx.createBiquadFilter();
+    f.type = 'bandpass';
+    f.Q.value = 3;
+    f.frequency.setValueAtTime(700, t);
+    f.frequency.linearRampToValueAtTime(1600, t + dur * 0.4);
+    f.frequency.linearRampToValueAtTime(900, t + dur);
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(vol, t + 0.06);
+    g.gain.setValueAtTime(vol * 0.8, t + dur * 0.7);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(f).connect(g).connect(this.out(pan));
+    o.start(t);
+    o.stop(t + dur + 0.05);
+  }
+
+  // Rising whine of something charging up (a Watcher's pupil).
+  charge(pan = 0, vol = 0.2, duration = 1.5) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    const o = this.ctx.createOscillator();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(180, t);
+    o.frequency.exponentialRampToValueAtTime(1900, t + duration);
+    const o2 = this.ctx.createOscillator();
+    o2.type = 'square';
+    o2.frequency.setValueAtTime(90, t);
+    o2.frequency.exponentialRampToValueAtTime(950, t + duration);
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(vol, t + duration);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + duration + 0.08);
+    const g2 = this.ctx.createGain();
+    g2.gain.value = 0.15;
+    o.connect(g).connect(this.out(pan));
+    o2.connect(g2).connect(g);
+    o.start(t);
+    o2.start(t);
+    o.stop(t + duration + 0.1);
+    o2.stop(t + duration + 0.1);
+  }
+
   // Small hammer tap.
   tink(pan = 0, vol = 0.15) {
     if (!this.ctx) return;

@@ -7,6 +7,13 @@ import { Clump } from './Clump.js';
 import { Duller } from './Duller.js';
 import { Partygoer } from './Partygoer.js';
 import { Wretch } from './Wretch.js';
+import { Woodlin } from './Woodlin.js';
+import { Watcher } from './Watcher.js';
+import { Nguithrxurh } from './Nguithrxurh.js';
+import { Growler } from './Growler.js';
+import { Deathrat } from './Deathrat.js';
+import { Wrangler } from './Wrangler.js';
+import { Samantha } from './Samantha.js';
 
 // The Backrooms entity library. A level opts in by creating an
 // EntityManager and spawning what it wants (Level 2 is an example):
@@ -15,6 +22,7 @@ import { Wretch } from './Wretch.js';
 //   this.entities = new EntityManager({ scene, world, audio: ctx.audio, rng, shared });
 //   this.entities.spawnFar('hound', player, { min: 15, max: 30 });
 //   this.entities.spawn('faceling', { x, z, variant: 'hostile' });
+//   // Samantha emits { type: 'speak', text } events: show them in the HUD.
 //   // each frame, in update(dt, player):
 //   const res = this.entities.update(dt, player, ctx);
 //   if (res.dead) ctx.onDeath(res.cause);
@@ -31,6 +39,13 @@ export const ENTITY_TYPES = {
   duller: { cls: Duller, name: 'Duller', blurb: 'A washed-out grey figure that fades when still. Unpredictable. Its touch festers.' },
   partygoer: { cls: Partygoer, name: 'Partygoer', blurb: 'Yellow, smiling, delighted to see you. Waves, dances, invites you along. =)' },
   wretch: { cls: Wretch, name: 'Wretch', blurb: 'Skinless, hunched, lopsided. Twitches and shambles until provoked, then charges in a zig-zag.' },
+  woodlin: { cls: Woodlin, name: 'Woodlin', blurb: 'A jointed figure of dark wood, like a forgotten mannequin. Still while watched; look away and it clatters closer.' },
+  watcher: { cls: Watcher, name: 'Watcher', blurb: 'A giant floating eyeball trailing optic nerves. Its pupil swells, then a beam turns you to dust. Break its line of sight.' },
+  nguithrxurh: { cls: Nguithrxurh, name: 'Nguithr\'xurh', blurb: 'Grey, insect-like, all limbs. Hangs on the ceiling by its round web and drops on whoever walks beneath.' },
+  growler: { cls: Growler, name: 'Growler', blurb: 'A hulk of twisted cables. Immensely strong, not bright: charges noise in a straight line and hits walls.' },
+  deathrat: { cls: Deathrat, name: 'Deathrat', blurb: 'Rats adapted to the Backrooms, coloured by where they live. Forage, flee light, bite when cornered. Variants: grey, pale, rust.' },
+  wrangler: { cls: Wrangler, name: 'Wrangler', blurb: 'A huge burrowing snake with a face. Surfaces near you and sways; watch it and you walk to it. Variants: human, insect.' },
+  samantha: { cls: Samantha, name: 'Samantha', blurb: 'A talking black-and-white cat with green eyes and sharp teeth. Readings for meat. Provoke her, or don\'t pay, and she bites.' },
 };
 
 export class EntityManager {
@@ -117,4 +132,4 @@ export class EntityManager {
   }
 }
 
-export { Smiler, Hound, Faceling, SkinStealer, Deathmoth, Clump, Duller, Partygoer, Wretch };
+export { Smiler, Hound, Faceling, SkinStealer, Deathmoth, Clump, Duller, Partygoer, Wretch, Woodlin, Watcher, Nguithrxurh, Growler, Deathrat, Wrangler, Samantha };
