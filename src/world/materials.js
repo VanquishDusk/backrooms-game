@@ -23,6 +23,7 @@ export function createSharedUniforms(fog) {
     lightMap: { value: null },
     lightMap2: { value: null },
     emergency: { value: 0 },
+    bend: { value: 0 },
     lmScale: { value: new THREE.Vector2(1, 1) },
     globalLight: { value: 1 },
     ambient: { value: new THREE.Color(0.05, 0.045, 0.035) },
@@ -42,6 +43,8 @@ export function createSharedUniforms(fog) {
 }
 
 const WORLD_VERT = /* glsl */ `
+uniform float bend;
+uniform float time;
 varying vec3 vWorld;
 varying vec3 vNormal;
 varying vec2 vUv;
@@ -49,6 +52,11 @@ varying vec2 vUv;
 #include <fog_pars_vertex>
 void main() {
   vec4 wp = modelMatrix * vec4(position, 1.0);
+  // Warped reality: walls lean and sway, more the higher up they go.
+  if (bend > 0.0) {
+    wp.x += sin(wp.z * 0.37 + time * 0.13) * wp.y * bend;
+    wp.z += cos(wp.x * 0.31 + time * 0.11) * wp.y * bend;
+  }
   vWorld = wp.xyz;
   vNormal = normal;
   vUv = uv;

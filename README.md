@@ -2,7 +2,7 @@
 
 A replayable 3D horror game set in the Backrooms, playable in the browser on desktop and mobile.
 
-Playable now: **Level 0 — "The Lobby" / "The Yellow Hell"**, its sub-level **Level 0.2 — "The Remodel"**, **Level 1 — "The Habitable Zone"** and **Level 1.3**. More levels will follow.
+Playable now: **Level 0 — "The Lobby" / "The Yellow Hell"**, its sub-level **Level 0.2 — "The Remodel"**, **Level 1 — "The Habitable Zone"**, **Level 1.3** and **Level 1.5 — "Inverted"**. More levels will follow.
 
 ## Play
 
@@ -76,6 +76,20 @@ One long, blinding-white tiled hallway with branching paths to 16 large rooms: D
   - One end of the hallway is already being swallowed.
 - **Exit:** noclip into either end of the main hallway to return to Level 1.
 
+## Level 1.5 — Inverted (Survival Difficulty unknown)
+
+Reached through a **fake window** set into a concrete corridor wall in Level 1. Through the glass you can see a hallway in negative.
+
+- **The look:** a house hallway shown as a monochrome photo negative.
+  - Ceiling fixtures radiate darkness, and the dark ends of the hallways glow white.
+  - Picture frames and door trim shine, and the floor at your feet is black.
+  - Walls lean and sway, and the camera sits slightly tilted.
+- **Upside-down architecture:** chairs and tables hang from the ceiling, fixtures are set into the floor, some doors are hung upside-down with the knob near the top, some pictures are upside-down, and there's backwards writing on the walls. Every so often the whole view turns over, and the controls adjust so they still feel right.
+- **Silence:** there's no hum. Denizens drift through the halls whispering, and their whispers get **quieter as you get closer**. If one passes through you, you lose sanity and end up somewhere else.
+- **She** only moves while you aren't looking at her.
+- **Logs** from the explorer who got trapped here are scattered on the floor, garbled.
+- **Exit:** the only hum here is Level 0's, leaking through the one place reality is thin. Follow it to a glitching dead end where the negative keeps failing, and noclip through. You usually land in Level 1, sometimes Level 0.
+
 The main menu has a **Levels** section (0, 1, …) and a **Sublevels** section (0.2, 1.3, …). Each level unlocks there once you reach it.
 
 Every run comes from a seed, which shows on the pause, death and escape screens. Type a seed on the main menu to replay a layout.
@@ -110,6 +124,7 @@ src/levels/level0/            Level 0 generator and runtime (events, hazards, ex
 src/levels/level0_2/          Level 0.2 generator and runtime (the collapse)
 src/levels/level1/            Level 1 generator and runtime (sectors, blackouts, crates, the hallway out)
 src/levels/level1_3/          Level 1.3 generator and runtime (Detox Zones, The Ward, the Decay)
+src/levels/level1_5/          Level 1.5 generator and runtime (the negative, the denizens, She)
 ```
 
 All textures and sounds are generated in code, so there are no asset files.

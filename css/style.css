@@ -455,3 +455,6 @@ h3 { margin: 0 0 4px; font-size: 22px; color: var(--accent); }
 @media (max-width: 420px) {
   .controls-grid { grid-template-columns: 1fr; }
 }
+
+/* Level 1.5: even the HUD is a negative. */
+body.inverted #hud, body.inverted #level-card { filter: invert(1) grayscale(1); }

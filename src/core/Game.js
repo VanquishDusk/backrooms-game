@@ -270,7 +270,7 @@ export class Game {
         return game.input.touchMode;
       },
       onDeath: (cause) => runId === this.runId && this.die(cause),
-      onCaught: (stalker) => runId === this.runId && this.caught(stalker),
+      onCaught: (stalker, cause) => runId === this.runId && this.caught(stalker, cause),
       onEscape: (target, style) => runId === this.runId && this.escape(target, style),
       fade: (to, dur) => this.fade(to, dur),
       hurtFlash: (a) => this.hurtFlash(a),
@@ -474,7 +474,7 @@ export class Game {
     this.showScreen('dead');
   }
 
-  caught(stalker) {
+  caught(stalker, cause = 'Something found you between the corridors.') {
     this.state = 'dying';
     this.player.frozen = true;
     this.dyingStalker = stalker;
@@ -496,7 +496,7 @@ export class Game {
     setTimeout(() => {
       if (runId !== this.runId) return;
       this.fade(1, 0.05);
-      setTimeout(() => runId === this.runId && this.die('Something found you between the corridors.'), 400);
+      setTimeout(() => runId === this.runId && this.die(cause), 400);
     }, 1200);
   }
 
@@ -632,8 +632,16 @@ export class Game {
     post.warp.value = atm.warp;
     post.aberr.value = atm.aberr;
     post.grain.value = atm.grain;
+    post.invert.value = atm.invert || 0;
+    post.mono.value = atm.mono || 0;
+    post.flip.value = atm.flip || 0;
+    post.glitch.value = atm.glitch || 0;
+    post.soften.value = atm.soften || 0;
+    this.renderer.forcePost = !!(atm.invert || atm.flip);
+    document.body.classList.toggle('inverted', !!atm.invert && this.state !== 'menu');
 
     player.applyCamera(this.camera);
+    if (atm.roll) this.camera.rotation.z += atm.roll;
     let shake = atm.shake * 0.006;
     if (this.state === 'dying') {
       shake = 0.03;

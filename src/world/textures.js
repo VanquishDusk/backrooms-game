@@ -545,3 +545,181 @@ export function whiteFloorTexture(renderer) {
   }
   return finish(c, renderer);
 }
+
+// ---- Level 1.5 -----------------------------------------------------------
+// These are painted as a "real" house hallway; the level shows them as a
+// photo negative, so dark here reads as glowing and light reads as void.
+
+// Smooth grey plaster, faintly mottled.
+export function plasterTexture(renderer, base = '#8c8c8a') {
+  const S = 512;
+  const [c, ctx] = makeCanvas(S);
+  ctx.fillStyle = base;
+  ctx.fillRect(0, 0, S, S);
+  blotches(ctx, S, S, 6, '40,40,40', 0.12);
+  blotches(ctx, S, S, 20, '255,255,255', 0.05);
+  speckle(ctx, S, 6000, '60,60,60', 0.08, 1.2);
+  return finish(c, renderer);
+}
+
+// Pale plaster ceiling with spreading water stains (they invert into the
+// dark, cloudy ceiling in the reference photo).
+export function stainedCeilingTexture(renderer) {
+  const S = 512;
+  const [c, ctx] = makeCanvas(S);
+  ctx.fillStyle = '#d0d0cc';
+  ctx.fillRect(0, 0, S, S);
+  blotches(ctx, S, S, 5, '70,70,64', 0.35);
+  blotches(ctx, S, S, 14, '90,90,84', 0.25);
+  blotches(ctx, S, S, 40, '60,60,56', 0.15);
+  speckle(ctx, S, 5000, '80,80,76', 0.12);
+  return finish(c, renderer);
+}
+
+// Narrow pale floorboards.
+export function floorboardTexture(renderer) {
+  const S = 512;
+  const [c, ctx] = makeCanvas(S);
+  const n = 8, w = S / n;
+  for (let i = 0; i < n; i++) {
+    const v = 175 + Math.floor(Math.random() * 30);
+    ctx.fillStyle = `rgb(${v},${v - 6},${v - 16})`;
+    ctx.fillRect(i * w, 0, w, S);
+    // Grain.
+    for (let k = 0; k < 40; k++) {
+      ctx.fillStyle = `rgba(90,70,50,${(Math.random() * 0.12).toFixed(3)})`;
+      ctx.fillRect(i * w + Math.random() * w, Math.random() * S, 1, 20 + Math.random() * 120);
+    }
+    ctx.fillStyle = 'rgba(40,30,20,0.55)';
+    ctx.fillRect(i * w, 0, 2, S);
+    // Board ends, staggered.
+    const e = ((i * 197) % S);
+    ctx.fillRect(i * w, e, w, 2);
+  }
+  return finish(c, renderer);
+}
+
+// Four "photographs" for the picture frames: soft greyscale portraits and
+// rooms, some of them wrong.
+export function pictureAtlasTexture(renderer) {
+  const W = 512, H = 128;
+  const c = document.createElement('canvas');
+  c.width = W;
+  c.height = H;
+  const ctx = c.getContext('2d');
+  for (let k = 0; k < 4; k++) {
+    const x0 = k * 128;
+    const g = ctx.createLinearGradient(x0, 0, x0, H);
+    g.addColorStop(0, '#c8c8c8');
+    g.addColorStop(1, '#8a8a8a');
+    ctx.fillStyle = g;
+    ctx.fillRect(x0, 0, 128, H);
+    ctx.fillStyle = '#2a2a2a';
+    if (k === 0 || k === 2) {
+      // A figure, head and shoulders. The second one has no face.
+      ctx.beginPath();
+      ctx.ellipse(x0 + 64, 52, 20, 26, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillRect(x0 + 30, 82, 68, 46);
+      if (k === 0) {
+        ctx.fillStyle = '#bdbdbd';
+        ctx.fillRect(x0 + 54, 46, 6, 4);
+        ctx.fillRect(x0 + 68, 46, 6, 4);
+      }
+    } else if (k === 1) {
+      // A hallway, receding to a door.
+      ctx.strokeStyle = '#2a2a2a';
+      ctx.lineWidth = 3;
+      for (const [a, b] of [[0, 0], [128, 0], [0, 128], [128, 128]]) {
+        ctx.beginPath();
+        ctx.moveTo(x0 + a, b);
+        ctx.lineTo(x0 + 64 + (a ? 14 : -14), 64 + (b ? 18 : -18));
+        ctx.stroke();
+      }
+      ctx.fillRect(x0 + 52, 46, 24, 36);
+    } else {
+      // A window with nothing outside it.
+      ctx.fillStyle = '#1c1c1c';
+      ctx.fillRect(x0 + 30, 24, 68, 80);
+      ctx.fillStyle = '#8a8a8a';
+      ctx.fillRect(x0 + 62, 24, 4, 80);
+      ctx.fillRect(x0 + 30, 62, 68, 4);
+    }
+  }
+  speckle(ctx, W, 3000, '30,30,30', 0.15);
+  return finish(c, renderer);
+}
+
+// Words written on the wall, upside down: what the denizens whisper.
+export function wallWritingTexture(renderer, text) {
+  const W = 512, H = 128;
+  const c = document.createElement('canvas');
+  c.width = W;
+  c.height = H;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#8c8c8a';
+  ctx.fillRect(0, 0, W, H);
+  ctx.translate(W / 2, H / 2);
+  ctx.rotate(Math.PI);
+  ctx.fillStyle = 'rgba(15,15,15,0.92)';
+  ctx.font = 'italic bold 44px Georgia, serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, 0, 0);
+  // Drips.
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.fillStyle = 'rgba(15,15,15,0.7)';
+  for (let i = 0; i < 18; i++) ctx.fillRect(40 + Math.random() * (W - 80), 70 + Math.random() * 10, 2, 10 + Math.random() * 40);
+  return finish(c, renderer);
+}
+
+// What a fake window in Level 1 shows: a hallway in negative.
+export function invertedGlimpseTexture() {
+  const W = 256, H = 280;
+  const c = document.createElement('canvas');
+  c.width = W;
+  c.height = H;
+  const ctx = c.getContext('2d');
+  const g = ctx.createRadialGradient(W / 2, H * 0.45, 4, W / 2, H * 0.45, W);
+  g.addColorStop(0, '#f2f2f2');
+  g.addColorStop(0.35, '#9a9a9a');
+  g.addColorStop(1, '#6a6a6a');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, W, H);
+  // Receding walls and a dark, mottled ceiling.
+  ctx.fillStyle = 'rgba(40,40,40,0.55)';
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(W, 0);
+  ctx.lineTo(W * 0.58, H * 0.36);
+  ctx.lineTo(W * 0.42, H * 0.36);
+  ctx.fill();
+  ctx.fillStyle = 'rgba(10,10,10,0.75)';
+  ctx.beginPath();
+  ctx.moveTo(0, H);
+  ctx.lineTo(W, H);
+  ctx.lineTo(W * 0.58, H * 0.62);
+  ctx.lineTo(W * 0.42, H * 0.62);
+  ctx.fill();
+  // Black fixtures that shine darkness.
+  ctx.fillStyle = '#050505';
+  for (const [y, w] of [[0.06, 0.16], [0.16, 0.1], [0.24, 0.06], [0.3, 0.035]]) ctx.fillRect(W / 2 - (W * w) / 2, H * y, W * w, H * 0.02);
+  // The glowing door at the end, and the white edges of doors along the way.
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(W * 0.44, H * 0.36, W * 0.12, H * 0.26);
+  ctx.fillStyle = '#d8d8d8';
+  ctx.fillRect(W * 0.465, H * 0.39, W * 0.07, H * 0.2);
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 3;
+  for (const x of [0.12, 0.26, 0.74, 0.88]) {
+    ctx.beginPath();
+    ctx.moveTo(W * x, H * (x < 0.5 ? 0.22 : 0.22));
+    ctx.lineTo(W * x, H * 0.8);
+    ctx.stroke();
+  }
+  for (let i = 0; i < 2500; i++) {
+    ctx.fillStyle = `rgba(${Math.random() < 0.5 ? '0,0,0' : '255,255,255'},${(Math.random() * 0.12).toFixed(3)})`;
+    ctx.fillRect(Math.random() * W, Math.random() * H, 1.4, 1.4);
+  }
+  return new THREE.CanvasTexture(c);
+}

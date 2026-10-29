@@ -37,6 +37,7 @@ export class Player {
     this.dead = false;
     this.frozen = false;
     this.speedMul = 1;
+    this.flipped = false;
   }
 
   // Stats that travel with you between levels.
@@ -64,6 +65,12 @@ export class Player {
     if (this.hurtAgo > 6 && this.health < 100) this.health = Math.min(100, this.health + 1.5 * dt);
 
     const look = input.consumeLook();
+    // When the view is turned upside-down, flip controls so they still
+    // feel right relative to the screen.
+    if (this.flipped) {
+      look.x = -look.x;
+      look.y = -look.y;
+    }
     if (!this.frozen) {
       const sens = settings.lookSens;
       this.yaw -= look.x * 0.0022 * sens;
@@ -83,7 +90,7 @@ export class Player {
     }
 
     const move = input.getMove();
-    let mx = move.x, my = move.y;
+    let mx = this.flipped ? -move.x : move.x, my = move.y;
     const mag = Math.hypot(mx, my);
     if (mag > 1) {
       mx /= mag;

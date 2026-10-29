@@ -351,6 +351,22 @@ export function generateLevel1(rng) {
     }
   }
   const whiteWall = whiteCands.length ? rng.pick(whiteCands) : null;
+  const sameE = (a, b) => a && b && a.h === b.h && a.x === b.x && a.y === b.y;
+
+  // A window in a concrete corridor that can't be a real window. It leads
+  // to Level 1.5.
+  const windowCands = [];
+  for (let y = 1; y < ROWS - 1; y++) {
+    for (let x = 1; x < COLS - 1; x++) {
+      const z = zone[idx(x, y)];
+      if ((z !== ZONE.CORRIDOR && z !== ZONE.ROOM) || Math.hypot(x - spawn.x, y - spawn.y) < 8) continue;
+      for (let d = 0; d < 4; d++) {
+        const e = map.edge(x, y, d);
+        if (map.getEdge(e) === EDGE_WALL && !keepEdge(e) && !sameE(e, whiteWall?.edge)) windowCands.push({ edge: e, side: { x, y } });
+      }
+    }
+  }
+  const fakeWindow = windowCands.length ? rng.pick(windowCands) : null;
 
   const notes = [];
   const noteCells = [[spawn.x, spawn.y]];
@@ -380,6 +396,6 @@ export function generateLevel1(rng) {
 
   return {
     map, zone, sector, spawn, spawnYaw: yaw, exit, lights, pillars, pillarAt, shelves, extraBoxes,
-    crates, pipes, rooms, blocks, workers, notes, gothicCell, whiteWall,
+    crates, pipes, rooms, blocks, workers, notes, gothicCell, whiteWall, fakeWindow,
   };
 }

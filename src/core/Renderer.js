@@ -12,10 +12,19 @@ uniform float aberr;
 uniform float warp;
 uniform vec3 tint;
 uniform vec2 res;
+uniform float invert;
+uniform float mono;
+uniform float flip;
+uniform float glitch;
+uniform float soften;
 varying vec2 vUv;
 float rand(vec2 co) { return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453); }
 void main() {
-  vec2 uv = vUv;
+  vec2 uv = mix(vUv, 1.0 - vUv, flip);
+  // Reality tearing: horizontal bands that slip sideways.
+  float row = floor(uv.y * 38.0);
+  float band = glitch > 0.0 ? step(1.0 - glitch * 0.4, rand(vec2(row, floor(time * 18.0)))) : 0.0;
+  uv.x += band * (rand(vec2(floor(time * 23.0), row)) - 0.5) * 0.18 * glitch;
   uv += warp * vec2(sin(uv.y * 11.0 + time * 1.9), cos(uv.x * 9.0 + time * 1.6)) * 0.006;
   vec2 dir = uv - 0.5;
   float d = length(dir);
@@ -25,9 +34,25 @@ void main() {
   col.g = texture2D(tScene, uv).g;
   col.b = texture2D(tScene, uv - dir * ab).b;
   col *= tint;
+  if (soften > 0.0) {
+    // Cheap glow: blend in a soft blur, so bright edges bleed like a photo.
+    vec3 blur = vec3(0.0);
+    vec2 px = 7.0 / res;
+    for (int i = 0; i < 8; i++) {
+      float a = float(i) * 0.785;
+      blur += texture2D(tScene, uv + vec2(cos(a), sin(a)) * px).rgb;
+      blur += texture2D(tScene, uv + vec2(cos(a + 0.39), sin(a + 0.39)) * px * 2.2).rgb;
+    }
+    col = mix(col, min(col, blur / 16.0), soften);
+  }
+  // Vignette before inversion, so an inverted view glows at the edges.
+  col *= mix(1.0, smoothstep(0.92, 0.22, d), vignette);
+  col = mix(col, vec3(dot(col, vec3(0.299, 0.587, 0.114))), mono);
+  // Photo-negative; tearing bands let the real colours show through.
+  float inv = invert * (1.0 - band);
+  col = mix(col, 1.0 - col, inv);
   col += (rand(uv * res + fract(time * 7.13) * 91.7) - 0.5) * grain;
   col *= 0.975 + 0.025 * sin(uv.y * res.y * 1.4);
-  col *= mix(1.0, smoothstep(0.92, 0.22, d), vignette);
   gl_FragColor = vec4(col, 1.0);
 }
 `;
@@ -54,6 +79,11 @@ export class Renderer {
         warp: { value: 0 },
         tint: { value: new THREE.Color(1, 1, 1) },
         res: { value: new THREE.Vector2(1, 1) },
+        invert: { value: 0 },
+        mono: { value: 0 },
+        flip: { value: 0 },
+        glitch: { value: 0 },
+        soften: { value: 0 },
       },
       vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }',
       fragmentShader: POST_FRAG,
@@ -89,7 +119,8 @@ export class Renderer {
 
   render(scene, camera, time) {
     this.camera = camera;
-    if (!this.usePost) {
+    // Some levels need the post pass (e.g. colour inversion) even on low.
+    if (!this.usePost && !this.forcePost) {
       this.renderer.setRenderTarget(null);
       this.renderer.render(scene, camera);
       return;

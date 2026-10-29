@@ -119,6 +119,7 @@ export class GridWorld {
     this.textures = opts.textures;
     this.shared = opts.shared;
     this.shared.emergency.value = 0;
+    this.shared.bend.value = 0;
     for (const d of this.shared.decay.value) d.set(0, 0, 0, 0);
     this.shared.globalLight.value = 1;
     this.group = new THREE.Group();

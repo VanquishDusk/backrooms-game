@@ -91,6 +91,41 @@ export class PropKit {
     return { group: g, x, z, nx, nz };
   }
 
+  /**
+   * A domestic window set into a wall face, placed like door(). `paneTex`
+   * is what you see through it. Returns { group, x, z, nx, nz }.
+   */
+  window(map, edge, side, paneTex) {
+    const cs = map.cellSize;
+    let x, z, nx = 0, nz = 0;
+    if (edge.h) {
+      x = (edge.x + 0.5) * cs;
+      nz = side.y === edge.y ? 1 : -1;
+      z = edge.y * cs + nz * WALL_FACE;
+    } else {
+      z = (edge.y + 0.5) * cs;
+      nx = side.x === edge.x ? 1 : -1;
+      x = edge.x * cs + nx * WALL_FACE;
+    }
+    const lx = x + nx * 0.5, lz = z + nz * 0.5;
+    const g = new THREE.Group();
+    const W = 1.1, H = 1.2, Y = 1.55, T = 0.06;
+    const frame = this.mat(0xe8e4d8, lx, lz, { minLight: 0.5 });
+    g.add(this.mesh(this.box(W + 0.14, 0.08, T), frame, 0, Y + H / 2 + 0.04, T / 2));
+    g.add(this.mesh(this.box(W + 0.24, 0.07, 0.16), frame, 0, Y - H / 2 - 0.035, 0.08));
+    for (const s of [-1, 1]) g.add(this.mesh(this.box(0.07, H, T), frame, s * (W / 2 + 0.035), Y, T / 2));
+    g.add(this.mesh(this.box(0.04, H, T * 0.8), frame, 0, Y, T / 2));
+    g.add(this.mesh(this.box(W, 0.04, T * 0.8), frame, 0, Y, T / 2));
+    const pane = new THREE.MeshBasicMaterial({ map: paneTex });
+    this.mats.push(pane);
+    const geo = new THREE.PlaneGeometry(W, H);
+    this.geos.push(geo);
+    g.add(this.mesh(geo, pane, 0, Y, 0.01));
+    g.position.set(x, 0, z);
+    g.rotation.y = Math.atan2(nx, nz);
+    return { group: g, x, z, nx, nz };
+  }
+
   // ---- Construction clutter ------------------------------------------------
 
   bucket(x, z) {

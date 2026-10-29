@@ -5,9 +5,9 @@ import { SURFACE, MAX_DYN_LIGHTS, createWorldMaterial, createGlitchMaterial } fr
 import {
   concreteFloorTexture, concreteWallTexture, concreteCeilingTexture, grassTexture, flagstoneTexture,
   woodPanelTexture, woodTexture, crateTexture, hazardTexture, solidTexture, gaugeTexture, leavesTexture,
-  whiteTileWallTexture,
+  whiteTileWallTexture, invertedGlimpseTexture,
 } from '../../world/textures.js';
-import { PropKit, disposeTextures, mergeGeometries } from '../../world/props.js';
+import { PropKit, disposeTextures, mergeGeometries, nearDoor } from '../../world/props.js';
 import { Hound } from '../../entities/Hound.js';
 import { generateLevel1, ZONE, SECTOR } from './generate.js';
 
@@ -148,6 +148,14 @@ export class Level1 {
     this.buildExitHall();
     this.buildCrates();
     this.buildNotes();
+
+    // The fake window to Level 1.5.
+    if (layout.fakeWindow) {
+      this.textures.glimpse = invertedGlimpseTexture();
+      const w = layout.fakeWindow;
+      this.fakeWindow = this.kit.window(map, w.edge, w.side, this.textures.glimpse);
+      this.props.add(this.fakeWindow.group);
+    }
 
     this.hound = new Hound(scene, this.world, this.rng.fork('hound'), (i) => {
       const z = zone[i];
@@ -700,6 +708,17 @@ export class Level1 {
       return;
     }
 
+    // The fake window to Level 1.5. Something whispers on the other side.
+    if (this.fakeWindow) {
+      const fw = this.fakeWindow;
+      if (Math.hypot(player.pos.x - fw.x, player.pos.z - fw.z) < 5 && this.once('window')) ctx.audio.whisper(this.panTo(player, fw.x, fw.z), 0.2);
+      if (nearDoor(fw, player.pos.x, player.pos.z)) {
+        this.done = true;
+        ctx.onEscape('level1_5', 'noclip');
+        return;
+      }
+    }
+
     // The white wall to Level 1.3.
     if (this.world.exit) {
       const dw = this.world.distanceToExit(player.pos.x, player.pos.z);
@@ -1008,6 +1027,8 @@ export class Level1 {
       for (let t = 0; t < 80; t++) {
         const x = rng.int(1, map.cols - 2), y = rng.int(1, map.rows - 2), d = rng.int(0, 3);
         const e = map.edge(x, y, d);
+        const fw = this.layout.fakeWindow?.edge;
+        if (fw && fw.h === e.h && fw.x === e.x && fw.y === e.y) continue;
         if (map.getEdge(e) === want && corridorEdge(e) && unseen(e)) return e;
       }
       return null;
