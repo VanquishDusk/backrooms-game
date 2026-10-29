@@ -7,6 +7,7 @@ import { createRng, randomSeedString } from './rng.js';
 import { load, save } from './storage.js';
 import { createSharedUniforms } from '../world/materials.js';
 import { Hud } from '../ui/Hud.js';
+import { Backpack } from './Backpack.js';
 import { LEVELS, FIRST_LEVEL, UPCOMING } from '../levels/registry.js';
 
 const $ = (id) => document.getElementById(id);
@@ -49,7 +50,7 @@ export class Game {
     });
     this.input.onTouchMode = () => this.updateTouchUi();
     this.input.onUnlock = () => {
-      if (this.state === 'playing' && !this.input.touchMode) this.pause();
+      if (this.state === 'playing' && !this.input.touchMode && !this.backpack.open) this.pause();
     };
 
     this.state = 'menu';
@@ -66,6 +67,7 @@ export class Game {
 
     this.applyQuality();
     this.bindUi();
+    this.backpack = new Backpack(this);
     this.updateTouchUi();
     this.showRecords();
     this.showUnlocked();
@@ -257,6 +259,7 @@ export class Game {
     }
     this.levelDef = LEVELS[id];
     this.levelSeed = seed;
+    this.backpack.clearWorld();
     const game = this;
     const runId = this.runId;
     const ctx = {
@@ -273,6 +276,7 @@ export class Game {
       onDeath: (cause) => runId === this.runId && this.die(cause),
       onCaught: (stalker, cause) => runId === this.runId && this.caught(stalker, cause),
       onEscape: (target, style) => runId === this.runId && this.escape(target, style),
+      placeItem: (item, x, z) => this.backpack.place(item, x, z),
       fade: (to, dur) => this.fade(to, dur),
       hurtFlash: (a) => this.hurtFlash(a),
       vibrate: (p) => navigator.vibrate && navigator.vibrate(p),
@@ -346,7 +350,7 @@ export class Game {
       this.hud.setHint(
         this.input.touchMode
           ? 'STICK: MOVE  ·  DRAG ANYWHERE: LOOK'
-          : `WASD MOVE · SHIFT RUN · C ${cover} · F LIGHT · E DRINK · ESC PAUSE`,
+          : `WASD MOVE · SHIFT RUN · C ${cover} · F LIGHT · E DRINK · 1/2 USE · TAB BAG · ESC PAUSE`,
         10,
       );
     }, 60);
@@ -415,6 +419,7 @@ export class Game {
 
   pause() {
     if (this.state !== 'playing') return;
+    this.backpack.close();
     this.state = 'paused';
     this.input.enabled = false;
     this.input.clear();
@@ -454,6 +459,7 @@ export class Game {
   }
 
   endRun() {
+    this.backpack.close();
     this.input.enabled = false;
     this.input.clear();
     this.input.unlockPointer();
@@ -534,6 +540,9 @@ export class Game {
         return;
       }
       this.stats.escapes++;
+      // Reaching a level that isn't built yet still counts: it unlocks in
+      // the level select once it is.
+      if (!this.stats.unlocked.includes(target)) this.stats.unlocked.push(target);
       const best = this.stats.bestTime == null || time < this.stats.bestTime;
       if (best) this.stats.bestTime = time;
       save('stats', this.stats);
@@ -564,7 +573,13 @@ export class Game {
 
     if (this.state === 'playing') {
       for (const a of input.consumeActions()) {
-        if (a === 'pause') this.pause();
+        if (a === 'pause') {
+          if (this.backpack.open) this.backpack.toggle(false);
+          else this.pause();
+        }
+        if (a === 'bag') this.backpack.toggle(!this.backpack.open);
+        if (a.startsWith('use')) this.backpack.use(Number(a.slice(3)));
+        if (a.startsWith('drop')) this.backpack.drop(Number(a.slice(4)));
         if (a === 'flashlight') {
           if (player.battery > 3) {
             player.flashlight = !player.flashlight;
@@ -605,6 +620,8 @@ export class Game {
       }
       $('btn-ears').classList.toggle('alert', !!level.hudInfo(player).warn && !player.coveringEars);
       level.update(dt, player);
+      if (this.state === 'playing') this.backpack.update(dt);
+      else this.backpack.close();
       this.runTime += dt;
       this.adaptQuality(dt);
     } else if (this.state === 'dying' || this.state === 'escaping') {
@@ -643,7 +660,8 @@ export class Game {
 
     player.applyCamera(this.camera);
     if (atm.roll) this.camera.rotation.z += atm.roll;
-    let shake = atm.shake * 0.006;
+    let shake = (atm.shake || 0) * 0.006 + this.shake * 0.02;
+    this.shake = Math.max(0, this.shake - dt * 4);
     if (this.state === 'dying') {
       shake = 0.03;
       this.dyingTime += dt;

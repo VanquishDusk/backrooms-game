@@ -87,6 +87,25 @@ export class EntityManager {
     return this.spawn(type, { ...opts, x, z });
   }
 
+  // Stun every entity within `range` of (x, z), in line of sight; if
+  // (fx, fz) is given, only those in front within the arc (cosine). Returns
+  // the entities hit.
+  stunNear(x, z, { range, seconds, fx = 0, fz = 0, arc = -1 }) {
+    const hit = [];
+    const map = this.ctx.world.map;
+    for (const e of this.list) {
+      if (!e.alive) continue;
+      const dx = e.pos.x - x, dz = e.pos.z - z;
+      const d = Math.hypot(dx, dz);
+      if (d > range + (e.radius || 0.3)) continue;
+      if (arc > -1 && d > 0.3 && (dx * fx + dz * fz) / d < arc) continue;
+      if (d > 0.8 && !map.hasLineOfSight(x, z, e.pos.x, e.pos.z)) continue;
+      e.stun(seconds);
+      hit.push(e);
+    }
+    return hit;
+  }
+
   remove(e) {
     e.dispose();
     this.list = this.list.filter((o) => o !== e);

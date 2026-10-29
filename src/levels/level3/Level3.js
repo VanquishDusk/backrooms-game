@@ -17,6 +17,7 @@ import { EntityManager } from '../../entities/lib/index.js';
 import { generateLevel3, KIND, CEIL } from './generate.js';
 import { Dresser, blockFurnishedSteps } from '../../world/dresser.js';
 import { generatorRoom, boilerRoom, assemblyHall, sanctum, baseGamma, gallery } from './dress.js';
+import { scatterItems } from '../../world/scatter.js';
 
 // Level 3 — "Electrical Station".
 //
@@ -37,7 +38,6 @@ import { generatorRoom, boilerRoom, assemblyHall, sanctum, baseGamma, gallery } 
 const T = 0.08;
 const VIEW = 36;
 const BOTTLE_SANITY = 35;
-const MAX_BOTTLES = 6;
 const JUNK = [
   'A fuse the size of your forearm. Blown.', 'A coil of copper wire, still warm.', 'A hard hat with M.E.G. stencilled on it.',
   'A logbook. Every entry says "pressure normal".', 'A jar of black fluid. It moves when you don\'t look at it.',
@@ -239,6 +239,7 @@ export class Level3 {
     blockFurnishedSteps(map, this.world, (i) => layout.roomId[i] >= 0, [bsx, bsy]);
     this.entities = new EntityManager({ scene, world: this.world, audio: ctx.audio, rng: this.rng.fork('entities'), shared });
     this.spawnEntities();
+    scatterItems(ctx, this.world, ctx.rng.fork('items'), ['pipe', 'flare'], [layout.spawn.x, layout.spawn.y], { min: 20, max: 120, ok: (i) => layout.kind[i] === KIND.CORR });
 
     this.secDark = new Uint8Array(layout.sections.length);
     this.time = 0;
@@ -1101,7 +1102,7 @@ export class Level3 {
           b.item = { kind, m };
         }
       } else if (d < 1.1) {
-        this.pickup(b.item.kind, player);
+        if (!this.pickup(b.item.kind, player)) continue;
         this.props.remove(b.item.m);
         b.item = null;
         b.next = this.rng.range(45, 80);
@@ -1118,20 +1119,16 @@ export class Level3 {
     }
   }
 
+  // Into the backpack; false if there's no room.
   pickup(kind, player) {
     const { ctx } = this;
-    if (kind === 'water') {
-      if (player.bottles < MAX_BOTTLES) player.bottles++;
-      else player.sanity = Math.min(100, player.sanity + 15);
-      ctx.hud.message('Almond Water, fresh off the line.', 2.5);
-    } else if (kind === 'battery') {
-      player.battery = 100;
-      ctx.hud.message('Batteries. Flashlight recharged.', 2.5);
-    } else {
-      player.health = Math.min(100, player.health + 40);
-      ctx.hud.message('A first aid kit.', 2.5);
-    }
+    const id = kind === 'aid' ? 'medkit' : kind;
+    if (!player.give(id)) return false;
+    ctx.hud.message({
+      water: 'Almond Water, fresh off the line.', battery: 'Batteries.', medkit: 'A first aid kit.', pipe: 'A lead pipe.', flare: 'A road flare.',
+    }[id], 2.5);
     ctx.audio.pickup();
+    return true;
   }
 
   updateHazards(dt, player) {
@@ -1245,6 +1242,11 @@ export class Level3 {
   updateCrates(player) {
     for (const c of this.crates) {
       if (c.opened || Math.hypot(c.x - player.pos.x, c.z - player.pos.z) > 1.3) continue;
+      // A crate stays shut until there's room in the backpack.
+      if (!player.canCarry()) {
+        player.onFull?.();
+        continue;
+      }
       c.opened = true;
       c.lid.position.set(c.size * 0.3, c.size * 0.8 + 0.1, c.size * 0.45);
       c.lid.rotation.set(0.5, 0.3, 0.2);
@@ -1258,7 +1260,7 @@ export class Level3 {
 
   loot(player) {
     const { ctx, rng } = this;
-    const table = [['water', 30], ['battery', 25], ['aid', 20], ['junk', 18], ['shock', 7]];
+    const table = [['water', 30], ['battery', 25], ['aid', 20], ['pipe', 10], ['flare', 8], ['junk', 16], ['shock', 7]];
     let r = rng.next() * table.reduce((a, [, w]) => a + w, 0);
     let pick = table[0][0];
     for (const [name, w] of table) {
@@ -1304,11 +1306,10 @@ export class Level3 {
   }
 
   drink(player) {
-    if (player.bottles <= 0) {
+    if (!player.takeItem('water')) {
       this.ctx.hud.message('No Almond Water.', 1.5);
       return;
     }
-    player.bottles--;
     player.sanity = Math.min(100, player.sanity + BOTTLE_SANITY);
     this.ctx.audio.drink();
   }

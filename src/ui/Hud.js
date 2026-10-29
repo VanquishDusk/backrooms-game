@@ -8,8 +8,6 @@ export class Hud {
     this.fps = $('fps');
     this.hint = $('controls-hint');
     this.ears = $('ears-warning');
-    this.bottleCount = $('bottle-count');
-    this.drinkCount = $('drink-count');
     this.bars = {
       sanity: $('stat-sanity'),
       stamina: $('stat-stamina'),
@@ -59,11 +57,6 @@ export class Hud {
     this.setBar('health', player.health, !extra.health && player.health >= 99.5);
     this.setBar('stamina', player.stamina, player.stamina >= 99.5);
     this.setBar('battery', player.battery, !player.flashlight && player.battery >= 99.5);
-    if (this.last.bottles !== player.bottles) {
-      this.last.bottles = player.bottles;
-      this.bottleCount.textContent = player.bottles;
-      this.drinkCount.textContent = player.bottles;
-    }
 
     const secs = Math.floor(runTime);
     if (this.last.secs !== secs) {

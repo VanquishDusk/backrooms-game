@@ -24,6 +24,7 @@ import {
 import {
   BOILER_PROFILES, pickBoilerProfile, passageRuns, boilerHall, tankRoom, pumpRoom, gallery, furnaceRoom, waterTap, debris,
 } from './boiler.js';
+import { scatterItems } from '../../world/scatter.js';
 
 // Level 5 — "Terror Hotel".
 //
@@ -44,7 +45,6 @@ import {
 
 const T = 0.08;
 const VIEW = 46;
-const MAX_BOTTLES = 8;
 const BOTTLE_SANITY = 30;
 const WALL_TEX = { wall: [1 / 2, 1 / 3.4], stone: 1 / 2.2, brick: 1 / 1.6 };
 const STYLE_RANK = { wall: 0, stone: 1, brick: 2 };
@@ -318,6 +318,10 @@ export class Level5 {
 
     this.entities = new EntityManager({ scene, world: this.world, audio: ctx.audio, rng: this.rng.fork('entities'), shared });
     this.spawnEntities();
+    // Lead pipes lying about the boiler room; flares and a pipe in the corridors.
+    const ir = rng.fork('items');
+    scatterItems(ctx, this.world, ir, ['pipe', 'pipe', 'flare'], [sp.x, sp.y], { min: 20, max: 400, ok: (i) => zone[i] === ZONE.BCORR });
+    scatterItems(ctx, this.world, ir, ['flare', 'flare', 'pipe'], [sp.x, sp.y], { min: 12, max: 150, ok: (i) => zone[i] === ZONE.CORR });
 
     this.time = 0;
     this.done = false;
@@ -1187,9 +1191,8 @@ export class Level5 {
         t.told = true;
         continue;
       }
-      if (player.bottles >= MAX_BOTTLES) continue;
+      if (!player.give('water')) continue;
       t.uses--;
-      player.bottles++;
       ctx.audio.slosh(ctx.audio.ctx?.currentTime ?? 0, 0.2);
       ctx.audio.pickup();
       ctx.hud.message('You fill a bottle from the pipe. Almond Water, warm.', 2.2);
@@ -1199,10 +1202,9 @@ export class Level5 {
       if (f.cool > 0 || f.left <= 0 || Math.hypot(f.x - player.pos.x, f.z - player.pos.z) > 1.0) continue;
       f.cool = 3;
       f.left--;
-      player.meat = (player.meat || 0) + 1;
       player.health = Math.min(100, player.health + 20);
       ctx.audio.pickup();
-      ctx.hud.message(`You eat, and wrap a cut of meat for later. (${player.meat} carried)`, 3);
+      ctx.hud.message(player.give('meat') ? 'You eat, and wrap a cut of meat for later.' : 'You eat. No room in your backpack to take any with you.', 3);
     }
     for (const b of this.bells) {
       const d = Math.hypot(b[0] - player.pos.x, b[2] - player.pos.z);
@@ -1221,20 +1223,18 @@ export class Level5 {
     }
     for (const c of this.crates) {
       if (c.opened || Math.hypot(c.x - player.pos.x, c.z - player.pos.z) > 1.3) continue;
+      // A crate stays shut until there's room in the backpack.
+      if (!player.canCarry()) {
+        player.onFull?.();
+        continue;
+      }
       c.opened = true;
       c.lid.position.set(c.size * 0.3, c.size * 0.8 + 0.1, c.size * 0.45);
       c.lid.rotation.set(0.5, 0.3, 0.2);
       const r = this.rng.next();
-      if (r < 0.45) {
-        player.bottles = Math.min(MAX_BOTTLES, player.bottles + 2);
-        ctx.hud.message('M.E.G. supplies: two bottles of Almond Water.', 2.5);
-      } else if (r < 0.7) {
-        player.battery = 100;
-        ctx.hud.message('M.E.G. supplies: batteries. Flashlight recharged.', 2.5);
-      } else {
-        player.health = Math.min(100, player.health + 45);
-        ctx.hud.message('M.E.G. supplies: a first aid kit.', 2.5);
-      }
+      const id = r < 0.3 ? 'water' : r < 0.5 ? 'battery' : r < 0.7 ? 'medkit' : r < 0.85 ? 'flare' : 'pipe';
+      player.give(id);
+      ctx.hud.message(`M.E.G. supplies: ${{ water: 'a bottle of Almond Water', battery: 'batteries', medkit: 'a first aid kit', flare: 'a road flare', pipe: 'a lead pipe' }[id]}.`, 2.5);
       ctx.audio.pickup();
     }
   }
@@ -1292,11 +1292,10 @@ export class Level5 {
   }
 
   drink(player) {
-    if (player.bottles <= 0) {
+    if (!player.takeItem('water')) {
       this.ctx.hud.message('No Almond Water.', 1.5);
       return;
     }
-    player.bottles--;
     player.sanity = Math.min(100, player.sanity + BOTTLE_SANITY);
     this.ctx.audio.drink();
   }

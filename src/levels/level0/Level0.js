@@ -6,6 +6,7 @@ import { MAX_DYN_LIGHTS } from '../../world/materials.js';
 import { Stalker } from '../../entities/Stalker.js';
 import { PropKit, nearDoor, disposeTextures } from '../../world/props.js';
 import { generateLevel0, ZONE } from './generate.js';
+import { scatterItems } from '../../world/scatter.js';
 
 // Level 0 — "The Lobby" / "The Yellow Hell".
 //
@@ -19,7 +20,6 @@ import { generateLevel0, ZONE } from './generate.js';
 
 const DRAIN_BASE = 0.11;
 const BOTTLE_SANITY = 35;
-const MAX_BOTTLES = 6;
 
 export class Level0 {
   constructor(ctx) {
@@ -83,6 +83,9 @@ export class Level0 {
     this.darkHintShown = false;
     this.pitFallen = false;
     this.done = false;
+
+    // A lead pipe and a road flare, somewhere out there.
+    scatterItems(ctx, this.world, ctx.rng.fork('items'), ['pipe', 'flare'], [layout.spawn.x, layout.spawn.y], { min: 18, max: 80, ok: (i) => !this.world.pitCells.has(i) });
   }
 
   // ---- Setup -------------------------------------------------------------
@@ -204,10 +207,9 @@ export class Level0 {
     for (const b of this.bottles) {
       if (b.taken) continue;
       if (Math.hypot(b.x - player.pos.x, b.z - player.pos.z) < 0.9) {
-        if (player.bottles >= MAX_BOTTLES) continue;
+        if (!player.give('water')) continue;
         b.taken = true;
         this.scene.remove(b.mesh);
-        player.bottles++;
         ctx.audio.pickup();
         hud.message(player.bottles === 1 && !this.drankOnce
           ? (ctx.touch ? 'Almond Water. Tap the bottle button to drink.' : 'Almond Water. Press E to drink.')
@@ -293,12 +295,23 @@ export class Level0 {
     this.ctx.audio.thud(0, 0.5);
   }
 
+  // Weapons: strike at the Stalker, or light a flare at it, and it's gone (for now).
+  stun(x, z, { range, fx = 0, fz = 0, arc = -1 }) {
+    const t = this.stalker;
+    if (t.state !== 'watching' && t.state !== 'hunting') return 0;
+    const dx = t.pos.x - x, dz = t.pos.z - z, d = Math.hypot(dx, dz);
+    if (d > range + 0.4 || (arc > -1 && d > 0.3 && (dx * fx + dz * fz) / d < arc)) return 0;
+    if (d > 0.8 && !this.world.map.hasLineOfSight(x, z, t.pos.x, t.pos.z)) return 0;
+    t.vanish();
+    t.cooldown = Math.max(t.cooldown, 25);
+    return 1;
+  }
+
   drink(player) {
-    if (player.bottles <= 0) {
+    if (!player.takeItem('water')) {
       this.ctx.hud.message('No Almond Water.', 1.5);
       return;
     }
-    player.bottles--;
     this.drankOnce = true;
     player.sanity = Math.min(100, player.sanity + BOTTLE_SANITY);
     this.ctx.audio.drink();

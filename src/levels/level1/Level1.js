@@ -26,7 +26,7 @@ import { generateLevel1, ZONE, SECTOR } from './generate.js';
 //  - Exit: an extended hallway where pipes and dials gradually appear
 
 const BOTTLE_SANITY = 35;
-const MAX_BOTTLES = 6;
+const CRATE_ITEMS = { water: 'Almond Water', battery: 'batteries', medkit: 'a first aid kit', pipe: 'a lead pipe', flare: 'a road flare' };
 const JUNK = [
   'A rubber duck. Damp.', 'A VHS tape labelled "DON\'T".', 'An empty can of beans.', 'A single shoe.',
   'A stack of blank paper, all slightly warm.', 'A broken compass. It spins.', 'A photo of this exact crate.',
@@ -986,6 +986,11 @@ export class Level1 {
       const d = Math.hypot(c.x - player.pos.x, c.z - player.pos.z);
       c.group.visible = d < 32;
       if (!c.opened && d < 1.3) {
+        // A crate stays shut until there's room in the backpack.
+        if (!player.canCarry()) {
+          player.onFull?.();
+          continue;
+        }
         c.opened = true;
         c.lid.position.set(c.size * 0.3, c.size * 0.8 + 0.1, c.size * 0.45);
         c.lid.rotation.set(0.5, 0.3, 0.2);
@@ -1031,8 +1036,8 @@ export class Level1 {
     const { ctx, rng } = this;
     const hud = ctx.hud;
     const table = c.table === 'garden'
-      ? [['water', 35], ['aid', 35], ['battery', 20], ['bad', 10]]
-      : [['water', 28], ['battery', 18], ['aid', 14], ['junk', 26], ['bad', 14]];
+      ? [['water', 35], ['aid', 35], ['battery', 20], ['flare', 8], ['bad', 10]]
+      : [['water', 28], ['battery', 18], ['aid', 14], ['pipe', 10], ['flare', 7], ['junk', 22], ['bad', 14]];
     let r = rng.next() * table.reduce((a, [, w]) => a + w, 0);
     let pick = table[0][0];
     for (const [name, w] of table) {
@@ -1045,25 +1050,16 @@ export class Level1 {
     ctx.audio.clank(0, 0.15);
     switch (pick) {
       case 'water':
-        if (player.bottles < MAX_BOTTLES) {
-          player.bottles++;
-          ctx.audio.pickup();
-          hud.message('A crate: Almond Water.', 2.5);
-        } else {
-          player.sanity = Math.min(100, player.sanity + 15);
-          hud.message('A crate: Almond Water. You drink it there and then.', 2.5);
-        }
-        break;
       case 'battery':
-        player.battery = 100;
-        ctx.audio.pickup();
-        hud.message('A crate: batteries. Flashlight recharged.', 2.5);
-        break;
       case 'aid':
-        player.health = Math.min(100, player.health + 45);
+      case 'pipe':
+      case 'flare': {
+        const id = pick === 'aid' ? 'medkit' : pick;
+        player.give(id);
         ctx.audio.pickup();
-        hud.message('A crate: a first aid kit.', 2.5);
+        hud.message(`A crate: ${CRATE_ITEMS[id]}. Into the backpack.`, 2.5);
         break;
+      }
       case 'junk':
         hud.message(`A crate: ${rng.pick(JUNK)}`, 3);
         break;
@@ -1172,12 +1168,22 @@ export class Level1 {
     }
   }
 
+  // Weapons: the hound reels for a few seconds.
+  stun(x, z, { range, seconds, fx = 0, fz = 0, arc = -1 }) {
+    const t = this.hound;
+    if (!t.active) return 0;
+    const dx = t.pos.x - x, dz = t.pos.z - z, d = Math.hypot(dx, dz);
+    if (d > range + 0.4 || (arc > -1 && d > 0.3 && (dx * fx + dz * fz) / d < arc)) return 0;
+    if (d > 0.8 && !this.world.map.hasLineOfSight(x, z, t.pos.x, t.pos.z)) return 0;
+    t.stun(seconds);
+    return 1;
+  }
+
   drink(player) {
-    if (player.bottles <= 0) {
+    if (!player.takeItem('water')) {
       this.ctx.hud.message('No Almond Water.', 1.5);
       return;
     }
-    player.bottles--;
     player.sanity = Math.min(100, player.sanity + BOTTLE_SANITY);
     this.ctx.audio.drink();
   }

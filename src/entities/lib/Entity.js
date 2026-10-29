@@ -243,6 +243,17 @@ export class Entity {
     this.stateTime += dt;
     this.cooldown = Math.max(0, this.cooldown - dt);
     this.moveSpeed = 0;
+    if (this.stunned > 0) {
+      // Stunned: it reels on the spot and does nothing else.
+      this.stunned -= dt;
+      this.animate(dt, player);
+      this.syncRoot();
+      this.root.rotation.z = Math.sin(this.time * 17) * 0.12 * Math.min(1, this.stunned);
+      this.root.rotation.x = Math.sin(this.time * 11 + 1) * 0.06 * Math.min(1, this.stunned);
+      this.applyLight(player);
+      return out;
+    }
+    this.root.rotation.x = this.root.rotation.z = 0;
     if (this.preview) {
       this.state = this.preview;
       this.moveSpeed = this.preview === 'move' ? this.previewSpeed ?? 1.5 : 0;
@@ -274,6 +285,12 @@ export class Entity {
     }
     k = Math.min(1.6, k * (this.lightBoost ?? 1));
     for (const { mat, base } of this.lit) mat.color.setRGB(base.r * k, base.g * k, base.b * k);
+  }
+
+  // Weapons: freeze for a few seconds, and don't strike straight after.
+  stun(seconds) {
+    this.stunned = Math.max(this.stunned || 0, seconds);
+    this.cooldown = Math.max(this.cooldown, 1.5);
   }
 
   // Remove from the scene and free GPU resources (shared textures stay cached).

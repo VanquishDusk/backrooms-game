@@ -25,6 +25,8 @@
     <div id="joy-base"><div id="joy-knob"></div></div>
   </div>
   <div id="touch-buttons" class="hidden">
+    <button class="tbtn slot disabled" id="btn-slot0" aria-label="Use backpack slot 1"><span>1</span></button>
+    <button class="tbtn slot disabled" id="btn-slot1" aria-label="Use backpack slot 2"><span>2</span></button>
     <button class="tbtn" id="btn-ears" aria-label="Cover ears">
       <svg viewBox="0 0 24 24"><path d="M7 9a5 5 0 0 1 10 0c0 3-3 4-3 7a3 3 0 0 1-5 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M10 10a2 2 0 0 1 4 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
       <span id="cover-label">EARS</span>
@@ -53,13 +55,24 @@
       <div class="stat" id="stat-health"><label>HEALTH</label><div class="bar"><div class="fill"></div></div></div>
       <div class="stat" id="stat-stamina"><label>STAMINA</label><div class="bar"><div class="fill"></div></div></div>
       <div class="stat" id="stat-battery"><label>BATTERY</label><div class="bar"><div class="fill"></div></div></div>
-      <div class="stat-line" id="stat-bottles">ALMOND WATER <b id="bottle-count">0</b></div>
+      <button id="bag" aria-label="Open backpack"><label>BACKPACK <small id="bag-key">TAB</small></label>
+        <div class="bag-slots"><div class="bag-slot" id="bag-slot0"><span class="empty">EMPTY</span></div><div class="bag-slot" id="bag-slot1"><span class="empty">EMPTY</span></div></div>
+      </button>
     </div>
     <div id="crosshair"></div>
     <div id="ears-warning">COVER YOUR EARS</div>
     <div id="msg"></div>
     <div id="controls-hint"></div>
     <div id="fps"></div>
+  </div>
+
+  <div id="backpack" class="hidden">
+    <div class="bp-box">
+      <div class="bp-head"><h2>BACKPACK</h2><span id="bp-count">0/2</span><button class="mbtn small" id="bp-close">CLOSE</button></div>
+      <div class="bp-slot" data-slot="0"><div class="bp-icon"></div><div class="bp-text"><b class="bp-name"></b><p class="bp-desc"></p></div><div class="bp-actions"><button class="mbtn small bp-use">USE</button><button class="mbtn small bp-drop">DROP</button></div></div>
+      <div class="bp-slot" data-slot="1"><div class="bp-icon"></div><div class="bp-text"><b class="bp-name"></b><p class="bp-desc"></p></div><div class="bp-actions"><button class="mbtn small bp-use">USE</button><button class="mbtn small bp-drop">DROP</button></div></div>
+      <div class="bp-help" id="bp-help"></div>
+    </div>
   </div>
 
   <div id="level-card"><div class="lc-name"></div><div class="lc-title"></div><div class="lc-diff"></div></div>
@@ -100,6 +113,7 @@
           <li>When the buzzing <b>spikes</b>, cover your ears and keep moving until you're out of it.</li>
           <li>The halls <b>shift</b> when you aren't looking. Don't trust your memory.</li>
           <li>If you see a dark figure, don't stare. If it follows you, <b>run</b>.</li>
+          <li>Your <b>backpack</b> holds 2 items. A <b>lead pipe</b> or a <b>road flare</b> stuns what's chasing you for a few seconds; it won't kill it.</li>
           <li>Watch your step near the Pitfalls.</li>
           <li>Where the buzzing quiets and the carpet dries, the rooms look half-built. There may be a <b>door</b>.</li>
           <li><b>Level 1</b>: when the lights die, something hunts the halls. Get into a corridor. Crates hold supplies, junk or worse. To leave, follow the pipes.</li>
@@ -113,9 +127,9 @@
         </ul>
         <div class="controls-grid">
           <div><h3>KEYBOARD</h3>
-            <p>WASD &middot; move<br>Mouse &middot; look<br>Shift &middot; run<br>C / Space &middot; cover ears / mouth<br>F &middot; flashlight<br>E &middot; drink<br>Esc &middot; pause</p></div>
+            <p>WASD &middot; move<br>Mouse &middot; look<br>Shift &middot; run<br>C / Space &middot; cover ears / mouth<br>F &middot; flashlight<br>E &middot; drink<br>1 / 2 &middot; use backpack item<br>Shift + 1 / 2 &middot; drop it<br>Tab &middot; open backpack<br>Esc &middot; pause</p></div>
           <div><h3>TOUCH</h3>
-            <p>Stick (bottom left) &middot; move<br>Drag anywhere else &middot; look<br>RUN &middot; toggle running<br>EARS / MOUTH &middot; hold to cover<br>LIGHT &middot; flashlight<br>Bottle &middot; drink</p></div>
+            <p>Stick (bottom left) &middot; move<br>Drag anywhere else &middot; look<br>RUN &middot; toggle running<br>EARS / MOUTH &middot; hold to cover<br>LIGHT &middot; flashlight<br>Bottle &middot; drink<br>1 / 2 &middot; use backpack item<br>Tap BACKPACK &middot; open it (drop items there)</p></div>
         </div>
         <button class="mbtn" data-back>BACK</button>
       </div>

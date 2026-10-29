@@ -474,11 +474,10 @@ export class Level15 {
   }
 
   drink(player) {
-    if (player.bottles <= 0) {
+    if (!player.takeItem('water')) {
       this.ctx.hud.message('No Almond Water.', 1.5);
       return;
     }
-    player.bottles--;
     player.sanity = Math.min(100, player.sanity + 35);
     this.ctx.audio.drink();
   }

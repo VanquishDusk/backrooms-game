@@ -1,9 +1,11 @@
 import * as THREE from 'three';
+import { BACKPACK_SLOTS, makeItem } from './items.js';
 
 const WALK = 2.5;
 const RUN = 4.6;
 const EARS_SPEED = 0.6; // moving while covering your ears is slower
 const EYE = 1.62;
+const STAMINA_DRAIN = 11; // per second of sprinting, out of 100
 
 export class Player {
   constructor() {
@@ -26,8 +28,7 @@ export class Player {
     this.hurtAgo = 99;
     this.battery = 100;
     this.flashlight = false;
-    this.bottles = 0;
-    this.meat = 0;
+    this.items = [];
     this.coveringEars = false;
     this.sprinting = false;
     this.bob = 0;
@@ -53,11 +54,49 @@ export class Player {
 
   // Stats that travel with you between levels.
   carry() {
-    return { sanity: this.sanity, health: this.health, battery: this.battery, bottles: this.bottles, meat: this.meat || 0 };
+    return { sanity: this.sanity, health: this.health, battery: this.battery, items: this.items.map((it) => ({ ...it })) };
   }
 
   restore(c) {
     if (c) Object.assign(this, c);
+  }
+
+  // ---- The backpack ---------------------------------------------------------------
+  // BACKPACK_SLOTS items at most. give() returns false (and calls onFull)
+  // when there's no room, so the item can stay where it was.
+
+  canCarry() {
+    return this.items.length < BACKPACK_SLOTS;
+  }
+
+  // `item` keeps a particular item's state (a pipe's hits left).
+  give(id, item = null) {
+    if (!this.canCarry()) {
+      if (this.onFull) this.onFull(id);
+      return false;
+    }
+    this.items.push(item ? { ...item } : makeItem(id));
+    return true;
+  }
+
+  count(id) {
+    return this.items.filter((it) => it.id === id).length;
+  }
+
+  // Remove one item of a kind; true if there was one.
+  takeItem(id) {
+    const i = this.items.findIndex((it) => it.id === id);
+    if (i < 0) return false;
+    this.items.splice(i, 1);
+    return true;
+  }
+
+  get bottles() {
+    return this.count('water');
+  }
+
+  get meat() {
+    return this.count('meat');
   }
 
   damage(amount) {
@@ -117,14 +156,14 @@ export class Player {
     if (this.staminaLock > 0) this.staminaLock -= dt;
     this.sprinting = wantRun && this.stamina > 0 && this.staminaLock <= 0;
     if (this.sprinting) {
-      this.stamina -= 17 * dt;
+      this.stamina -= STAMINA_DRAIN * dt;
       if (this.stamina <= 0) {
         this.stamina = 0;
-        this.staminaLock = 2.2;
+        this.staminaLock = 1.4;
         events.push('exhausted');
       }
     } else {
-      this.stamina = Math.min(100, this.stamina + (moving ? 9 : 15) * this.staminaRegenMul * dt);
+      this.stamina = Math.min(100, this.stamina + (moving ? 14 : 24) * this.staminaRegenMul * dt);
     }
 
     let speed = (this.sprinting ? RUN : WALK) * Math.min(1, Math.max(mag, 0));

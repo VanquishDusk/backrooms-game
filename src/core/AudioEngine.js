@@ -1037,6 +1037,41 @@ export class AudioEngine {
     s.start(t, Math.random() * 2, 0.7);
   }
 
+  // A heavy swing through the air.
+  swing(vol = 0.3) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    const s = this.noiseSource();
+    const f = this.ctx.createBiquadFilter();
+    f.type = 'bandpass';
+    f.Q.value = 1.6;
+    f.frequency.setValueAtTime(380, t);
+    f.frequency.exponentialRampToValueAtTime(1400, t + 0.12);
+    f.frequency.exponentialRampToValueAtTime(500, t + 0.3);
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(vol, t + 0.1);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.32);
+    s.connect(f).connect(g).connect(this.master);
+    s.start(t, Math.random() * 2, 0.4);
+  }
+
+  // A pipe connecting with something solid and alive.
+  impact(vol = 0.5) {
+    if (!this.ctx) return;
+    this.thud(0, vol);
+    const t = this.ctx.currentTime;
+    const o = this.ctx.createOscillator();
+    o.type = 'triangle';
+    o.frequency.setValueAtTime(900, t);
+    o.frequency.exponentialRampToValueAtTime(600, t + 0.4);
+    const g = this.ctx.createGain();
+    this.env(g, t, vol * 0.25, 0.002, 0.5);
+    o.connect(g).connect(this.master);
+    o.start(t);
+    o.stop(t + 0.6);
+  }
+
   // ---- Entity library sounds (all take pan, vol) -------------------------
 
   // Breathy, high hiss through teeth (Smilers).

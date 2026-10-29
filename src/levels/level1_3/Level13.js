@@ -18,7 +18,6 @@ import { generateLevel13, ROOM } from './generate.js';
 
 const DECAY_CHANCE = 0.65;
 const BOTTLE_SANITY = 35;
-const MAX_BOTTLES = 6;
 
 const DOCUMENTS = [
   'AUTOPSY NOTES, Dr. Reathe: "Each victim suffered a systemic, extreme, lethal overproduction or overreaction, as if their bodies had been given instructions a hundred times as extreme as they should have been."',
@@ -465,20 +464,11 @@ export class Level13 {
     // Supplies.
     for (const k of this.pickups) {
       if (k.taken || Math.hypot(k.x - p.x, k.z - p.z) > 0.8) continue;
-      if (k.type === 'water' && player.bottles >= MAX_BOTTLES) continue;
+      if (!player.give(k.type === 'aid' ? 'medkit' : k.type === 'water' ? 'water' : 'battery')) continue;
       k.taken = true;
       this.props.remove(k.group);
       ctx.audio.pickup();
-      if (k.type === 'aid') {
-        player.health = Math.min(100, player.health + 40);
-        hud.message('Medical supplies. You patch yourself up.', 2.5);
-      } else if (k.type === 'water') {
-        player.bottles++;
-        hud.message('Almond Water', 2);
-      } else {
-        player.battery = 100;
-        hud.message('Batteries. Flashlight recharged.', 2.5);
-      }
+      hud.message(k.type === 'aid' ? 'Medical supplies.' : k.type === 'water' ? 'Almond Water' : 'Batteries.', 2);
     }
     for (const d of this.documents) {
       if (d.read || Math.hypot(d.x - p.x, d.z - p.z) > 1.3) continue;
@@ -575,11 +565,10 @@ export class Level13 {
   }
 
   drink(player) {
-    if (player.bottles <= 0) {
+    if (!player.takeItem('water')) {
       this.ctx.hud.message('No Almond Water.', 1.5);
       return;
     }
-    player.bottles--;
     player.sanity = Math.min(100, player.sanity + BOTTLE_SANITY);
     this.ctx.audio.drink();
   }

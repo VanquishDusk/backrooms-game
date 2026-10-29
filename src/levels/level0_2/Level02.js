@@ -17,7 +17,6 @@ const START_DELAY = 8; // seconds of calm before the first crack
 const DROP = 0.35; // must match GridWorld's collapsed floor depth
 const WARN = -1.0, CEIL = 0, WALLS = 0.5, FLOOR = 1.4; // phase offsets per cell
 const BOTTLE_SANITY = 35;
-const MAX_BOTTLES = 6;
 
 export class Level02 {
   constructor(ctx) {
@@ -312,11 +311,11 @@ export class Level02 {
 
     // Almond Water.
     for (const b of this.bottles) {
-      if (b.taken || player.bottles >= MAX_BOTTLES) continue;
+      if (b.taken) continue;
       if (Math.hypot(b.x - player.pos.x, b.z - player.pos.z) < 0.9) {
+        if (!player.give('water')) continue;
         b.taken = true;
         this.props.remove(b.mesh);
-        player.bottles++;
         ctx.audio.pickup();
         hud.message('Almond Water', 2);
       }
@@ -431,11 +430,10 @@ export class Level02 {
   }
 
   drink(player) {
-    if (player.bottles <= 0) {
+    if (!player.takeItem('water')) {
       this.ctx.hud.message('No Almond Water.', 1.5);
       return;
     }
-    player.bottles--;
     player.sanity = Math.min(100, player.sanity + BOTTLE_SANITY);
     player.health = Math.min(100, player.health + 15);
     this.ctx.audio.drink();

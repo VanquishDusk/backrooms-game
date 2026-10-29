@@ -259,7 +259,27 @@ Open **`entities.html`** to inspect them. Pick an entity, switch poses (idle, mo
 | Cover ears / mouth | C / Space (hold) | EARS / MOUTH (hold) |
 | Flashlight | F | LIGHT |
 | Drink Almond Water | E | Bottle button |
+| Use backpack item | 1 / 2 | Slot buttons above the bottle |
+| Drop backpack item | Shift + 1 / 2, or DROP in the backpack | DROP in the backpack |
+| Open the backpack | Tab (or I, B) | Tap BACKPACK under the stats |
 | Pause | Esc | Pause button |
+
+## The backpack
+
+Everything you pick up goes into your backpack, and it only holds **2 items**. It shows under your stats; open it to read what you're carrying, use it or drop it. When it's full, pickups stay where they are (crates stay shut) until you make room. Dropped items lie on the floor, and you can pick them up again. Your backpack comes with you between levels.
+
+| Item | Use |
+|---|---|
+| **Almond Water** | Drink it (E, or its slot) to restore sanity. |
+| **Batteries** | Recharge the flashlight. |
+| **First aid kit** | Heal 45 health. |
+| **Meat** (Level 5's Homely Hotel) | Eat it, or keep it: Samantha trades readings for meat. |
+| **Lead pipe** (weapon) | Swing at whatever is in front of you: it's stunned for about 4.5 seconds. Bends after 4 hits. |
+| **Road flare** (weapon) | Lights the area red and stuns everything nearby that can see it for 7 seconds; anything that comes close while it burns (9 s) reels back. One use. |
+
+Weapons only buy you time: stunned entities freeze and reel, then carry on. In Level 0 they drive the Stalker off for a while. They do nothing to *her* in Level 1.5. Pipes and flares turn up in crates and lying about in Levels 0, 2, 3, 4 and 5.
+
+Stamina lasts longer than it used to (about 9 seconds of running) and comes back faster.
 
 The Settings screen has mouse and touch sensitivity, FOV, volume, invert Y, graphics quality and an FPS counter. On "Auto", graphics quality steps down if the device can't keep up.
 
@@ -277,8 +297,11 @@ src/world/                    reusable grid-level toolkit: GridMap (layout + pat
                               services (wall pipe bundles, ceiling runs, 45-degree corners), fixtures (tubes, bulbs, lamps),
                               dresser (furniture placement in room frames)
 src/entities/                 Stalker (Level 0's dark figure), Hound (Level 1's blackout hunter)
-src/entities/lib/             reusable entity library: Entity base (AI helpers), humanoid rig, skins, 9 entities, EntityManager
+src/entities/lib/             reusable entity library: Entity base (AI helpers, stun), humanoid rig, skins, 16 entities, EntityManager
 entities.html                 entity viewer
+src/core/items.js             backpack items (Almond Water, batteries, first aid, meat, pipe, flare)
+src/core/Backpack.js          the backpack: HUD strip, panel, using/dropping, items on the floor, the pipe and the flare
+src/world/scatter.js          scatter backpack items across a level
 src/levels/registry.js        list of levels + the level interface
 src/levels/level0/            Level 0 generator and runtime (events, hazards, exits)
 src/levels/level0_2/          Level 0.2 generator and runtime (the collapse)

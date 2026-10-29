@@ -14,6 +14,7 @@ import { createNoise2D } from '../../core/rng.js';
 import { EntityManager } from '../../entities/lib/index.js';
 import { generateLevel4, ZONE } from './generate.js';
 import { office, openPlan, conference, breakRoom, storage, megOutpost, camp, emptyRoom, vending, cooler, fountain } from './dress.js';
+import { scatterItems } from '../../world/scatter.js';
 
 // Level 4 — "Abandoned Office".
 //
@@ -32,7 +33,6 @@ import { office, openPlan, conference, breakRoom, storage, megOutpost, camp, emp
 const T = 0.08;
 const VIEW = 44;
 const BOTTLE_SANITY = 35;
-const MAX_BOTTLES = 8;
 const DOOR_W = 1.0;
 const NOTES = {
   meg: '"M.E.G. OUTPOST — LEVEL 4. Safe as it gets down here: fill up on Almond Water before you go deeper, the coolers and machines refill eventually. Stairs and lifts in the service cores go down to 5. DO NOT look out of any window that isn\'t blacked out. Keep an eye on the exits: if you look away, they move."',
@@ -210,6 +210,7 @@ export class Level4 {
 
     this.entities = new EntityManager({ scene, world: this.world, audio: ctx.audio, rng: this.rng.fork('entities'), shared });
     this.spawnEntities();
+    scatterItems(ctx, this.world, ctx.rng.fork('items'), ['pipe', 'flare', 'battery'], [layout.spawn.x, layout.spawn.y], { min: 15, max: 100, ok: (i) => zone[i] === ZONE.CORR });
 
     this.flickers = layout.lights.map((l, i) => (l.state === 'flicker' ? i : -1)).filter((i) => i >= 0);
     this.phase = layout.lights.map(() => this.rng.next() * 100);
@@ -927,9 +928,8 @@ export class Level4 {
         s.toldEmpty = true;
         continue;
       }
-      if (player.bottles >= MAX_BOTTLES) continue;
+      if (!player.give('water')) continue;
       s.uses--;
-      player.bottles++;
       if (s.type === 'vending') ctx.audio.clank(0, 0.2);
       else ctx.audio.slosh(ctx.audio.ctx?.currentTime ?? 0, 0.2);
       ctx.audio.pickup();
@@ -974,6 +974,11 @@ export class Level4 {
   updateCrates(player) {
     for (const c of this.crates) {
       if (c.opened || Math.hypot(c.x - player.pos.x, c.z - player.pos.z) > 1.3) continue;
+      // A crate stays shut until there's room in the backpack.
+      if (!player.canCarry()) {
+        player.onFull?.();
+        continue;
+      }
       c.opened = true;
       c.lid.position.set(c.size * 0.3, c.size * 0.8 + 0.1, c.size * 0.45);
       c.lid.rotation.set(0.5, 0.3, 0.2);
@@ -983,15 +988,21 @@ export class Level4 {
       c.group.add(inside);
       const r = this.rng.next();
       const { ctx } = this;
-      if (r < 0.4) {
-        player.bottles = Math.min(MAX_BOTTLES, player.bottles + 2);
-        ctx.hud.message('A crate: two bottles of Almond Water.', 2.5);
-      } else if (r < 0.65) {
-        player.battery = 100;
-        ctx.hud.message('A crate: batteries. Flashlight recharged.', 2.5);
-      } else if (r < 0.85) {
-        player.health = Math.min(100, player.health + 45);
+      if (r < 0.32) {
+        player.give('water');
+        ctx.hud.message('A crate: a bottle of Almond Water.', 2.5);
+      } else if (r < 0.5) {
+        player.give('battery');
+        ctx.hud.message('A crate: batteries.', 2.5);
+      } else if (r < 0.66) {
+        player.give('medkit');
         ctx.hud.message('A crate: a first aid kit.', 2.5);
+      } else if (r < 0.78) {
+        player.give('pipe');
+        ctx.hud.message('A crate: a lead pipe.', 2.5);
+      } else if (r < 0.88) {
+        player.give('flare');
+        ctx.hud.message('A crate: a road flare.', 2.5);
       } else {
         ctx.hud.message(`A crate: ${this.rng.pick(JUNK)}`, 3);
         continue;
@@ -1016,11 +1027,10 @@ export class Level4 {
   }
 
   drink(player) {
-    if (player.bottles <= 0) {
+    if (!player.takeItem('water')) {
       this.ctx.hud.message('No Almond Water.', 1.5);
       return;
     }
-    player.bottles--;
     player.sanity = Math.min(100, player.sanity + BOTTLE_SANITY);
     this.ctx.audio.drink();
   }

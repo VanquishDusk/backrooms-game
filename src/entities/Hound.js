@@ -158,9 +158,18 @@ export class Hound {
   }
 
   // Returns events: 'growl' | 'bite' | 'step'.
+  // Weapons: it reels for a few seconds.
+  stun(seconds) {
+    this.stunned = Math.max(this.stunned || 0, seconds);
+  }
+
   update(dt, player) {
     const events = [];
     if (this.state === 'gone') return events;
+    if (this.stunned > 0) {
+      this.stunned -= dt;
+      return events;
+    }
     this.timer += dt;
     const dist = Math.hypot(player.pos.x - this.pos.x, player.pos.z - this.pos.z);
     let speed = 0;

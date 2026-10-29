@@ -7,7 +7,7 @@ import { catFur } from './textures.js';
 // exchange for meat, follows you while she waits, and turns vicious if
 // you provoke her (light in her eyes, running at her) or don't pay.
 //
-// Feeding: if player.meat > 0 when she asks, she takes one and gives a
+// Feeding: if you carry meat when she asks, she takes one and gives a
 // reading (and a little sanity back).
 // Emits { type: 'speak', text } events for the level to show.
 // States: sit -> approach -> ask -> (reading | angry -> attack) -> leave
@@ -131,8 +131,7 @@ export class Samantha extends Entity {
         // Follows at your heel, waiting to be paid.
         this.turnTo(toYaw, dt, 4);
         if (d > 1.6) this.pathTo(player.pos.x, player.pos.z, 1.8, dt);
-        if ((player.meat || 0) > 0) {
-          player.meat--;
+        if (player.takeItem ? player.takeItem('meat') : (player.meat || 0) > 0 && player.meat--) {
           player.sanity = Math.min(100, player.sanity + 20);
           this.say(out, `"${this.rng.pick(READINGS)}"`, player);
           this.cooldown = 60;

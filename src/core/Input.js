@@ -2,7 +2,7 @@
 //
 // Touch layout: a fixed joystick sits in the bottom-left corner (a touch
 // near it grabs the stick, and the stick never moves); anywhere else on the
-// screen drags the camera. Buttons (run, light, ears, drink, pause) sit along the right edge
+// screen drags the camera. Buttons (run, light, ears, drink, backpack slots, pause) sit along the right edge
 // and never steal the look gesture from another finger.
 
 const JOY_RADIUS = 56;
@@ -93,7 +93,12 @@ export class Input {
         if (code === 'KeyF') this.actions.push('flashlight');
         if (code === 'KeyE' || code === 'KeyQ') this.actions.push('drink');
         if (code === 'KeyP' || code === 'Escape') this.actions.push('pause');
+        // The backpack: 1 / 2 use a slot, Shift + 1 / 2 drop it, Tab (or I, B) opens it.
+        const slot = code === 'Digit1' || code === 'Numpad1' ? 0 : code === 'Digit2' || code === 'Numpad2' ? 1 : -1;
+        if (slot >= 0) this.actions.push(`${e.shiftKey ? 'drop' : 'use'}${slot}`);
+        if (code === 'Tab' || code === 'KeyI' || code === 'KeyB') this.actions.push('bag');
       }
+      if (this.enabled && code === 'Tab') e.preventDefault();
       this.keys.add(code);
       if (this.enabled && ['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(code)) e.preventDefault();
     } else {
