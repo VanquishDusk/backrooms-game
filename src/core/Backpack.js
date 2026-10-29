@@ -170,6 +170,11 @@ export class Backpack {
         audio.swing(0.35);
         break;
       case 'flare':
+        if (g.level.noLight) {
+          audio.click();
+          hud.message('You strike the flare. It sputters and won\'t catch.', 2);
+          return;
+        }
         if (this.flare) {
           hud.message('A flare is already burning.', 1.5);
           return;

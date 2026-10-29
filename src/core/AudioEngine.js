@@ -214,6 +214,7 @@ export class AudioEngine {
   stopAmbience() {
     if (this.jazzOut) this.jazzOut.gain.setValueAtTime(0, this.ctx.currentTime);
     if (this.windOut) this.windOut.gain.setValueAtTime(0, this.ctx.currentTime);
+    if (this.wavesOut) this.wavesOut.gain.setValueAtTime(0, this.ctx.currentTime);
     if (!this.ambienceOn) return;
     this.ambienceOn = false;
     for (const n of this.amb) {
@@ -245,6 +246,7 @@ export class AudioEngine {
     this.machineGain.gain.setTargetAtTime(s.machine || 0, t, 0.2);
     this.updateJazz(s.jazz || 0, s.jazzMuffle ?? 6000);
     this.updateWind(s.wind || 0);
+    this.updateWaves(s.waves || 0, s.wavesPan || 0);
     if (this.machinePan) this.machinePan.pan.setTargetAtTime(s.machinePan || 0, t, 0.1);
     this.muffle.frequency.setTargetAtTime(s.ears ? 380 : 20000, t, 0.06);
 
@@ -760,6 +762,58 @@ export class AudioEngine {
       lfo2.start();
     }
     this.windOut.gain.setTargetAtTime(level, ctx.currentTime, 0.5);
+  }
+
+  // Far-off waves on a shore: slow swells of low noise, from one direction.
+  updateWaves(level, pan) {
+    const ctx = this.ctx;
+    if (!this.wavesOut) {
+      if (level < 0.001) return;
+      this.wavesOut = ctx.createGain();
+      this.wavesOut.gain.value = 0;
+      this.wavesPan = ctx.createStereoPanner ? ctx.createStereoPanner() : null;
+      const src = this.noiseSource(true);
+      const lp = ctx.createBiquadFilter();
+      lp.type = 'lowpass';
+      lp.frequency.value = 520;
+      const swell = ctx.createGain();
+      swell.gain.value = 0.5;
+      const lfo = ctx.createOscillator();
+      lfo.frequency.value = 0.11;
+      const lfoG = ctx.createGain();
+      lfoG.gain.value = 0.48;
+      lfo.connect(lfoG).connect(swell.gain);
+      const lfoF = ctx.createGain();
+      lfoF.gain.value = 300;
+      lfo.connect(lfoF).connect(lp.frequency);
+      src.connect(lp).connect(swell).connect(this.wavesOut);
+      if (this.wavesPan) this.wavesOut.connect(this.wavesPan).connect(this.master);
+      else this.wavesOut.connect(this.master);
+      src.start();
+      lfo.start();
+    }
+    const t = ctx.currentTime;
+    this.wavesOut.gain.setTargetAtTime(level, t, 0.6);
+    if (this.wavesPan) this.wavesPan.pan.setTargetAtTime(Math.max(-1, Math.min(1, pan)), t, 0.3);
+  }
+
+  // Slow breathing, close by.
+  breath(pan = 0, vol = 0.2) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    for (const [dt, len, f] of [[0, 1.1, 700], [1.4, 1.5, 450]]) {
+      const s = this.noiseSource();
+      const bp = this.ctx.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.value = f;
+      bp.Q.value = 0.8;
+      const g = this.ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t + dt);
+      g.gain.linearRampToValueAtTime(vol, t + dt + len * 0.45);
+      g.gain.linearRampToValueAtTime(0.0001, t + dt + len);
+      s.connect(bp).connect(g).connect(this.out(pan));
+      s.start(t + dt, Math.random() * 2, len + 0.1);
+    }
   }
 
   // A gust passing through: rising, whistling, gone.

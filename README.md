@@ -2,7 +2,7 @@
 
 A replayable 3D horror game set in the Backrooms, playable in the browser on desktop and mobile.
 
-Playable now: **Level 0 — "The Lobby" / "The Yellow Hell"**, its sub-level **Level 0.2 — "The Remodel"**, **Level 1 — "The Habitable Zone"**, **Level 1.3**, **Level 1.5 — "Inverted"**, **Level 2 — "Abandoned Utility Halls"**, **Level 3 — "Electrical Station"**, **Level 4 — "Abandoned Office"**, **Level 5 — "Terror Hotel"** and **Level 63 — "Tranquility"**. More levels will follow.
+Playable now: **Level 0 — "The Lobby" / "The Yellow Hell"**, its sub-level **Level 0.2 — "The Remodel"**, **Level 1 — "The Habitable Zone"**, **Level 1.3**, **Level 1.5 — "Inverted"**, **Level 2 — "Abandoned Utility Halls"**, **Level 3 — "Electrical Station"**, **Level 4 — "Abandoned Office"**, **Level 5 — "Terror Hotel"**, **Level 6 — "Lights Out"** and **Level 63 — "Tranquility"**. More levels will follow.
 
 ## Play
 
@@ -204,7 +204,22 @@ Reached by Level 4's stairwells and elevators, or one of Level 3's freight lifts
   - A **dark wooden door** with no number among the guest rooms: **Level 9**.
   - Rarely, a **plain metal door** among the wooden ones, with a porthole full of sky and cold daylight leaking under it: **Level 63**.
   - Stairs by the **furnace**, in the deepest boiler hall, go down to **Level 6**.
-- Levels 6 and 9 are coming soon.
+- Level 9 is coming soon.
+
+## Level 6 — Lights Out (Survival Difficulty pending)
+
+Reached by the stairs by the furnace (or the maintenance lift) in Level 5's boiler room, or through the dark doorway in Level 4.
+
+- **The halls:** endless narrow hallways of smooth, cold concrete, one person wide, a maze of long straights, junctions and dead ends.
+- **Complete darkness:** your flashlight clicks and nothing comes out, and flares won't catch. Your eyes adjust just enough to make out a wall at arm's length; past that, nothing.
+- **Silence, then not:** no hum, no machines. The longer you're here the more you hear: whispering, breathing right behind you, something scuttling, footsteps that aren't yours. Your sanity drains the whole time, faster if you stand still. Almond Water helps.
+- **Possibly an entity:** nothing confirmed. But when your mind starts to go, something may come up the hall behind you, breathing. Keep moving and it loses you; let it reach you and it hurts.
+- **Wrong turns:** the door back to Level 5 is right where you arrive, and slams shut once you go far enough in. Take a branch that leads away from the way out and the hall may grind shut behind you once you're out of sight. Usually another way opens somewhere else; sometimes the way to Level 7 is simply gone.
+- **Exits:**
+  - A **stairwell** deep inside goes to **Level 7**. Listen for faint waves: they get louder, and pull to one side, along the way that actually leads there.
+  - Rarely, a huge **frost-covered metal door**, so cold you feel it before you find it: **Level 129**.
+  - **Wires** strung across the floor at ankle height. Walk carefully and you'll usually step over; run and you'll trip and fall right through into **Level 6.1**.
+- Levels 7, 129 and 6.1 are coming soon.
 
 ## Level 63 — Tranquility (Survival Difficulty 0)
 
@@ -335,6 +350,7 @@ src/levels/level2/            Level 2 generator and runtime
 src/levels/level3/            Level 3 generator, room dressing (generator/boiler rooms, assembly hall, Sanctums, Base Gamma, galleries) and runtime
 src/levels/level4/            Level 4 generator (corridor grid, rooms, service cores), furniture and runtime (moving exits, trap windows)
 src/levels/level5/            Level 5 generator (hotel, ballroom, boiler room maze), hotel and boiler room dressing, runtime (elevators, stairs, heat)
+src/levels/level6/            Level 6 (maze generator, darkness, shifting halls, hallucinations, exits)
 src/levels/level63/           Level 63 generator (platforms, bridges, ladders, monkey bars, Meditation Points) and runtime (sky, clouds, vines, climbing, falling)
 ```
 
@@ -346,4 +362,4 @@ All textures and sounds are generated in code, so there are no asset files.
 2. Grid-style levels can reuse `GridMap` and `GridWorld` with their own generator, textures and lighting.
 3. Register the level in `src/levels/registry.js`.
 
-Levels hand off with `ctx.onEscape(targetId, 'noclip' | 'door' | 'walk')`, and player stats carry over. An exit that targets a level that isn't built yet shows a "coming soon" screen, using the names in `UPCOMING`. Level 4's and Level 5's exits already target `level6`, `level9` and `level71`.
+Levels hand off with `ctx.onEscape(targetId, 'noclip' | 'door' | 'walk')`, and player stats carry over. An exit that targets a level that isn't built yet shows a "coming soon" screen, using the names in `UPCOMING`. Level 4's and Level 5's exits already target `level9` and `level71`, and Level 6's target `level7`, `level129` and `level6_1`.

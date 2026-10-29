@@ -562,7 +562,11 @@ export class Game {
         if (a.startsWith('use')) this.backpack.use(Number(a.slice(3)));
         if (a.startsWith('drop')) this.backpack.drop(Number(a.slice(4)));
         if (a === 'flashlight') {
-          if (player.battery > 3) {
+          if (level.noLight) {
+            player.flashlight = false;
+            this.audio.click();
+            this.hud.message('The flashlight clicks. Nothing comes out.', 1.8);
+          } else if (player.battery > 3) {
             player.flashlight = !player.flashlight;
             this.audio.click();
             $('btn-light').classList.toggle('on', player.flashlight);

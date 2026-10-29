@@ -586,7 +586,7 @@ export class GridWorld {
       mesh.setColorAt(i, c.setRGB(...this.panelColor(l, 1)));
     });
     mesh.instanceMatrix.needsUpdate = true;
-    mesh.instanceColor.needsUpdate = true;
+    if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
     mesh.frustumCulled = false;
     this.panels = mesh;
     this.group.add(mesh);

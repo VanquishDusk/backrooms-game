@@ -9,5 +9,6 @@ export const LEVEL_INFO = {
   level3: 'Electrical Station: brick corridors, sealed galleries, switchgear that sparks, Sanctums that keep you safe. The way on is an old freight lift.',
   level4: 'Abandoned Office: an empty office floor that goes on and on. Almond Water everywhere. Don\'t look out of the windows.',
   level5: 'Terror Hotel: endless 1920s corridors, a ballroom where the music never stops, and a boiler room that gets hotter the deeper you go.',
+  level6: 'Lights Out: endless narrow halls of cold concrete in total darkness. Lights don\'t work here. Listen for the waves; don\'t trip on the wires; don\'t take a wrong turn.',
   level63: 'Tranquility: wooden bridges and platforms high in the sky over an endless void, ringed by shifting walls of vines. Sit at a Meditation Point and breathe.',
 };
