@@ -363,7 +363,7 @@ export class Game {
       this.hud.setHint(
         this.input.touchMode
           ? 'STICK: MOVE  ·  DRAG ANYWHERE: LOOK'
-          : `WASD MOVE · SHIFT RUN · C ${cover} · F LIGHT · E DRINK · 1/2 USE · TAB BAG · V PHOTO · ESC PAUSE`,
+          : `WASD MOVE · SHIFT RUN · C ${cover} · F LIGHT · E DRINK · 1–4 USE · TAB BAG · V PHOTO · ESC PAUSE`,
         10,
       );
     }, 60);

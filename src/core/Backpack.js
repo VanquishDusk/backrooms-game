@@ -5,7 +5,7 @@ import { glowTexture } from '../world/fixtures.js';
 
 const $ = (id) => document.getElementById(id);
 
-// The backpack: two slots, a strip on the HUD, a panel you can open (Tab,
+// The backpack: four slots, a strip on the HUD, a panel you can open (Tab,
 // or tap the strip), quick-use keys and touch buttons. Also owns what's
 // lying on the floor (items levels place, items you drop) and the weapons
 // in your hands: the lead pipe swing and the burning flare.
@@ -63,7 +63,7 @@ export class Backpack {
       tap(el.querySelector('.bp-use'), () => this.use(k));
       tap(el.querySelector('.bp-drop'), () => this.drop(k));
     }
-    for (const k of [0, 1]) g.input.bindButton($(`btn-slot${k}`), { onPress: () => g.input.actions.push(`use${k}`) });
+    for (let k = 0; k < BACKPACK_SLOTS; k++) g.input.bindButton($(`btn-slot${k}`), { onPress: () => g.input.actions.push(`use${k}`) });
   }
 
   toggle(on, keepUnlocked = false) {
@@ -109,7 +109,7 @@ export class Backpack {
     $('drink-count').textContent = this.player.bottles;
     $('bp-help').textContent = this.game.input.touchMode
       ? 'TAP A SLOT BUTTON TO USE IT'
-      : '1 / 2  USE  ·  SHIFT + 1 / 2  DROP  ·  TAB  CLOSE';
+      : '1–4  USE  ·  SHIFT + 1–4  DROP  ·  TAB  CLOSE';
     $('bag-key').textContent = this.game.input.touchMode ? 'TAP' : 'TAB';
   }
 

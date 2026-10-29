@@ -86,6 +86,7 @@ button { font-family: inherit; }
   grid-template-columns: auto auto;
   grid-template-areas:
     "slot0 slot1"
+    "slot2 slot3"
     "drink light"
     "ears run";
   gap: 12px;
@@ -123,6 +124,8 @@ button { font-family: inherit; }
 #btn-drink { grid-area: drink; }
 #btn-slot0 { grid-area: slot0; }
 #btn-slot1 { grid-area: slot1; }
+#btn-slot2 { grid-area: slot2; }
+#btn-slot3 { grid-area: slot3; }
 .tbtn.slot { width: 54px; height: 54px; font-size: 11px; }
 .tbtn.slot svg { width: 20px; height: 20px; }
 #btn-light { grid-area: light; }
@@ -150,7 +153,7 @@ button { font-family: inherit; }
 }
 #bag label { display: block; opacity: 0.8; letter-spacing: 1px; cursor: inherit; }
 #bag small { opacity: 0.6; font-size: 13px; margin-left: 4px; }
-.bag-slots { display: flex; gap: 6px; margin-top: 3px; }
+.bag-slots { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 3px; }
 .bag-slot {
   flex: 1;
   min-width: 0;
@@ -197,8 +200,8 @@ button { font-family: inherit; }
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px;
-  margin-bottom: 8px;
+  padding: 7px 10px;
+  margin-bottom: 6px;
   border: 1px solid rgba(236, 227, 176, 0.35);
   background: rgba(0, 0, 0, 0.3);
 }
@@ -209,7 +212,7 @@ button { font-family: inherit; }
 .bp-text { flex: 1; min-width: 0; }
 .bp-name { font-size: 20px; letter-spacing: 1px; }
 .bp-desc { margin: 2px 0 0; font-size: 16px; opacity: 0.8; line-height: 1.15; }
-.bp-actions { display: flex; flex-direction: column; gap: 6px; }
+.bp-actions { display: flex; gap: 6px; }
 .bp-help { font-size: 15px; opacity: 0.7; text-align: center; margin-top: 4px; letter-spacing: 1px; }
 
 /* ---------- HUD ---------- */

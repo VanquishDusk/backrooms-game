@@ -300,7 +300,7 @@ Open **`entities.html`** to inspect them. Pick an entity, switch poses (idle, mo
 
 ## The backpack
 
-Everything you pick up goes into your backpack, and it only holds **2 items**. It shows under your stats; open it to read what you're carrying, use it or drop it. When it's full, pickups stay where they are (crates stay shut) until you make room. Dropped items lie on the floor, and you can pick them up again. Your backpack comes with you between levels.
+Everything you pick up goes into your backpack, and it only holds **4 items**. It shows under your stats; open it to read what you're carrying, use it or drop it. When it's full, pickups stay where they are (crates stay shut) until you make room. Dropped items lie on the floor, and you can pick them up again. Your backpack comes with you between levels.
 
 | Item | Use |
 |---|---|

@@ -1,7 +1,7 @@
 // Things you can carry. The backpack holds BACKPACK_SLOTS of them, one per
 // slot; an item is { id, uses? } (uses: hits left on a weapon).
 
-export const BACKPACK_SLOTS = 2;
+export const BACKPACK_SLOTS = 4;
 
 const svg = (body) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${body}</svg>`;
 

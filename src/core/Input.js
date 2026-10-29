@@ -93,8 +93,9 @@ export class Input {
         if (code === 'KeyF') this.actions.push('flashlight');
         if (code === 'KeyE' || code === 'KeyQ') this.actions.push('drink');
         if (code === 'KeyP' || code === 'Escape') this.actions.push('pause');
-        // The backpack: 1 / 2 use a slot, Shift + 1 / 2 drop it, Tab (or I, B) opens it.
-        const slot = code === 'Digit1' || code === 'Numpad1' ? 0 : code === 'Digit2' || code === 'Numpad2' ? 1 : -1;
+        // The backpack: 1-4 use a slot, Shift + 1-4 drop it, Tab (or I, B) opens it.
+        const m = /^(?:Digit|Numpad)([1-4])$/.exec(code);
+        const slot = m ? Number(m[1]) - 1 : -1;
         if (slot >= 0) this.actions.push(`${e.shiftKey ? 'drop' : 'use'}${slot}`);
         if (code === 'Tab' || code === 'KeyI' || code === 'KeyB') this.actions.push('bag');
         if (code === 'KeyV') this.actions.push('photo');
