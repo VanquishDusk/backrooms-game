@@ -723,3 +723,379 @@ export function invertedGlimpseTexture() {
   }
   return new THREE.CanvasTexture(c);
 }
+
+// ---- Level 2 -------------------------------------------------------------
+
+// Chalky, whitewashed concrete: peeling paint, rust runs, damp, grime.
+// Spans the full wall height once (use [u, 1/height]).
+export function chalkyConcreteTexture(renderer) {
+  const W = 512, H = 512;
+  const c = document.createElement('canvas');
+  c.width = W;
+  c.height = H;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#aaa391';
+  ctx.fillRect(0, 0, W, H);
+  blotches(ctx, W, H, 12, '95,88,70', 0.35);
+  blotches(ctx, W, H, 30, '215,210,195', 0.2);
+  blotches(ctx, W, H, 6, '60,55,42', 0.25);
+  // Board-formed concrete: faint horizontal pour lines and tie holes.
+  for (let y = 40; y < H; y += 64 + Math.random() * 20) {
+    ctx.fillStyle = 'rgba(60,55,45,0.18)';
+    ctx.fillRect(0, y, W, 2);
+    for (let x = 30; x < W; x += 128) {
+      ctx.fillStyle = 'rgba(40,36,30,0.5)';
+      ctx.beginPath();
+      ctx.arc(x + Math.random() * 6, y + 30, 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  // Peeling whitewash: small jagged flakes of bare grey concrete.
+  for (let i = 0; i < 55; i++) {
+    const cx = Math.random() * W, cy = H * (0.35 + Math.random() * 0.65);
+    const r = 1.5 + Math.random() * (cy > H * 0.75 ? 7 : 4);
+    ctx.beginPath();
+    for (let k = 0; k < 9; k++) {
+      const a = (k / 9) * Math.PI * 2, rr = r * (0.45 + Math.random() * 0.75);
+      ctx.lineTo(cx + Math.cos(a) * rr * 1.4, cy + Math.sin(a) * rr);
+    }
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(112,108,98,0.5)';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(225,222,210,0.3)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+  // Rust and water runs from the top, and from where pipes are bolted on.
+  for (let i = 0; i < 38; i++) {
+    const x = Math.random() * W, y0 = Math.random() < 0.6 ? 0 : Math.random() * H * 0.6;
+    const len = H * (0.1 + Math.random() * 0.5);
+    const g = ctx.createLinearGradient(0, y0, 0, y0 + len);
+    const rust = Math.random() < 0.55;
+    g.addColorStop(0, rust ? 'rgba(125,62,24,0.4)' : 'rgba(55,50,38,0.35)');
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(x, y0, 1 + Math.random() * 5, len);
+  }
+  // Damp and grime toward the floor.
+  const g = ctx.createLinearGradient(0, H * 0.6, 0, H);
+  g.addColorStop(0, 'rgba(38,34,24,0)');
+  g.addColorStop(1, 'rgba(38,34,24,0.7)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, H * 0.6, W, H * 0.4);
+  // Soot near the ceiling.
+  const s2 = ctx.createLinearGradient(0, 0, 0, H * 0.18);
+  s2.addColorStop(0, 'rgba(20,18,15,0.45)');
+  s2.addColorStop(1, 'rgba(20,18,15,0)');
+  ctx.fillStyle = s2;
+  ctx.fillRect(0, 0, W, H * 0.18);
+  speckle(ctx, W, 12000, '55,50,40', 0.25, 1.4);
+  return finish(c, renderer);
+}
+
+// Old, dark, sooty brick.
+export function darkBrickTexture(renderer) {
+  const W = 512, H = 512;
+  const c = document.createElement('canvas');
+  c.width = W;
+  c.height = H;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#3a302a';
+  ctx.fillRect(0, 0, W, H);
+  const bh = H / 16, bw = W / 6;
+  for (let r = 0; r < 16; r++) {
+    for (let k = -1; k < 7; k++) {
+      const x = k * bw + (r % 2 ? bw / 2 : 0), y = r * bh;
+      const v = 60 + Math.random() * 40;
+      ctx.fillStyle = `rgb(${v + 30},${v * 0.7},${v * 0.55})`;
+      ctx.fillRect(x + 3, y + 3, bw - 6, bh - 6);
+    }
+  }
+  blotches(ctx, W, H, 14, '20,16,14', 0.55);
+  blotches(ctx, W, H, 8, '160,150,130', 0.2);
+  speckle(ctx, W, 6000, '15,12,10', 0.3);
+  return finish(c, renderer);
+}
+
+// Dirty, worn concrete floor.
+export function utilityFloorTexture(renderer) {
+  const S = 512;
+  const [c, ctx] = makeCanvas(S);
+  ctx.fillStyle = '#6e6a60';
+  ctx.fillRect(0, 0, S, S);
+  blotches(ctx, S, S, 10, '30,28,24', 0.4);
+  blotches(ctx, S, S, 20, '150,145,130', 0.15);
+  speckle(ctx, S, 14000, '30,30,26', 0.25, 1.4);
+  cracks(ctx, S, 5, 'rgba(20,18,15,0.5)');
+  return finish(c, renderer);
+}
+
+// Diamond plate steel, scuffed.
+export function diamondPlateTexture(renderer) {
+  const S = 256;
+  const [c, ctx] = makeCanvas(S);
+  ctx.fillStyle = '#5c5c58';
+  ctx.fillRect(0, 0, S, S);
+  for (let y = 0; y < S; y += 16) {
+    for (let x = (y / 16) % 2 ? 8 : 0; x < S; x += 16) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(((x + y) / 16) % 2 ? 0.7 : -0.7);
+      ctx.fillStyle = 'rgba(190,190,180,0.5)';
+      ctx.fillRect(-5, -1.5, 10, 3);
+      ctx.restore();
+    }
+  }
+  blotches(ctx, S, S, 10, '40,30,20', 0.35);
+  speckle(ctx, S, 3000, '20,20,20', 0.25);
+  return finish(c, renderer);
+}
+
+// Low, dark, stained concrete ceiling.
+export function utilityCeilingTexture(renderer) {
+  const S = 256;
+  const [c, ctx] = makeCanvas(S);
+  ctx.fillStyle = '#4c4842';
+  ctx.fillRect(0, 0, S, S);
+  blotches(ctx, S, S, 10, '15,14,12', 0.5);
+  blotches(ctx, S, S, 8, '120,110,90', 0.2);
+  speckle(ctx, S, 5000, '20,20,18', 0.25);
+  return finish(c, renderer);
+}
+
+// Pipe surfaces. All tile along the pipe (u around, v along).
+export function pipeTexture(renderer, kind) {
+  const S = 128;
+  const [c, ctx] = makeCanvas(S);
+  if (kind === 'insulation') {
+    // Dirty cream lagging with canvas wrap seams and stains.
+    ctx.fillStyle = '#d6cbb0';
+    ctx.fillRect(0, 0, S, S);
+    blotches(ctx, S, S, 12, '150,120,80', 0.35);
+    blotches(ctx, S, S, 6, '90,70,40', 0.3);
+    for (let y = 0; y < S; y += 32) {
+      ctx.fillStyle = 'rgba(120,100,70,0.35)';
+      ctx.fillRect(0, y, S, 3);
+    }
+    speckle(ctx, S, 1500, '80,70,50', 0.2);
+  } else if (kind === 'rust') {
+    ctx.fillStyle = '#6a3a22';
+    ctx.fillRect(0, 0, S, S);
+    blotches(ctx, S, S, 20, '150,80,40', 0.45);
+    blotches(ctx, S, S, 14, '40,25,18', 0.45);
+    blotches(ctx, S, S, 6, '170,160,140', 0.25);
+    speckle(ctx, S, 2500, '200,120,60', 0.25);
+  } else if (kind === 'galv') {
+    ctx.fillStyle = '#9a9c98';
+    ctx.fillRect(0, 0, S, S);
+    for (let x = 0; x < S; x += 3) {
+      ctx.fillStyle = `rgba(255,255,255,${(Math.random() * 0.12).toFixed(3)})`;
+      ctx.fillRect(x, 0, 1, S);
+    }
+    blotches(ctx, S, S, 6, '60,58,50', 0.3);
+  } else if (kind === 'duct') {
+    // Spiral-seam ducting.
+    ctx.fillStyle = '#b4b2a8';
+    ctx.fillRect(0, 0, S, S);
+    ctx.strokeStyle = 'rgba(60,58,52,0.6)';
+    ctx.lineWidth = 3;
+    for (let k = -S; k < S * 2; k += 22) {
+      ctx.beginPath();
+      ctx.moveTo(0, k);
+      ctx.lineTo(S, k + S * 0.35);
+      ctx.stroke();
+    }
+    blotches(ctx, S, S, 6, '120,100,60', 0.25);
+  } else if (kind === 'redpaint') {
+    ctx.fillStyle = '#6e2a22';
+    ctx.fillRect(0, 0, S, S);
+    blotches(ctx, S, S, 10, '40,20,15', 0.5);
+    blotches(ctx, S, S, 8, '140,70,40', 0.35);
+  } else {
+    // Cable / dark machinery paint.
+    ctx.fillStyle = kind === 'machine' ? '#3e4a3c' : '#1e1c1a';
+    ctx.fillRect(0, 0, S, S);
+    blotches(ctx, S, S, 10, '120,110,90', kind === 'machine' ? 0.25 : 0.1);
+    blotches(ctx, S, S, 8, '90,50,25', kind === 'machine' ? 0.3 : 0);
+  }
+  return finish(c, renderer);
+}
+
+// Steel maintenance doors, and the rare odd ones.
+export function utilityDoorTexture(renderer, kind) {
+  const W = 128, H = 256;
+  const c = document.createElement('canvas');
+  c.width = W;
+  c.height = H;
+  const ctx = c.getContext('2d');
+  const base = { locked: '#5a6460', locked2: '#6a5a40', exit1: '#4f6a4a', exit3: '#7a2a20', exit4: '#7a5634' }[kind];
+  ctx.fillStyle = base;
+  ctx.fillRect(0, 0, W, H);
+  blotches(ctx, W, H, 12, '20,18,15', 0.4);
+  blotches(ctx, W, H, 8, '160,150,130', 0.2);
+  if (kind === 'exit4') {
+    // An office door: wood grain and panels.
+    for (let x = 0; x < W; x += 3) {
+      ctx.fillStyle = `rgba(40,20,5,${(Math.random() * 0.2).toFixed(3)})`;
+      ctx.fillRect(x, 0, 1, H);
+    }
+    ctx.strokeStyle = 'rgba(30,15,5,0.6)';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(18, 20, W - 36, 90);
+    ctx.strokeRect(18, 130, W - 36, 100);
+    ctx.fillStyle = '#c8a050';
+    ctx.fillRect(W / 2 - 14, 60, 28, 22);
+    ctx.fillStyle = '#3a2810';
+    ctx.font = 'bold 20px serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('4', W / 2, 78);
+  } else {
+    // Rivets, a kick plate and a push bar.
+    ctx.fillStyle = 'rgba(20,20,18,0.5)';
+    for (const y of [8, H - 8]) for (let x = 8; x < W; x += 16) ctx.fillRect(x, y, 3, 3);
+    ctx.fillStyle = 'rgba(30,30,28,0.55)';
+    ctx.fillRect(6, H - 40, W - 12, 32);
+    ctx.fillStyle = 'rgba(200,200,190,0.35)';
+    ctx.fillRect(10, H * 0.45, W - 20, 8);
+    if (kind === 'locked' || kind === 'locked2') {
+      ctx.fillStyle = '#d8d0b8';
+      ctx.fillRect(18, 40, W - 36, 34);
+      ctx.fillStyle = '#8a1a14';
+      ctx.font = 'bold 11px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('AUTHORIZED', W / 2, 54);
+      ctx.fillText('PERSONNEL ONLY', W / 2, 68);
+    } else if (kind === 'exit1') {
+      // Chalk: a circled 1 and an arrow.
+      ctx.strokeStyle = 'rgba(230,220,120,0.85)';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.arc(W / 2, 70, 26, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.font = 'bold 40px sans-serif';
+      ctx.fillStyle = 'rgba(230,220,120,0.85)';
+      ctx.textAlign = 'center';
+      ctx.fillText('1', W / 2, 84);
+      ctx.beginPath();
+      ctx.moveTo(W / 2, 170);
+      ctx.lineTo(W / 2, 120);
+      ctx.lineTo(W / 2 - 12, 134);
+      ctx.moveTo(W / 2, 120);
+      ctx.lineTo(W / 2 + 12, 134);
+      ctx.stroke();
+    } else if (kind === 'exit3') {
+      // Hazard tape border and a lightning bolt.
+      for (let i = 0; i < (W + H) * 2; i += 14) {
+        ctx.fillStyle = (i / 14) % 2 ? '#e0b818' : '#141414';
+        ctx.fillRect(i < W ? i : 0, 0, 7, 7);
+      }
+      ctx.fillStyle = '#e0b818';
+      for (const [x, y, w, h] of [[0, 0, W, 8], [0, H - 8, W, 8], [0, 0, 8, H], [W - 8, 0, 8, H]]) ctx.fillRect(x, y, w, h);
+      ctx.fillStyle = '#141414';
+      for (let i = 0; i < W; i += 16) {
+        ctx.fillRect(i, 0, 8, 8);
+        ctx.fillRect(i, H - 8, 8, 8);
+      }
+      ctx.fillStyle = '#f0d040';
+      ctx.beginPath();
+      ctx.moveTo(70, 30);
+      ctx.lineTo(42, 92);
+      ctx.lineTo(62, 92);
+      ctx.lineTo(50, 140);
+      ctx.lineTo(86, 70);
+      ctx.lineTo(66, 70);
+      ctx.closePath();
+      ctx.fill();
+      ctx.font = 'bold 30px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('3', W / 2, 190);
+    }
+  }
+  speckle(ctx, W, 2500, '20,20,18', 0.2);
+  return finish(c, renderer);
+}
+
+// Wall signs, eight tiles in a row: DANGER, HIGH VOLTAGE, KEEP CLEAR,
+// NO ENTRY, then stencilled section plates.
+export const SIGN_TILES = 8;
+export function signAtlasTexture(renderer, labels = ['C-7', 'D-12', 'B-3', 'E-9']) {
+  const T = 128, W = T * SIGN_TILES;
+  const c = document.createElement('canvas');
+  c.width = W;
+  c.height = T;
+  const ctx = c.getContext('2d');
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const tile = (k, bg) => {
+    ctx.fillStyle = bg;
+    ctx.fillRect(k * T, 0, T, T);
+    return k * T + T / 2;
+  };
+  // DANGER
+  let x = tile(0, '#efece2');
+  ctx.fillStyle = '#c81e14';
+  ctx.fillRect(x - 60, 8, 120, 40);
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 26px sans-serif';
+  ctx.fillText('DANGER', x, 29);
+  ctx.fillStyle = '#1a1a1a';
+  ctx.font = 'bold 15px sans-serif';
+  ctx.fillText('HOT PIPES', x, 70);
+  ctx.fillText('DO NOT TOUCH', x, 92);
+  // HIGH VOLTAGE
+  x = tile(1, '#e8c21c');
+  ctx.fillStyle = '#141414';
+  ctx.beginPath();
+  ctx.moveTo(x, 10);
+  ctx.lineTo(x + 46, 86);
+  ctx.lineTo(x - 46, 86);
+  ctx.closePath();
+  ctx.lineWidth = 7;
+  ctx.strokeStyle = '#141414';
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(x + 6, 30);
+  ctx.lineTo(x - 10, 60);
+  ctx.lineTo(x + 2, 60);
+  ctx.lineTo(x - 6, 80);
+  ctx.lineTo(x + 12, 52);
+  ctx.lineTo(x, 52);
+  ctx.closePath();
+  ctx.fill();
+  ctx.font = 'bold 15px sans-serif';
+  ctx.fillText('HIGH VOLTAGE', x, 108);
+  // KEEP CLEAR
+  x = tile(2, '#1f5a9a');
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 24px sans-serif';
+  ctx.fillText('KEEP', x, 46);
+  ctx.fillText('CLEAR', x, 78);
+  // NO ENTRY
+  x = tile(3, '#efece2');
+  ctx.fillStyle = '#c81e14';
+  ctx.beginPath();
+  ctx.arc(x, 52, 38, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(x - 26, 45, 52, 14);
+  ctx.fillStyle = '#1a1a1a';
+  ctx.font = 'bold 15px sans-serif';
+  ctx.fillText('NO ENTRY', x, 108);
+  // Section plates: black stencil on yellow, scuffed.
+  labels.forEach((t, i) => {
+    x = tile(4 + i, '#d9b21e');
+    ctx.fillStyle = '#141414';
+    ctx.font = 'bold 54px sans-serif';
+    ctx.fillText(t, x, 66);
+  });
+  for (let k = 0; k < SIGN_TILES; k++) {
+    // Grime, scratches, a rusty bolt in each corner.
+    for (let j = 0; j < 30; j++) {
+      ctx.fillStyle = `rgba(60,45,25,${(Math.random() * 0.25).toFixed(3)})`;
+      ctx.fillRect(k * T + Math.random() * T, Math.random() * T, 2 + Math.random() * 14, 1 + Math.random() * 3);
+    }
+    ctx.fillStyle = '#5a3a20';
+    for (const [bx, by] of [[6, 6], [T - 10, 6], [6, T - 10], [T - 10, T - 10]]) ctx.fillRect(k * T + bx, by, 4, 4);
+  }
+  return finish(c, renderer);
+}

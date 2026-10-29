@@ -5,8 +5,9 @@ import { SURFACE, MAX_DYN_LIGHTS, createWorldMaterial, createGlitchMaterial } fr
 import {
   concreteFloorTexture, concreteWallTexture, concreteCeilingTexture, grassTexture, flagstoneTexture,
   woodPanelTexture, woodTexture, crateTexture, hazardTexture, solidTexture, gaugeTexture, leavesTexture,
-  whiteTileWallTexture, invertedGlimpseTexture,
+  whiteTileWallTexture, invertedGlimpseTexture, pipeTexture,
 } from '../../world/textures.js';
+import { TubeBuilder } from '../../world/tubes.js';
 import { PropKit, disposeTextures, mergeGeometries, nearDoor } from '../../world/props.js';
 import { Hound } from '../../entities/Hound.js';
 import { generateLevel1, ZONE, SECTOR } from './generate.js';
@@ -87,6 +88,7 @@ export class Level1 {
       const sb = map.inBounds(b[0], b[1]) ? sector[map.idx(b[0], b[1])] : null;
       return sa === SECTOR.AQUILA || sa == null ? sb ?? sa : sa;
     };
+    this.planExitNarrowing(layout);
     this.world = new GridWorld({
       map,
       lights: layout.lights,
@@ -524,38 +526,152 @@ export class Level1 {
     return { group: g, arm, x: w.x, z: w.z, phase: this.rng.next() * 10, lastHit: 0 };
   }
 
-  // The hallway out: pipes and dials gradually appear along it.
+  // The hallway out narrows toward Level 2: false walls step in at 45
+  // degrees, the ceiling drops, and pipes crowd in. Collision has to exist
+  // before the world is built, so this runs first.
+  planExitNarrowing(layout) {
+    const { map, exit } = layout;
+    const cs = map.cellSize;
+    const L = exit.cells.length;
+    const [ax, az] = map.cellCenter(...exit.cells[0]);
+    const [bx, bz] = map.cellCenter(...exit.cells[L - 1]);
+    const dx = Math.sign(bx - ax), dz = Math.sign(bz - az);
+    const side = [dz, dx];
+    const len = L * cs;
+    const wallFace = cs / 2 - 0.08;
+    // [start of a 45-degree step, half-width after it]
+    const steps = [[len * 0.42, 1.3], [len * 0.64, 0.95]];
+    const hw = (t) => {
+      let w = wallFace;
+      for (const [ts, nw] of steps) {
+        if (t >= ts + (w - nw)) w = nw;
+        else if (t > ts) return w - (t - ts);
+        else break;
+      }
+      return w;
+    };
+    const P = (t, lat) => [ax - dx * cs / 2 + dx * t + side[0] * lat, az - dz * cs / 2 + dz * t + side[1] * lat];
+    const boxes = layout.extraBoxes;
+    const box = (t0, t1, l0, l1) => {
+      const a = P(t0, l0), b = P(t1, l1);
+      boxes.push({ x0: Math.min(a[0], b[0]), z0: Math.min(a[1], b[1]), x1: Math.max(a[0], b[0]), z1: Math.max(a[1], b[1]) });
+    };
+    let w = wallFace;
+    for (let k = 0; k < steps.length; k++) {
+      const [ts, nw] = steps[k];
+      const tEnd = k + 1 < steps.length ? steps[k + 1][0] : len;
+      for (const sgn of [-1, 1]) {
+        // The diagonal, as a few stair steps, then the straight slab.
+        for (let q = 0; q < 3; q++) {
+          const t0 = ts + ((w - nw) * q) / 3, t1 = ts + ((w - nw) * (q + 1)) / 3;
+          const lat = w - ((w - nw) * (q + 0.5)) / 3;
+          box(t0, t1, sgn * lat, sgn * (cs / 2));
+        }
+        box(ts + (w - nw), tEnd, sgn * nw, sgn * (cs / 2));
+      }
+      w = nw;
+    }
+    this.narrow = { ax, az, dx, dz, side, len, steps, hw, P, wallFace };
+  }
+
   buildExitHall() {
     const { map, exit } = this.layout;
     const cs = map.cellSize, H = map.height;
     const L = exit.cells.length;
-    const pipes = [], redPipes = [];
-    const along = (i) => {
-      const [x, y] = exit.cells[i];
-      return map.cellCenter(x, y);
-    };
-    const [ax, az] = along(0), [bx, bz] = along(L - 1);
-    const dx = Math.sign(bx - ax), dz = Math.sign(bz - az);
-    const side = [dz, dx]; // perpendicular (x, z)
-    // Pipe j starts further in for higher j, so density grows with depth.
-    const count = 9;
-    for (let j = 0; j < count; j++) {
-      const startI = Math.floor((j / count) * (L - 2));
-      const [sx, sz] = along(startI);
-      const len = (L - startI) * cs;
-      const r = 0.05 + (j % 3) * 0.04;
-      const wallSide = j % 2 ? 1 : -1;
-      const off = cs / 2 - 0.25 - (j % 4) * 0.08;
-      const y = j % 3 === 2 ? H - 0.3 - j * 0.03 : 0.6 + j * 0.28;
-      const g = new THREE.CylinderGeometry(r, r, len, 8, 1, true);
-      if (dx) g.rotateZ(Math.PI / 2);
-      else g.rotateX(Math.PI / 2);
-      const midA = len / 2 - cs / 2;
-      g.translate(sx + dx * midA + side[0] * off * wallSide, y, sz + dz * midA + side[1] * off * wallSide);
-      (j % 3 === 0 ? redPipes : pipes).push(g);
+    const N = this.narrow;
+    const { hw, P, len, steps, side } = N;
+    const { dx, dz } = N;
+
+    // False walls: straight faces and their 45-degree steps.
+    const walls = new GeoBuilder(), soffit = new GeoBuilder();
+    let w = N.wallFace;
+    for (let k = 0; k < steps.length; k++) {
+      const [ts, nw] = steps[k];
+      const tEnd = k + 1 < steps.length ? steps[k + 1][0] : len;
+      for (const sgn of [-1, 1]) {
+        const n = [-side[0] * sgn, 0, -side[1] * sgn];
+        const quad = (t0, l0, t1, l1, nrm) => {
+          const a = P(t0, sgn * l0), b = P(t1, sgn * l1);
+          const ulen = Math.hypot(b[0] - a[0], b[1] - a[1]);
+          walls.quad([a[0], 0, a[1]], [b[0], 0, b[1]], [b[0], H, b[1]], [a[0], H, a[1]], nrm, [t0, 0], [t0 + ulen, 0], [t0 + ulen, H], [t0, H]);
+        };
+        const dn = [(-side[0] * sgn - dx) / Math.SQRT2, 0, (-side[1] * sgn - dz) / Math.SQRT2];
+        quad(ts, w, ts + (w - nw), nw, dn);
+        quad(ts + (w - nw), nw, tEnd, nw, n);
+      }
+      w = nw;
     }
-    this.addMerged(pipes, this.propMats.grey);
-    this.addMerged(redPipes, this.propMats.red);
+    // The ceiling comes down to meet Level 2's.
+    for (const [t0, y] of [[len * 0.72, 3.05], [len * 0.84, 2.75]]) {
+      const a = P(t0, -N.wallFace - 0.1), b = P(t0, N.wallFace + 0.1), c = P(len, N.wallFace + 0.1), d = P(len, -N.wallFace - 0.1);
+      soffit.quad([a[0], y, a[1]], [b[0], y, b[1]], [c[0], y, c[1]], [d[0], y, d[1]], [0, -1, 0], [0, 0], [3, 0], [3, 3], [0, 3]);
+      walls.quad([a[0], y, a[1]], [b[0], y, b[1]], [b[0], H, b[1]], [a[0], H, a[1]], [-dx, 0, -dz], [0, y], [3, y], [3, H], [0, H]);
+    }
+    for (const [g, mat] of [[walls, this.world.materials.exitwall], [soffit, this.world.materials.ceiling]]) {
+      const geo = g.build();
+      if (!geo) continue;
+      (this.ownGeos ||= []).push(geo);
+      this.props.add(new THREE.Mesh(geo, mat));
+    }
+    const ceilAt = (t) => (t > len * 0.84 ? 2.75 : t > len * 0.72 ? 3.05 : H);
+
+    // Pipes appear further in for higher j, so they crowd in with depth, and
+    // follow the walls in through every step.
+    this.lagTex = pipeTexture(this.ctx.renderer, 'insulation');
+    const lagMat = this.litMaterial(this.lagTex);
+    const tb = { grey: new TubeBuilder(), red: new TubeBuilder(), lag: new TubeBuilder(), strut: new TubeBuilder() };
+    const count = 13;
+    for (let j = 0; j < count; j++) {
+      const k = j / count;
+      const t0 = Math.floor(k * (L - 2)) * cs + 0.6;
+      const lag = j >= 7 && j % 2 === 1;
+      const r = lag ? 0.12 + (j % 3) * 0.03 : 0.05 + (j % 3) * 0.035;
+      const sgn = j % 2 ? 1 : -1;
+      const ins = r + 0.05 + (j % 4) * 0.06;
+      const y = lag ? 0.45 + (j % 4) * 0.42 : j % 3 === 2 ? 2.5 - (j % 4) * 0.12 : 0.6 + (j % 5) * 0.36;
+      const pts = [];
+      const at = (t, lat) => {
+        const [x, z] = P(t, sgn * lat);
+        return [x, y, z];
+      };
+      // Out of the wall...
+      pts.push(at(t0, hw(t0) + 0.1), at(t0, hw(t0) - ins));
+      let wPrev = N.wallFace;
+      for (const [ts, nw] of steps) {
+        if (ts + (wPrev - nw) < t0) {
+          wPrev = nw;
+          continue;
+        }
+        pts.push(at(ts, wPrev - ins), at(ts + (wPrev - nw), nw - ins));
+        wPrev = nw;
+      }
+      // ...and into the far end wall.
+      pts.push(at(len - 0.02, hw(len) - ins));
+      const b = lag ? tb.lag : j % 3 === 0 ? tb.red : tb.grey;
+      for (let i = 0; i < pts.length - 1; i++) b.cylinder(pts[i], pts[i + 1], r, lag ? 10 : 8, { vScale: 0.5 });
+      // Brackets every couple of metres.
+      for (let t = t0 + 1; t < len - 0.5; t += 2.2) {
+        const lat = hw(t);
+        const [x, z] = P(t, sgn * (lat - 0.02));
+        tb.strut.box(x, y - r - 0.03, z, dx ? 0.04 : 0.04 + ins, 0.03, dx ? 0.04 + ins : 0.04);
+      }
+    }
+    this.addBuilt(tb.grey, this.propMats.grey);
+    this.addBuilt(tb.red, this.propMats.red);
+    this.addBuilt(tb.lag, lagMat);
+    this.addBuilt(tb.strut, this.propMats.grey);
+
+    // Caged bulbs under the dropped ceiling, getting sparse.
+    this.hallBulbs = [];
+    const bulbGeo = new THREE.SphereGeometry(0.06, 8, 6);
+    (this.ownGeos ||= []).push(bulbGeo);
+    this.hallBulbMat = new THREE.MeshBasicMaterial({ color: 0xffb060 });
+    for (let t = len * 0.74; t < len - 1; t += 3.1) {
+      const [x, z] = P(t, 0);
+      const m = new THREE.Mesh(bulbGeo, this.hallBulbMat);
+      m.position.set(x, ceilAt(t) - 0.18, z);
+      this.props.add(m);
+    }
 
     // Dials: more of them, and twitchier, the deeper you go.
     this.gaugeTex = gaugeTexture();
@@ -567,12 +683,10 @@ export class Level1 {
     for (let i = 1; i < L; i++) {
       const k = i / (L - 1);
       const n = Math.floor(k * k * 4 + (this.rng.chance(k) ? 1 : 0));
-      const [cx, cz] = along(i);
       for (let d = 0; d < n; d++) {
-        const wallSide = this.rng.chance(0.5) ? 1 : -1;
-        const off = cs / 2 - 0.09;
-        const a = this.rng.range(-cs / 2 + 0.3, cs / 2 - 0.3);
-        const px = cx + side[0] * off * wallSide + dx * a, pz = cz + side[1] * off * wallSide + dz * a;
+        const sgn = this.rng.chance(0.5) ? 1 : -1;
+        const t = (i + this.rng.range(0.15, 0.85)) * cs;
+        const [px, pz] = P(t, sgn * (hw(t) - 0.01));
         const [lr, lg, lb] = this.world.sampleLight(px, pz);
         const lit = Math.max(0.3, (lr + lg + lb) / 3 * 1.4);
         const faceMat = new THREE.MeshBasicMaterial({ map: this.gaugeTex, color: new THREE.Color(lit, lit, lit * 0.95) });
@@ -583,13 +697,13 @@ export class Level1 {
         needle.position.z = 0.005;
         const holder = new THREE.Group();
         holder.add(face, needle);
-        holder.position.set(px, this.rng.range(1.2, 2.3), pz);
-        holder.rotation.y = Math.atan2(-side[0] * wallSide, -side[1] * wallSide);
+        holder.position.set(px, Math.min(ceilAt(t) - 0.4, this.rng.range(1.2, 2.3)), pz);
+        holder.rotation.y = Math.atan2(-side[0] * sgn, -side[1] * sgn);
         this.props.add(holder);
         this.dials.push({ needle, base: this.rng.range(-1, 1), k, phase: this.rng.next() * 10 });
       }
     }
-    this.exitInfo = { ax, az, dx, dz, L, cs };
+    this.exitInfo = { ax: N.ax, az: N.az, dx, dz, L, cs };
   }
 
   buildCrates() {
@@ -1148,6 +1262,8 @@ export class Level1 {
     if (this.lampMat) this.lampMat.dispose();
     this.leafTex.dispose();
     this.gaugeTex.dispose();
+    this.lagTex.dispose();
+    this.hallBulbMat.dispose();
     disposeTextures(this.textures);
   }
 }

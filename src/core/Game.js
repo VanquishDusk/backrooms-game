@@ -263,6 +263,7 @@ export class Game {
       scene: this.scene,
       rng: createRng(`${id}:${seed}`),
       renderer: this.renderer.renderer,
+      quality: () => this.renderer.quality,
       shared: this.shared,
       audio: this.audio,
       hud: this.hud,

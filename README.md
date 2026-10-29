@@ -2,7 +2,7 @@
 
 A replayable 3D horror game set in the Backrooms, playable in the browser on desktop and mobile.
 
-Playable now: **Level 0 — "The Lobby" / "The Yellow Hell"**, its sub-level **Level 0.2 — "The Remodel"**, **Level 1 — "The Habitable Zone"**, **Level 1.3** and **Level 1.5 — "Inverted"**. More levels will follow.
+Playable now: **Level 0 — "The Lobby" / "The Yellow Hell"**, its sub-level **Level 0.2 — "The Remodel"**, **Level 1 — "The Habitable Zone"**, **Level 1.3**, **Level 1.5 — "Inverted"** and **Level 2 — "Abandoned Utility Halls"**. More levels will follow.
 
 ## Play
 
@@ -59,7 +59,7 @@ An endless, abandoned concrete complex: half underground car park, half empty wa
 - **Blackouts:** the lights die and something hunts the halls. It won't follow you into the corridors.
 - **Impossible geometry:** halls stretch away from you, and corridor walls move when you aren't looking.
 - **Crates** hold Almond Water, batteries, first aid kits, junk, or something worse. Some vanish when you look away, and new ones turn up.
-- **Exit:** follow an extended hallway where pipes and dials gradually appear. Pipes on the ceiling get denser as you get closer, and you can hear steam ahead. The hallway leads on to Level 2, which is coming soon.
+- **Exit:** follow an extended hallway where pipes and dials gradually appear. Pipes on the ceiling get denser as you get closer, and you can hear steam ahead. Toward the end it gets more industrial: false walls step in at 45 degrees, the ceiling drops, and fat lagged pipes, gauges and caged bulbs crowd in until you walk into Level 2.
 
 Near the explorers' cache, a spotless **white wall** leads to Level 1.3.
 
@@ -90,13 +90,40 @@ Reached through a **fake window** set into a concrete corridor wall in Level 1. 
 - **Logs** from the explorer who got trapped here are scattered on the floor, garbled.
 - **Exit:** the only hum here is Level 0's, leaking through the one place reality is thin. Follow it to a glitching dead end where the negative keeps failing, and noclip through. You usually land in Level 1, sometimes Level 0.
 
+## Level 2 — Abandoned Utility Halls (Survival Difficulty 2)
+
+Reached by following Level 1's pipe hallway until it narrows into a maintenance tunnel.
+
+- **The tunnels:** a labyrinth of narrow (about 2 m) concrete maintenance tunnels with long straight runs, branches, loops and dead ends.
+  - Turns are cut at **45 degrees**, so the tunnels bend instead of meeting at square corners.
+  - Walls are chalky, peeling whitewash over board-formed concrete, with rust runs and damp. Some sections are old dark brick.
+- **Pipes everywhere:**
+  - Every wall carries a bundle that runs continuously along the tunnel, follows each bend and turns corners. It only dives into the wall or rises into the ceiling where the wall ends.
+  - Bundles mix fat cream-lagged pipes, rusty iron, red-painted pipe, galvanised pipe, conduit and cable, all on strut-channel brackets.
+  - Some walls have a raised concrete ledge instead.
+  - Ceilings carry pipe runs, big spiral ducts or cable trays on threaded-rod hangers. There are valves, flanges, gauges and steam leaks.
+- **Plant rooms:** small rooms with diamond-plate floors, boilers, pumps, tanks, generators and switchgear. You can hear them whirring from the tunnels.
+- **Clutter:** drums, gas bottles, cable spools, cardboard boxes, toolboxes, rubble, paper and broken fluorescent tubes. Wall signs say DANGER, HIGH VOLTAGE or KEEP CLEAR, or give section codes.
+- **Light and dark:**
+  - Lights are harsh bare fluorescent tubes or orange caged bulbs. Many are dead, some flicker, and there are long dark gaps between them.
+  - Some sections are almost entirely dark.
+  - Every so often a whole section loses power at once and stays dark for a while.
+  - Darkness wears on your sanity, so use the flashlight.
+- **Sound:** fluorescent buzz, motors and pumps, water hammer knocking down the pipes, distant clanks, drips and steam.
+- **Entities:** Hounds, Smilers (only in the dark), Skin-Stealers, Deathmoths (around the lights, and your flashlight) and Clumps (waiting in dead ends).
+- **Doors:** steel maintenance doors sit at the back of dead ends and in plant-room walls. Almost all are locked. A rare few are unlocked, and each looks and sounds different:
+  - **Faded green with a chalk "1"**, under a lone bulb, with water dripping nearby. It leads back to **Level 1**.
+  - **Rust red with hazard tape and a lightning bolt**, with a pulsing red lamp and arcing electricity. It leads on to **Level 3** (coming soon).
+  - **Sometimes, a wooden office door with a brass "4"**, with warm light spilling under it and a scrap of carpet in front. It leads to **Level 4** (coming soon).
+- **Supply crates** sit in some dead ends: Almond Water, batteries, first aid, junk, or a burst of steam.
+
 The main menu has a **Levels** section (0, 1, …) and a **Sublevels** section (0.2, 1.3, …). Each level unlocks there once you reach it.
 
 Every run comes from a seed, which shows on the pause, death and escape screens. Type a seed on the main menu to replay a layout.
 
 ## Entity library
 
-Reusable entities live in `src/entities/lib/`. None of them are placed in a level yet. Each has its own model, procedural skin, animations, sounds and AI (idle, movement, detection, attack), and they're lit by the level's lighting and your flashlight.
+Reusable entities live in `src/entities/lib/`. Level 2 uses Hounds, Smilers, Skin-Stealers, Deathmoths and Clumps; the rest aren't placed in a level yet. Each has its own model, procedural skin, animations, sounds and AI (idle, movement, detection, attack), and they're lit by the level's lighting and your flashlight.
 
 | Entity | What it does |
 |---|---|
@@ -150,7 +177,8 @@ src/main.js                   entry point
 src/core/                     engine: Game loop/state, Input, Player, AudioEngine (procedural), Renderer (+post FX), rng, storage
 src/world/                    reusable grid-level toolkit: GridMap (layout + pathing + line of sight),
                               GridWorld (meshes, collision, baked lightmap, destructible cells),
-                              materials (shaders), textures (procedural), props (doors, clutter, fixtures)
+                              materials (shaders), textures (procedural), props (doors, clutter, fixtures),
+                              tubes (fast pipe/box geometry writer, chunked meshes)
 src/entities/                 Stalker (Level 0's dark figure), Hound (Level 1's blackout hunter)
 src/entities/lib/             reusable entity library: Entity base (AI helpers), humanoid rig, skins, 9 entities, EntityManager
 entities.html                 entity viewer
@@ -160,6 +188,7 @@ src/levels/level0_2/          Level 0.2 generator and runtime (the collapse)
 src/levels/level1/            Level 1 generator and runtime (sectors, blackouts, crates, the hallway out)
 src/levels/level1_3/          Level 1.3 generator and runtime (Detox Zones, The Ward, the Decay)
 src/levels/level1_5/          Level 1.5 generator and runtime (the negative, the denizens, She)
+src/levels/level2/            Level 2 generator, service planner (pipes, 45-degree corners, collision) and runtime
 ```
 
 All textures and sounds are generated in code, so there are no asset files.
@@ -170,4 +199,4 @@ All textures and sounds are generated in code, so there are no asset files.
 2. Grid-style levels can reuse `GridMap` and `GridWorld` with their own generator, textures and lighting.
 3. Register the level in `src/levels/registry.js`.
 
-Levels hand off with `ctx.onEscape(targetId, 'noclip' | 'door' | 'walk')`, and player stats carry over. An exit that targets a level that isn't built yet shows a "coming soon" screen, using the names in `UPCOMING`. Level 1's hallway already targets `level2`.
+Levels hand off with `ctx.onEscape(targetId, 'noclip' | 'door' | 'walk')`, and player stats carry over. An exit that targets a level that isn't built yet shows a "coming soon" screen, using the names in `UPCOMING`. Level 2's odd doors already target `level3` and `level4`.

@@ -8,8 +8,8 @@ import { Duller } from './Duller.js';
 import { Partygoer } from './Partygoer.js';
 import { Wretch } from './Wretch.js';
 
-// The Backrooms entity library. None of these are placed in any level yet;
-// a level opts in by creating an EntityManager and spawning what it wants:
+// The Backrooms entity library. A level opts in by creating an
+// EntityManager and spawning what it wants (Level 2 is an example):
 //
 //   import { EntityManager } from '../../entities/lib/index.js';
 //   this.entities = new EntityManager({ scene, world, audio: ctx.audio, rng, shared });

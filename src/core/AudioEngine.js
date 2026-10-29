@@ -162,6 +162,38 @@ export class AudioEngine {
     thrum.connect(tlp).connect(tg).connect(this.steamGain);
     thrum.start();
 
+    // Machinery: a motor's whir and the thrum of a pump, somewhere close.
+    this.machineGain = keep(ctx.createGain());
+    this.machineGain.gain.value = 0;
+    this.machinePan = ctx.createStereoPanner ? keep(ctx.createStereoPanner()) : null;
+    if (this.machinePan) this.machineGain.connect(this.machinePan).connect(this.master);
+    else this.machineGain.connect(this.master);
+    const motor = keep(ctx.createOscillator());
+    motor.type = 'sawtooth';
+    motor.frequency.value = 29;
+    const mlp = keep(ctx.createBiquadFilter());
+    mlp.type = 'lowpass';
+    mlp.frequency.value = 180;
+    const mg = keep(ctx.createGain());
+    mg.gain.value = 0.7;
+    motor.connect(mlp).connect(mg).connect(this.machineGain);
+    motor.start();
+    const whir = keep(this.noiseSource(true));
+    const wbp = keep(ctx.createBiquadFilter());
+    wbp.type = 'bandpass';
+    wbp.frequency.value = 900;
+    wbp.Q.value = 6;
+    const wg = keep(ctx.createGain());
+    wg.gain.value = 0.35;
+    const wlfo = keep(ctx.createOscillator());
+    wlfo.frequency.value = 7.3;
+    const wlg = keep(ctx.createGain());
+    wlg.gain.value = 0.25;
+    wlfo.connect(wlg).connect(wg.gain);
+    whir.connect(wbp).connect(wg).connect(this.machineGain);
+    whir.start();
+    wlfo.start();
+
     // Low drone that swells when the figure is hunting.
     this.droneGain = keep(ctx.createGain());
     this.droneGain.gain.value = 0;
@@ -195,7 +227,7 @@ export class AudioEngine {
 
   /**
    * Per-frame mix.
-   * @param {object} s  { hum, exitGain, exitPan, exitType ('static' | 'hum' | 'steam'), drone, sanity, ears }
+   * @param {object} s  { hum, exitGain, exitPan, exitType ('static' | 'hum' | 'steam'), drone, sanity, ears, machine?, machinePan? }
    */
   update(s) {
     if (!this.ctx || !this.ambienceOn) return;
@@ -208,6 +240,8 @@ export class AudioEngine {
     this.steamGain.gain.setTargetAtTime(type === 'steam' ? s.exitGain * 0.45 : 0, t, 0.1);
     if (this.staticPan) this.staticPan.pan.setTargetAtTime(s.exitPan, t, 0.05);
     this.droneGain.gain.setTargetAtTime(s.drone, t, 0.3);
+    this.machineGain.gain.setTargetAtTime(s.machine || 0, t, 0.2);
+    if (this.machinePan) this.machinePan.pan.setTargetAtTime(s.machinePan || 0, t, 0.1);
     this.muffle.frequency.setTargetAtTime(s.ears ? 380 : 20000, t, 0.06);
 
     // Heartbeat when the mind starts to slip.
@@ -408,6 +442,90 @@ export class AudioEngine {
       o.connect(lp).connect(g).connect(this.out(pan));
       o.start(t);
       o.stop(t + 1.3);
+    }
+  }
+
+  // Water hammer: a run of hollow knocks travelling down a pipe.
+  pipeKnock(pan = 0, vol = 0.25) {
+    if (!this.ctx) return;
+    const t0 = this.ctx.currentTime;
+    const n = 2 + Math.floor(Math.random() * 4);
+    let t = t0;
+    for (let i = 0; i < n; i++) {
+      const o = this.ctx.createOscillator();
+      o.type = 'triangle';
+      const f = 140 + Math.random() * 60;
+      o.frequency.setValueAtTime(f, t);
+      o.frequency.exponentialRampToValueAtTime(f * 0.6, t + 0.25);
+      const g = this.ctx.createGain();
+      this.env(g, t, vol * (1 - i * 0.15), 0.004, 0.35);
+      const ring = this.ctx.createOscillator();
+      ring.type = 'sine';
+      ring.frequency.value = f * 4.7;
+      const rg = this.ctx.createGain();
+      this.env(rg, t, vol * 0.12, 0.002, 0.5);
+      o.connect(g).connect(this.out(pan));
+      ring.connect(rg).connect(this.out(pan));
+      o.start(t);
+      o.stop(t + 0.45);
+      ring.start(t);
+      ring.stop(t + 0.6);
+      t += 0.12 + Math.random() * 0.25;
+    }
+  }
+
+  // A steam leak letting go.
+  steam(pan = 0, vol = 0.2) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    const s = this.noiseSource();
+    const f = this.ctx.createBiquadFilter();
+    f.type = 'highpass';
+    f.frequency.value = 1800;
+    const g = this.ctx.createGain();
+    const dur = 0.8 + Math.random() * 1.4;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(vol, t + 0.06);
+    g.gain.setValueAtTime(vol * 0.8, t + dur);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.5);
+    s.connect(f).connect(g).connect(this.out(pan));
+    s.start(t, Math.random(), dur + 0.6);
+  }
+
+  // A locked door's handle, rattled.
+  rattle(pan = 0, vol = 0.3) {
+    if (!this.ctx) return;
+    const t0 = this.ctx.currentTime;
+    for (let i = 0; i < 4; i++) {
+      const t = t0 + i * 0.07 + Math.random() * 0.02;
+      const s = this.noiseSource();
+      const f = this.ctx.createBiquadFilter();
+      f.type = 'bandpass';
+      f.frequency.value = 1400 + Math.random() * 900;
+      f.Q.value = 4;
+      const g = this.ctx.createGain();
+      this.env(g, t, vol, 0.002, 0.06);
+      s.connect(f).connect(g).connect(this.out(pan));
+      s.start(t, Math.random(), 0.1);
+    }
+    this.clank(pan, vol * 0.3);
+  }
+
+  // Electrical arcing: sharp, irregular snaps.
+  arc(pan = 0, vol = 0.2) {
+    if (!this.ctx) return;
+    const t0 = this.ctx.currentTime;
+    const n = 3 + Math.floor(Math.random() * 6);
+    for (let i = 0; i < n; i++) {
+      const t = t0 + Math.random() * 0.35;
+      const s = this.noiseSource();
+      const f = this.ctx.createBiquadFilter();
+      f.type = 'highpass';
+      f.frequency.value = 2500;
+      const g = this.ctx.createGain();
+      this.env(g, t, vol * (0.4 + Math.random() * 0.6), 0.001, 0.03 + Math.random() * 0.05);
+      s.connect(f).connect(g).connect(this.out(pan));
+      s.start(t, Math.random(), 0.12);
     }
   }
 
