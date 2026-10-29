@@ -492,3 +492,56 @@ export function leavesTexture() {
   const tex = new THREE.CanvasTexture(c);
   return tex;
 }
+
+// ---- Level 1.3 -----------------------------------------------------------
+
+// Big glossy white tiles with bevelled edges, laid in a running bond.
+export function whiteTileWallTexture(renderer) {
+  const S = 512;
+  const [c, ctx] = makeCanvas(S);
+  ctx.fillStyle = '#c8c9c6';
+  ctx.fillRect(0, 0, S, S);
+  const rows = 4, cols = 2, th = S / rows, tw = S / cols, g = 5;
+  for (let r = 0; r < rows; r++) {
+    for (let k = -1; k <= cols; k++) {
+      const x = k * tw + (r % 2 ? tw / 2 : 0), y = r * th;
+      const grad = ctx.createLinearGradient(x, y, x, y + th);
+      grad.addColorStop(0, '#ffffff');
+      grad.addColorStop(0.15, '#f3f4f2');
+      grad.addColorStop(0.85, '#eceeeb');
+      grad.addColorStop(1, '#d6d8d4');
+      ctx.fillStyle = grad;
+      ctx.fillRect(x + g, y + g, tw - g * 2, th - g * 2);
+      // Bevel highlights and shadows.
+      ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      ctx.fillRect(x + g, y + g, tw - g * 2, 3);
+      ctx.fillRect(x + g, y + g, 3, th - g * 2);
+      ctx.fillStyle = 'rgba(150,152,148,0.6)';
+      ctx.fillRect(x + g, y + th - g - 3, tw - g * 2, 3);
+      ctx.fillRect(x + tw - g - 3, y + g, 3, th - g * 2);
+    }
+  }
+  speckle(ctx, S, 1500, '150,150,150', 0.08);
+  return finish(c, renderer);
+}
+
+export function whiteFloorTexture(renderer) {
+  const S = 256;
+  const [c, ctx] = makeCanvas(S);
+  ctx.fillStyle = '#b9bbb8';
+  ctx.fillRect(0, 0, S, S);
+  const n = 4, w = S / n;
+  for (let y = 0; y < n; y++) {
+    for (let x = 0; x < n; x++) {
+      const v = 236 + Math.floor(Math.random() * 10);
+      ctx.fillStyle = `rgb(${v},${v + 1},${v - 1})`;
+      ctx.fillRect(x * w + 2, y * w + 2, w - 4, w - 4);
+    }
+  }
+  // Soft sheen streaks, like a freshly mopped floor.
+  for (let i = 0; i < 6; i++) {
+    ctx.fillStyle = 'rgba(255,255,255,0.18)';
+    ctx.fillRect(Math.random() * S, 0, 6 + Math.random() * 14, S);
+  }
+  return finish(c, renderer);
+}

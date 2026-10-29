@@ -2,7 +2,7 @@
 
 A replayable 3D horror game set in the Backrooms, playable in the browser on desktop and mobile.
 
-Playable now: **Level 0 — "The Lobby" / "The Yellow Hell"**, its sub-level **Level 0.2 — "The Remodel"**, and **Level 1 — "The Habitable Zone"**. More levels will follow.
+Playable now: **Level 0 — "The Lobby" / "The Yellow Hell"**, its sub-level **Level 0.2 — "The Remodel"**, **Level 1 — "The Habitable Zone"** and **Level 1.3**. More levels will follow.
 
 ## Play
 
@@ -61,6 +61,21 @@ An endless, abandoned concrete complex: half underground car park, half empty wa
 - **Crates** hold Almond Water, batteries, first aid kits, junk, or something worse. Some vanish when you look away, and new ones turn up.
 - **Exit:** follow an extended hallway where pipes and dials gradually appear. Pipes on the ceiling get denser as you get closer, and you can hear steam ahead. The hallway leads on to Level 2, which is coming soon.
 
+Near the explorers' cache, a spotless **white wall** leads to Level 1.3.
+
+## Level 1.3 — The Ward (Survival Difficulty 0… or a Dead Zone)
+
+One long, blinding-white tiled hallway with branching paths to 16 large rooms: Detox Zones (marked in green tape), medical supply rooms, and The Ward. Each visit rolls which Level 1.3 you get:
+
+- **The sanctuary:** Detox Zones heal you quickly (it burns), M.E.G. doctors staff The Ward, the supply rooms are stocked, and heart monitors beep.
+- **The Dead Zone:** the Decay has got in.
+  - Black voids eat into the floors, walls and ceilings, and they keep spreading. Step into one and you're gone.
+  - Dried blood, covered bodies, a flatlined monitor.
+  - The Detox Zones heal you for a moment, then tear you apart.
+  - Recovered documents tell what happened.
+  - One end of the hallway is already being swallowed.
+- **Exit:** noclip into either end of the main hallway to return to Level 1.
+
 Levels you've reached can be started directly from the main menu.
 
 Every run comes from a seed, which shows on the pause, death and escape screens. Type a seed on the main menu to replay a layout.
@@ -94,6 +109,7 @@ src/levels/registry.js        list of levels + the level interface
 src/levels/level0/            Level 0 generator and runtime (events, hazards, exits)
 src/levels/level0_2/          Level 0.2 generator and runtime (the collapse)
 src/levels/level1/            Level 1 generator and runtime (sectors, blackouts, crates, the hallway out)
+src/levels/level1_3/          Level 1.3 generator and runtime (Detox Zones, The Ward, the Decay)
 ```
 
 All textures and sounds are generated in code, so there are no asset files.

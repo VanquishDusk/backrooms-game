@@ -1,10 +1,11 @@
 import * as THREE from 'three';
 import { GridWorld, GeoBuilder } from '../../world/GridWorld.js';
 import { EDGE_OPEN, EDGE_WALL } from '../../world/GridMap.js';
-import { SURFACE, MAX_DYN_LIGHTS, createWorldMaterial } from '../../world/materials.js';
+import { SURFACE, MAX_DYN_LIGHTS, createWorldMaterial, createGlitchMaterial } from '../../world/materials.js';
 import {
   concreteFloorTexture, concreteWallTexture, concreteCeilingTexture, grassTexture, flagstoneTexture,
   woodPanelTexture, woodTexture, crateTexture, hazardTexture, solidTexture, gaugeTexture, leavesTexture,
+  whiteTileWallTexture,
 } from '../../world/textures.js';
 import { PropKit, disposeTextures, mergeGeometries } from '../../world/props.js';
 import { Hound } from '../../entities/Hound.js';
@@ -31,7 +32,7 @@ const JUNK = [
   'A key to nothing.', 'A deflated balloon.', 'A tin of buttons.',
 ];
 const NOTES = [
-  "To whoever comes through next: crates are real, mostly. When the lights die, get into the corridors. It won't follow you in there. To get out, follow the pipes. — the cache team",
+  "To whoever comes through next: crates are real, mostly. When the lights die, get into the corridors. It won't follow you in there. To get out, follow the pipes. P.S. Base Alpha says the clean white wall near here leads to Level 1.3, the hospital. They don't talk about what's in there now. — the cache team",
   "Don't trust distances in the big halls. Pick a pillar and count.",
   "The workers in the grey section don't answer. Don't ask them what they're building.",
   "The garden smells sweet. Do NOT sit down in it. We lost two that way.",
@@ -113,6 +114,13 @@ export class Level1 {
       },
     });
     scene.add(this.world.group);
+
+    // The white wall: walk through it to reach Level 1.3.
+    if (layout.whiteWall) {
+      this.textures.white = whiteTileWallTexture(renderer);
+      this.whiteMat = createGlitchMaterial(shared, this.textures.white, 1 / 1.2);
+      this.world.setExit(layout.whiteWall.edge, this.whiteMat);
+    }
 
     const [sx, sz] = map.cellCenter(layout.spawn.x, layout.spawn.y);
     this.spawn = { x: sx, z: sz, yaw: layout.spawnYaw };
@@ -699,6 +707,18 @@ export class Level1 {
       return;
     }
 
+    // The white wall to Level 1.3.
+    if (this.world.exit) {
+      const dw = this.world.distanceToExit(player.pos.x, player.pos.z);
+      this.whiteMat.uniforms.prox.value = Math.max(0, 1 - dw / 6) * 0.4;
+      if (dw < 6 && this.once('white')) hud.message('A white wall. Spotless. Nothing in Level 1 is this clean.', 3.5);
+      if (dw < 0.22) {
+        this.done = true;
+        ctx.onEscape('level1_3', 'noclip');
+        return;
+      }
+    }
+
     // The hallway out.
     const e = this.exitInfo;
     const t = (player.pos.x - e.ax) * e.dx + (player.pos.z - e.az) * e.dz; // metres along it
@@ -1117,6 +1137,7 @@ export class Level1 {
     this.crateGeo.dispose();
     this.lidGeo.dispose();
     this.innerMat.dispose();
+    if (this.whiteMat) this.whiteMat.dispose();
     if (this.lampMat) this.lampMat.dispose();
     this.leafTex.dispose();
     this.gaugeTex.dispose();

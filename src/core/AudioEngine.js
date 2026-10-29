@@ -488,6 +488,40 @@ export class AudioEngine {
     s.start(t, Math.random() * 2, 0.08);
   }
 
+  // Heart monitor beep (a long `duration` is a flatline).
+  beep(pan = 0, vol = 0.08, duration = 0.11, freq = 980) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    const o = this.ctx.createOscillator();
+    o.type = 'sine';
+    o.frequency.value = freq;
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(vol, t + 0.01);
+    g.gain.setValueAtTime(vol, t + duration);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + duration + 0.05);
+    o.connect(g).connect(this.out(pan));
+    o.start(t);
+    o.stop(t + duration + 0.1);
+  }
+
+  // Wet tearing / sizzling, for a Detox Zone gone wrong.
+  sizzle(vol = 0.3) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    const s = this.noiseSource();
+    const f = this.ctx.createBiquadFilter();
+    f.type = 'bandpass';
+    f.frequency.value = 3200 + Math.random() * 1500;
+    f.Q.value = 0.8;
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(vol, t + 0.05);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.6);
+    s.connect(f).connect(g).connect(this.master);
+    s.start(t, Math.random() * 2, 0.7);
+  }
+
   // Structural creak: a slow, pitched groan.
   creak(pan = 0, vol = 0.3) {
     if (!this.ctx) return;

@@ -6,13 +6,15 @@ import * as THREE from 'three';
 // keeps the level cheap enough for phones.
 
 export const MAX_DYN_LIGHTS = 4;
+export const MAX_DECAY = 12;
 
 export const SURFACE = { WALL: 0, FLOOR: 1, CEILING: 2, PLAIN: 3 };
 
 // Uniform objects shared by every world material, so one write per frame
 // updates all of them.
 export function createSharedUniforms(fog) {
-  const dynPos = [], dynCol = [];
+  const dynPos = [], dynCol = [], decay = [];
+  for (let i = 0; i < MAX_DECAY; i++) decay.push(new THREE.Vector4(0, 0, 0, 0));
   for (let i = 0; i < MAX_DYN_LIGHTS; i++) {
     dynPos.push(new THREE.Vector4(0, -100, 0, 0));
     dynCol.push(new THREE.Color(0, 0, 0));
@@ -31,6 +33,7 @@ export function createSharedUniforms(fog) {
     flOn: { value: 0 },
     dynPos: { value: dynPos },
     dynCol: { value: dynCol },
+    decay: { value: decay },
     fogColor: { value: fog.color },
     fogDensity: { value: fog.density },
     fogNear: { value: 1 },
@@ -122,6 +125,7 @@ const WORLD_FRAG = /* glsl */ `
 uniform sampler2D map;
 uniform vec2 texScale;
 uniform float surface;
+uniform vec4 decay[${MAX_DECAY}];
 varying vec3 vWorld;
 varying vec3 vNormal;
 varying vec2 vUv;
@@ -144,7 +148,22 @@ void main() {
     float stain = smoothstep(0.55, 0.85, n) * (1.0 - smoothstep(0.0, 0.9, vWorld.y));
     albedo *= 1.0 - stain * 0.25;
   }
-  gl_FragColor = vec4(albedo * sceneLight(vWorld, N, surface), 1.0);
+  vec3 col = albedo * sceneLight(vWorld, N, surface);
+  // Decay: irregular spots of pure blackness eating into every surface.
+  // Each spot is (x, z, radius, strength); strength 0 = unused.
+  float rot = 0.0;
+  for (int i = 0; i < ${MAX_DECAY}; i++) {
+    vec4 s = decay[i];
+    if (s.w <= 0.0) continue;
+    float d = length(vWorld.xz - s.xy);
+    if (d > s.z + 2.5) continue;
+    float n = vnoise(vWorld.xz * 1.6 + vWorld.y * 0.8) * 0.6 + vnoise(vWorld.xz * 5.0 - vWorld.y * 2.0) * 0.3;
+    float edge = s.z + n * 0.8;
+    rot = max(rot, (1.0 - smoothstep(edge - 0.08, edge + 1.3, d)) * s.w);
+    rot = max(rot, step(d, edge - 0.08) * s.w);
+  }
+  col *= 1.0 - clamp(rot, 0.0, 1.0);
+  gl_FragColor = vec4(col, 1.0);
   #include <fog_fragment>
 }
 `;

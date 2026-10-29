@@ -357,8 +357,9 @@ export class Game {
     const card = $('level-card');
     const def = this.levelDef;
     card.querySelector('.lc-name').textContent = def.name.toUpperCase();
-    card.querySelector('.lc-title').textContent = def.title.toUpperCase();
-    card.querySelector('.lc-diff').textContent = def.difficulty != null ? `SURVIVAL DIFFICULTY ${def.difficulty}` : '';
+    const own = this.level.card;
+    card.querySelector('.lc-title').textContent = (own?.title || def.title).toUpperCase();
+    card.querySelector('.lc-diff').textContent = own?.sub ?? (def.difficulty != null ? `SURVIVAL DIFFICULTY ${def.difficulty}` : '');
     card.classList.add('show');
     clearTimeout(this.cardTimer);
     this.cardTimer = setTimeout(() => card.classList.remove('show'), 3200);

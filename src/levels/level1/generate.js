@@ -337,6 +337,21 @@ export function generateLevel1(rng) {
     const c = pickCell((x, y, i) => sector[i] === SECTOR.OUROBOROS && zone[i] === ZONE.HALL && !reserved[i]);
     if (c) workers.push({ x: (c[0] + 0.5) * CELL + rng.range(-0.6, 0.6), z: (c[1] + 0.5) * CELL + rng.range(-0.6, 0.6), rot: rng.range(0, Math.PI * 2) });
   }
+  // A clean white wall near the cache (Base Alpha). Level 1.3 is on the
+  // other side of it.
+  const whiteCands = [];
+  for (let y = spawn.y - 6; y <= spawn.y + 6; y++) {
+    for (let x = spawn.x - 6; x <= spawn.x + 6; x++) {
+      if (!map.inBounds(x, y) || zone[idx(x, y)] !== ZONE.HALL) continue;
+      if (Math.hypot(x - spawn.x, y - spawn.y) < 2.5) continue;
+      for (let d = 0; d < 4; d++) {
+        const e = map.edge(x, y, d);
+        if (map.getEdge(e) === EDGE_WALL && !keepEdge(e)) whiteCands.push({ edge: e, side: { x, y } });
+      }
+    }
+  }
+  const whiteWall = whiteCands.length ? rng.pick(whiteCands) : null;
+
   const notes = [];
   const noteCells = [[spawn.x, spawn.y]];
   for (let k = 0; k < 4; k++) {
@@ -365,6 +380,6 @@ export function generateLevel1(rng) {
 
   return {
     map, zone, sector, spawn, spawnYaw: yaw, exit, lights, pillars, pillarAt, shelves, extraBoxes,
-    crates, pipes, rooms, blocks, workers, notes, gothicCell,
+    crates, pipes, rooms, blocks, workers, notes, gothicCell, whiteWall,
   };
 }

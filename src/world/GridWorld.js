@@ -119,6 +119,7 @@ export class GridWorld {
     this.textures = opts.textures;
     this.shared = opts.shared;
     this.shared.emergency.value = 0;
+    for (const d of this.shared.decay.value) d.set(0, 0, 0, 0);
     this.shared.globalLight.value = 1;
     this.group = new THREE.Group();
     this.chunksX = Math.ceil(this.map.cols / CHUNK);
@@ -425,7 +426,8 @@ export class GridWorld {
 
   // ---- Exit wall -------------------------------------------------------
 
-  setExit(e) {
+  // `material` defaults to the flickering-wall glitch shader.
+  setExit(e, material = this.materials.glitch) {
     this.map.setEdge(e, EDGE_EXIT);
     const cs = this.map.cellSize, H = this.map.height;
     const geo = new GeoBuilder();
@@ -441,7 +443,7 @@ export class GridWorld {
       this.exit = { x0: x, x1: x, z0: e.y * cs, z1: (e.y + 1) * cs, h: false, cx: x, cz: (e.y + 0.5) * cs };
     }
     this.exit.edge = e;
-    this.exitMesh = new THREE.Mesh(geo.build(), this.materials.glitch);
+    this.exitMesh = new THREE.Mesh(geo.build(), material);
     this.group.add(this.exitMesh);
     this.rebuildAroundEdge(e);
     this.rebuildCollision();
