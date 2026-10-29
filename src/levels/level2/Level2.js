@@ -9,10 +9,11 @@ import {
 } from '../../world/textures.js';
 import { disposeTextures, nearDoor, mergeGeometries } from '../../world/props.js';
 import { ChunkedBuilders } from '../../world/tubes.js';
+import { Fixtures, applyDynamicLights } from '../../world/fixtures.js';
 import { createNoise2D } from '../../core/rng.js';
 import { EntityManager } from '../../entities/lib/index.js';
 import { generateLevel2, KIND } from './generate.js';
-import { planServices, LEDGE } from './plan.js';
+import { planServices, buildServices, valve } from '../../world/services.js';
 
 // Level 2 — "Abandoned Utility Halls".
 //
@@ -36,9 +37,6 @@ const JUNK = [
   'A box of fuses, all blown.', 'A work glove, full of grease.', 'A map of these tunnels. It is blank.',
 ];
 const DOOR_TARGET = { exit1: 'level1', exit3: 'level3', exit4: 'level4' };
-const PIPE_SEG = { lag: 9, duct: 11, rust: 7, galv: 6, red: 6, conduit: 4, cable: 4 };
-const PIPE_V = { lag: 0.5, duct: 1.4, rust: 0.7, galv: 0.6, red: 0.6, conduit: 0.5, cable: 0.5 };
-const PIPE_MAT = { lag: 'lag', duct: 'duct', rust: 'rust', galv: 'galv', red: 'red', conduit: 'conduit', cable: 'cable' };
 
 // Machines against plant-room walls: length along the wall, depth out of it.
 // (Nothing deeper than 0.85 m, so room cell centres stay walkable.)
@@ -200,8 +198,6 @@ export class Level2 {
     this.entities = new EntityManager({ scene, world: this.world, audio: ctx.audio, rng: this.rng.fork('entities'), shared });
     this.spawnEntities();
 
-    this.flickers = layout.lights.map((l, i) => (l.state === 'flicker' ? i : -1)).filter((i) => i >= 0);
-    this.phase = layout.lights.map(() => this.rng.next() * 100);
     this.secDark = new Uint8Array(layout.sections.length);
     this.time = 0;
     this.done = false;
@@ -351,235 +347,18 @@ export class Level2 {
   }
 
   buildServices() {
-    const { cb, plan } = this;
-    const H = this.map.height;
-    for (const p of plan.pipes) {
-      const name = PIPE_MAT[p.k];
-      const seg = PIPE_SEG[p.k] || 6;
-      const vScale = PIPE_V[p.k] || 0.6;
-      let v = 0;
-      const pts = p.pts;
-      // Bends: each segment runs on past the corner by r*tan(angle/2), so
-      // the two overlap into a solid joint without extra elbow geometry.
-      const ext = pts.map((q, j) => {
-        if (j === 0 || j === pts.length - 1) return 0;
-        const a = pts[j - 1], c = pts[j + 1];
-        const d1 = unit([q[0] - a[0], q[1] - a[1], q[2] - a[2]]), d2 = unit([c[0] - q[0], c[1] - q[1], c[2] - q[2]]);
-        const cos = Math.max(-0.99, Math.min(1, d1[0] * d2[0] + d1[1] * d2[1] + d1[2] * d2[2]));
-        return Math.min(1, Math.sqrt((1 - cos) / (1 + cos))) * p.r;
-      });
-      for (let i = 0; i < pts.length - 1; i++) {
-        const a = pts[i], c = pts[i + 1];
-        const len = Math.hypot(c[0] - a[0], c[1] - a[1], c[2] - a[2]);
-        const d = [(c[0] - a[0]) / len, (c[1] - a[1]) / len, (c[2] - a[2]) / len];
-        const a2 = [a[0] - d[0] * ext[i], a[1] - d[1] * ext[i], a[2] - d[2] * ext[i]];
-        const c2 = [c[0] + d[0] * ext[i + 1], c[1] + d[1] * ext[i + 1], c[2] + d[2] * ext[i + 1]];
-        const b = cb.at(name, (a[0] + c[0]) / 2, (a[2] + c[2]) / 2);
-        b.cylinder(a2, c2, p.r, seg, { vScale, v0: v - ext[i] * vScale });
-        v += len * vScale;
-        // Flanged joints every few metres on bare metal pipe.
-        if (p.flanges && p.r >= 0.035 && len > 1.2) {
-          const n = Math.floor(len / 3.2);
-          for (let k = 1; k <= n; k++) {
-            const t = k / (n + 1), t2 = t + 0.05 / len;
-            const f0 = [a[0] + (c[0] - a[0]) * t, a[1] + (c[1] - a[1]) * t, a[2] + (c[2] - a[2]) * t];
-            const f1 = [a[0] + (c[0] - a[0]) * t2, a[1] + (c[1] - a[1]) * t2, a[2] + (c[2] - a[2]) * t2];
-            b.cylinder(f0, f1, p.r * 1.4, seg);
-          }
-        }
-        // Lagging has metal bands at its seams.
-        if (p.k === 'lag' && len > 1.5 && Math.abs(c[1] - a[1]) < 0.01) {
-          const n = Math.floor(len / 1.7);
-          for (let k = 1; k <= n; k++) {
-            const t = k / (n + 1), t2 = t + 0.03 / len;
-            const f0 = [a[0] + (c[0] - a[0]) * t, a[1], a[2] + (c[2] - a[2]) * t];
-            const f1 = [a[0] + (c[0] - a[0]) * t2, a[1], a[2] + (c[2] - a[2]) * t2];
-            cb.at('galv', f0[0], f0[2]).cylinder(f0, f1, p.r * 1.03, seg);
-          }
-        }
-        // A valve now and then.
-        if ((p.k === 'rust' || p.k === 'red') && p.r >= 0.05 && len > 2 && !p.ceiling && this.drng.chance(0.18)) {
-          const t = this.drng.range(0.3, 0.7);
-          const m = [a[0] + (c[0] - a[0]) * t, a[1], a[2] + (c[2] - a[2]) * t];
-          this.valve(m, [c[0] - a[0], 0, c[2] - a[2]], p.r);
-        }
-      }
-    }
-    // Strut channel brackets and their arms.
-    for (const s of plan.struts) {
-      cb.at('strut', s.x, s.z).box(s.x, (s.y0 + s.y1) / 2, s.z, s.a === 0 ? 0.042 : 0.045, s.y1 - s.y0, s.a === 0 ? 0.045 : 0.042, 0, 1, NO_CAPS);
-    }
-    for (const [x, y, z, sx, sy, sz] of plan.arms) cb.at('strut', x, z).box(x, y, z, sx, sy, sz, 0, 1, NO_TOP);
-    // Ledges.
-    for (const [x0, z0, x1, z1] of plan.ledges) {
-      cb.at('ledge', (x0 + x1) / 2, (z0 + z1) / 2).aabb(x0, 0, z0, x1, LEDGE.h, z1, 1, ['bottom']);
-    }
-    // Cable trays with their load.
-    for (const t of plan.trays) {
-      const b = cb.at('strut', (t.a[0] + t.b[0]) / 2, (t.a[1] + t.b[1]) / 2);
-      const x0 = Math.min(t.a[0], t.b[0]), x1 = Math.max(t.a[0], t.b[0]);
-      const z0 = Math.min(t.a[1], t.b[1]), z1 = Math.max(t.a[1], t.b[1]);
-      const w = t.w / 2;
-      if (t.axis === 0) {
-        b.aabb(x0, t.y - 0.01, z0 - w, x1, t.y, z0 + w);
-        b.aabb(x0, t.y, z0 - w, x1, t.y + 0.08, z0 - w + 0.012);
-        b.aabb(x0, t.y, z0 + w - 0.012, x1, t.y + 0.08, z0 + w);
-      } else {
-        b.aabb(x0 - w, t.y - 0.01, z0, x0 + w, t.y, z1);
-        b.aabb(x0 - w, t.y, z0, x0 - w + 0.012, t.y + 0.08, z1);
-        b.aabb(x0 + w - 0.012, t.y, z0, x0 + w, t.y + 0.08, z1);
-      }
-      const cables = cb.at('cable', (x0 + x1) / 2, (z0 + z1) / 2);
-      for (let k = 0; k < 5; k++) {
-        const o = -w + 0.04 + k * ((t.w - 0.08) / 4);
-        const r = 0.018 + (k % 2) * 0.008;
-        const y = t.y + r + (k % 3 === 1 ? 0.02 : 0);
-        if (t.axis === 0) cables.cylinder([x0, y, z0 + o], [x1, y, z0 + o], r, 5);
-        else cables.cylinder([x0 + o, y, z0], [x0 + o, y, z1], r, 5);
-      }
-    }
-    // Hangers: threaded rods and a trapeze bar.
-    for (const h of plan.hangers) {
-      const b = cb.at('strut', h.x, h.z);
-      const p0 = [h.x + h.lat[0] * h.o0, h.z + h.lat[1] * h.o0];
-      const p1 = [h.x + h.lat[0] * h.o1, h.z + h.lat[1] * h.o1];
-      for (const p of [p0, p1]) b.cylinder([p[0], H, p[1]], [p[0], h.y - 0.02, p[1]], 0.008, 4);
-      const cx = (p0[0] + p1[0]) / 2, cz = (p0[1] + p1[1]) / 2;
-      const len = h.o1 - h.o0 + 0.04;
-      b.box(cx, h.y - 0.02, cz, h.axis === 0 ? 0.04 : len, 0.04, h.axis === 0 ? len : 0.04);
-    }
-  }
-
-  // Handwheel valve on a pipe: body, stem and a red wheel.
-  valve(m, along, r) {
-    const b = this.cb.at('red', m[0], m[2]);
-    const l = Math.hypot(along[0], along[2]) || 1;
-    const d = [along[0] / l, 0, along[2] / l];
-    this.cb.at('rust', m[0], m[2]).cylinder([m[0] - d[0] * r * 1.6, m[1], m[2] - d[2] * r * 1.6], [m[0] + d[0] * r * 1.6, m[1], m[2] + d[2] * r * 1.6], r * 1.5, 8, { caps: true });
-    const top = [m[0], m[1] + r * 1.5 + 0.12, m[2]];
-    this.cb.at('galv', m[0], m[2]).cylinder([m[0], m[1] + r, m[2]], top, 0.012, 5);
-    const R = 0.11;
-    for (let k = 0; k < 8; k++) {
-      const a0 = (k / 8) * Math.PI * 2, a1 = ((k + 1) / 8) * Math.PI * 2;
-      b.cylinder([top[0] + Math.cos(a0) * R, top[1], top[2] + Math.sin(a0) * R], [top[0] + Math.cos(a1) * R, top[1], top[2] + Math.sin(a1) * R], 0.012, 4);
-    }
-    for (let k = 0; k < 3; k++) {
-      const a = (k / 3) * Math.PI * 2;
-      b.cylinder(top, [top[0] + Math.cos(a) * R, top[1], top[2] + Math.sin(a) * R], 0.008, 4);
-    }
+    buildServices(this.cb, this.plan, this.drng, this.map.height);
   }
 
   // Fixtures: bare tubes and caged bulbs. The glowing parts are instanced
   // so they can flicker and die one by one.
   buildFixtures() {
-    const { cb } = this;
-    const H = this.map.height;
-    const lights = this.layout.lights;
-    const tubes = [], bulbs = [];
-    lights.forEach((l, i) => {
-      if (l.type === 'tube') {
-        const along = l.axis === 1;
-        const sx = along ? 0.07 : 1.3, sz = along ? 1.3 : 0.07;
-        const b = cb.at('housing', l.x, l.z);
-        b.box(l.x, H - 0.025, l.z, sx, 0.05, sz);
-        for (const s of [-0.62, 0.62]) b.box(l.x + (along ? 0 : s), H - 0.075, l.z + (along ? s : 0), 0.04, 0.05, 0.04);
-        // Some dead tubes are gone entirely; the glass is on the floor.
-        l.missing = l.state === 'off' && this.drng.chance(0.35);
-        if (l.missing) this.brokenGlass(l.x, l.z);
-        tubes.push(i);
-      } else {
-        const b = cb.at('cage', l.x, l.z);
-        b.box(l.x, H - 0.03, l.z, 0.12, 0.06, 0.12);
-        b.cylinder([l.x, H - 0.06, l.z], [l.x, H - 0.17, l.z], 0.014, 5);
-        b.cylinder([l.x, H - 0.17, l.z], [l.x, H - 0.19, l.z], 0.085, 6);
-        b.cylinder([l.x, H - 0.31, l.z], [l.x, H - 0.33, l.z], 0.06, 6);
-        for (let k = 0; k < 4; k++) {
-          const a = (k / 4) * Math.PI * 2 + 0.4;
-          b.cylinder([l.x + Math.cos(a) * 0.084, H - 0.18, l.z + Math.sin(a) * 0.084], [l.x + Math.cos(a) * 0.06, H - 0.33, l.z + Math.sin(a) * 0.06], 0.005, 3);
-        }
-        bulbs.push(i);
-      }
-    });
-    const tubeGeo = new THREE.CylinderGeometry(0.019, 0.019, 1.18, 6, 1, true);
-    tubeGeo.rotateZ(Math.PI / 2);
-    const bulbGeo = new THREE.SphereGeometry(0.055, 7, 5);
-    this.ownGeos.push(tubeGeo, bulbGeo);
-    this.glowMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-    this.ownMats.push(this.glowMat);
-    const make = (geo, list) => {
-      const mesh = new THREE.InstancedMesh(geo, this.glowMat, Math.max(1, list.length));
-      const m = new THREE.Matrix4();
-      list.forEach((li, k) => {
-        const l = lights[li];
-        if (l.type === 'tube') {
-          m.makeRotationY(l.axis === 1 ? Math.PI / 2 : 0);
-          m.setPosition(l.x, H - 0.085, l.z);
-          if (l.missing) m.makeScale(0, 0, 0);
-        } else {
-          m.makeTranslation(l.x, H - 0.25, l.z);
-        }
-        mesh.setMatrixAt(k, m);
-        mesh.setColorAt(k, new THREE.Color(0, 0, 0));
-        l.inst = { mesh, k };
-      });
-      mesh.count = list.length;
-      mesh.instanceMatrix.needsUpdate = true;
-      mesh.frustumCulled = false;
-      this.props.add(mesh);
-      return mesh;
-    };
-    this.tubeMesh = make(tubeGeo, tubes);
-    this.bulbMesh = make(bulbGeo, bulbs);
-
-    // Soft halos around lit fixtures.
-    this.glowTex = glowTexture();
-    const halo = (list, size) => {
-      const geo = new THREE.BufferGeometry();
-      const pos = new Float32Array(list.length * 3), col = new Float32Array(list.length * 3);
-      list.forEach((li, k) => {
-        const l = lights[li];
-        pos.set([l.x, H - (l.type === 'tube' ? 0.1 : 0.25), l.z], k * 3);
-        l.halo = { geo, k };
-      });
-      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-      geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
-      const mat = new THREE.PointsMaterial({ size, map: this.glowTex, vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
-      this.ownGeos.push(geo);
-      this.ownMats.push(mat);
-      const pts = new THREE.Points(geo, mat);
-      pts.frustumCulled = false;
-      this.props.add(pts);
-    };
-    halo(tubes, 1.5);
-    halo(bulbs, 0.9);
-    lights.forEach((l, i) => this.setFixture(i, l.state === 'on' ? 1 : l.state === 'flicker' ? 0.6 : 0));
+    this.fixtures = new Fixtures({ lights: this.layout.lights, cb: this.cb, group: this.props, rng: this.drng, H: this.map.height });
+    this.glowTex = this.fixtures.glowTex;
   }
 
   setFixture(i, level) {
-    const l = this.layout.lights[i];
-    if (l.level === level) return;
-    l.level = level;
-    const tube = l.type === 'tube';
-    const base = tube ? [1, 1, 1] : [1, 0.72, 0.36];
-    const dead = tube ? 0.2 : 0.1;
-    const k = level > 0.02 ? 0.25 + 0.75 * level : 0;
-    const c = level > 0.02 ? [base[0] * k, base[1] * k, base[2] * k] : [dead, dead * 0.98, dead * 0.94];
-    l.inst.mesh.setColorAt(l.inst.k, _c.setRGB(c[0], c[1], c[2]));
-    l.inst.mesh.instanceColor.needsUpdate = true;
-    const h = tube ? 0.32 : 0.55;
-    const col = l.halo.geo.attributes.color;
-    col.setXYZ(l.halo.k, base[0] * level * h, base[1] * level * h, base[2] * level * h);
-    col.needsUpdate = true;
-  }
-
-  brokenGlass(x, z) {
-    const b = this.cb.at('glass', x, z);
-    const r = this.drng;
-    for (let k = 0; k < 3; k++) {
-      const a = r.range(0, Math.PI), len = r.range(0.15, 0.5);
-      const cx = x + r.range(-0.4, 0.4), cz = z + r.range(-0.4, 0.4);
-      b.cylinder([cx - Math.cos(a) * len / 2, 0.018, cz - Math.sin(a) * len / 2], [cx + Math.cos(a) * len / 2, 0.018, cz + Math.sin(a) * len / 2], 0.017, 5);
-    }
+    this.fixtures.set(i, level);
   }
 
   // Local (along wall, up, out of wall) -> world, for a placed object.
@@ -622,7 +401,7 @@ export class Level2 {
             cyl('rust', [sx, 1.4, 0], [sx, H + 0.05, 0], rad, 8, false);
             cyl('rust', [sx, 1.95, 0], [sx, 2.0, 0], rad * 1.4, 8);
           }
-          this.valve(at(0.7, 1.75, 0), [Math.cos(m.rot), 0, -Math.sin(m.rot)], 0.06);
+          valve(this.cb, at(0.7, 1.75, 0), [Math.cos(m.rot), 0, -Math.sin(m.rot)], 0.06);
           this.dialSpot(at(0.3, 1.12, 0.565), m.rot, 0.12);
           this.dialSpot(at(-0.25, 1.2, 0.55), m.rot, 0.09);
           this.machineSpots.push({ x: m.x, z: m.z, loud: 1 });
@@ -642,7 +421,7 @@ export class Level2 {
           cyl('machine', [0.38, 0.5, -0.12], [0.38, 0.5, 0.14], 0.26, 12);
           cyl('rust', [0.38, 0.76, 0], [0.38, H + 0.05, 0], 0.08, 8, false);
           cyl('rust', [0.38, 0.5, back + 0.05], [0.38, 0.5, -0.12], 0.08, 8, false);
-          this.valve(at(0.38, 1.3, 0), [0, 1, 0], 0.08);
+          valve(this.cb, at(0.38, 1.3, 0), [0, 1, 0], 0.08);
           this.dialSpot(at(0.38, 1.0, 0.09), m.rot, 0.07);
           this.machineSpots.push({ x: m.x, z: m.z, loud: 0.8 });
           break;
@@ -1173,22 +952,7 @@ export class Level2 {
   updateLights(dt, player) {
     const { shared, layout } = this;
     shared.globalLight.value = 1;
-    const H = this.map.height;
-    const cands = [];
-    for (const i of this.flickers) {
-      const l = layout.lights[i];
-      if (this.secDark[l.section]) {
-        this.setFixture(i, 0);
-        continue;
-      }
-      const d = Math.hypot(l.x - player.pos.x, l.z - player.pos.z);
-      const ph = this.phase[i];
-      const t = this.time * 8 + ph;
-      const on = Math.sin(t * 1.3) + Math.sin(t * 0.41 + ph) * 1.1 > -0.3 && fract(Math.sin(Math.floor(t) * 77.1 + ph) * 43758.5) > 0.25;
-      const level = on ? 1 : 0.04;
-      if (d < 30) this.setFixture(i, level);
-      if (d < 16) cands.push({ d, x: l.x, y: H - (l.type === 'tube' ? 0.15 : 0.3), z: l.z, power: l.power * 1.15 * level, color: l.color });
-    }
+    const cands = this.fixtures.flicker(this.time, player.pos.x, player.pos.z, (i) => this.secDark[layout.lights[i].section]);
     // The odd doors glow.
     for (const door of this.doors) {
       if (!door.glow) continue;
@@ -1198,19 +962,7 @@ export class Level2 {
       cands.push({ d, x: door.glowPos[0], y: door.glowPos[1], z: door.glowPos[2], power: (door.type === 'exit3' ? 0.9 : 0.7) * pulse, color: door.glow });
       if (door.lamp) this.redLampMat.color.setRGB(0.35 + 0.65 * pulse, 0.05 * pulse, 0.03);
     }
-    cands.sort((a, b) => a.d - b.d);
-    let nearest = Infinity;
-    for (let k = 0; k < MAX_DYN_LIGHTS; k++) {
-      const pos = shared.dynPos.value[k], col = shared.dynCol.value[k];
-      const c = cands[k];
-      if (!c) {
-        pos.set(0, -100, 0, 0);
-        continue;
-      }
-      pos.set(c.x, c.y, c.z, c.power);
-      col.setRGB(c.color[0], c.color[1], c.color[2]);
-      nearest = Math.min(nearest, c.d);
-    }
+    const nearest = applyDynamicLights(shared, cands, MAX_DYN_LIGHTS);
     this.buzzTimer -= dt;
     if (nearest < 6 && this.buzzTimer <= 0) {
       this.ctx.audio.flickerBuzz(1.1, 0.07 * (1 - nearest / 6));
@@ -1395,42 +1147,15 @@ export class Level2 {
     this.entities.dispose();
     for (const g of this.ownGeos) g.dispose();
     for (const m of this.ownMats) m.dispose();
-    this.glowTex.dispose();
+    this.fixtures.dispose();
     disposeTextures(this.textures);
   }
-}
-
-const _c = new THREE.Color();
-const NO_CAPS = ['top', 'bottom'];
-const NO_TOP = ['top'];
-
-function unit(v) {
-  const l = Math.hypot(v[0], v[1], v[2]) || 1;
-  return [v[0] / l, v[1] / l, v[2] / l];
-}
-
-function fract(x) {
-  return x - Math.floor(x);
 }
 
 // Tiny seeded generator for per-object variation.
 function createSeeded(seed) {
   let s = Math.floor(seed * 2147483646) + 1;
   return () => (s = (s * 16807) % 2147483647) / 2147483647;
-}
-
-function glowTexture() {
-  const c = document.createElement('canvas');
-  c.width = c.height = 64;
-  const ctx = c.getContext('2d');
-  const g = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
-  g.addColorStop(0, 'rgba(255,255,255,1)');
-  g.addColorStop(0.25, 'rgba(255,255,255,0.45)');
-  g.addColorStop(1, 'rgba(255,255,255,0)');
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, 64, 64);
-  const tex = new THREE.CanvasTexture(c);
-  return tex;
 }
 
 // Grey electrical cabinet front: two doors, vents, a warning label.

@@ -1,7 +1,8 @@
-import { DIRS, EDGE_WALL } from '../../world/GridMap.js';
-import { KIND, sameEdge } from './generate.js';
+import { DIRS, EDGE_WALL, EDGE_EXIT } from './GridMap.js';
 
-// Plans everything bolted to the tunnel walls and ceilings, as pure data:
+// Wall and ceiling services for industrial grid levels (Levels 2 and 3).
+//
+// planServices() plans everything bolted to the walls and ceilings, as pure data:
 // pipe polylines, brackets, ledges, cables, ceiling ducts and trays, the
 // 45-degree corner cuts, and the collision boxes all of that needs.
 //
@@ -15,7 +16,8 @@ const T = 0.08; // half wall thickness (GridWorld WALL_T / 2)
 const SQ2 = Math.SQRT2;
 
 // Bundle profiles. o = distance from the wall face to the pipe's centre.
-const PROFILES = {
+// A level can pass its own (opts.profiles / opts.pick).
+export const UTILITY_PROFILES = {
   heavy: (rng) => [
     { k: 'lag', r: 0.17, o: 0.2, y: rng.range(0.42, 0.55) },
     { k: 'lag', r: 0.12, o: 0.15, y: rng.range(0.92, 1.02) },
@@ -61,11 +63,28 @@ const PROFILES = {
 };
 export const LEDGE = { h: 0.78, d: 0.32 };
 
-export function planServices(layout, rng) {
+/**
+ * layout: { map, kind (0 = tunnel), doors [{edge}], chamfers, runs, inRun }
+ * opts: {
+ *   profiles   name -> (rng) => pipe list (default UTILITY_PROFILES)
+ *   pick       (rng, run) => profile name for a tunnel chain
+ *   H          ceiling height the services hang from (default map.height)
+ *   ceilingOk  (x, y) => whether ceiling services may run through a cell
+ *   ceilingKinds  pipe kinds to pick from for ceiling runs
+ * }
+ */
+export function planServices(layout, rng, opts = {}) {
   const { map, kind, doors, chamfers } = layout;
-  const cs = map.cellSize, H = map.height, N = map.cols;
-  const wall = (x, y, d) => map.getEdge(map.edge(x, y, d)) === EDGE_WALL || map.getEdge(map.edge(x, y, d)) === 2;
-  const isTunnel = (x, y) => kind[map.idx(x, y)] === KIND.TUNNEL;
+  const cs = map.cellSize, N = map.cols;
+  const H = opts.H ?? map.height;
+  const PROFILES = opts.profiles || UTILITY_PROFILES;
+  const pickProfile = opts.pick || pickUtility;
+  const ceilingOk = opts.ceilingOk || (() => true);
+  const wall = (x, y, d) => {
+    const v = map.getEdge(map.edge(x, y, d));
+    return v === EDGE_WALL || v === EDGE_EXIT;
+  };
+  const isTunnel = (x, y) => kind[map.idx(x, y)] === 0;
   const doorOn = (x, y, d) => doors.some((o) => sameEdge(o.edge, map.edge(x, y, d)));
   const chamferAt = new Map(chamfers.map((c) => [map.idx(c.x, c.y), c]));
 
@@ -237,8 +256,8 @@ export function planServices(layout, rng) {
       cur = next;
     }
     const sample = list[0];
-    const pname = sample.door ? 'door' : !sample.tunnel ? 'room' : pickProfile(rng);
-    const profile = PROFILES[pname](rng);
+    const pname = sample.door ? 'door' : !sample.tunnel ? 'room' : pickProfile(rng, sample);
+    const profile = (PROFILES[pname] || UTILITY_PROFILES[pname] || (() => []))(rng);
     for (const [r] of order) r.profile = pname;
     const closed = order.length > 1 && order[0][0].ends[order[0][1] ? 0 : 1].type !== 'dive';
 
@@ -346,7 +365,7 @@ export function planServices(layout, rng) {
     const segs = [];
     let curSeg = [];
     for (const [x, y] of run.cells) {
-      if (run.axis === 1 && inRun[0][map.idx(x, y)] >= 0) {
+      if ((run.axis === 1 && inRun[0][map.idx(x, y)] >= 0) || !ceilingOk(x, y)) {
         if (curSeg.length) segs.push(curSeg);
         curSeg = [];
         continue;
@@ -375,7 +394,7 @@ export function planServices(layout, rng) {
         const n = rng.int(2, 3);
         let off = 0.22;
         for (let i = 0; i < n; i++) {
-          const k = rng.pick(['galv', 'rust', 'rust', 'lag']);
+          const k = rng.pick(opts.ceilingKinds || ['galv', 'rust', 'rust', 'lag']);
           const r = k === 'lag' ? rng.range(0.09, 0.12) : rng.range(0.035, 0.075);
           off += r;
           items.push({ k, r, off: side * off, y: H - 0.1 - r - (run.axis === 1 ? 0.03 : 0) });
@@ -408,7 +427,7 @@ export function planServices(layout, rng) {
   return out;
 }
 
-function pickProfile(rng) {
+function pickUtility(rng) {
   const r = rng.next();
   return r < 0.3 ? 'heavy' : r < 0.6 ? 'mixed' : r < 0.73 ? 'ledge' : r < 0.91 ? 'conduit' : 'bare';
 }
@@ -424,4 +443,143 @@ function intersect(P1, D1, P2, D2) {
   if (Math.abs(den) < 1e-9) return [...P2];
   const t = ((P2[0] - P1[0]) * D2[1] - (P2[1] - P1[1]) * D2[0]) / den;
   return [P1[0] + D1[0] * t, P1[1] + D1[1] * t];
+}
+
+export function sameEdge(a, b) {
+  return a.h === b.h && a.x === b.x && a.y === b.y;
+}
+
+// ---- Geometry -------------------------------------------------------------------
+
+const PIPE_SEG = { lag: 9, duct: 11, rust: 7, galv: 6, red: 6, conduit: 4, cable: 4, black: 7, brass: 8, copper: 6 };
+const PIPE_V = { lag: 0.5, duct: 1.4, rust: 0.7, galv: 0.6, red: 0.6, conduit: 0.5, cable: 0.5 };
+const NO_CAPS = ['top', 'bottom'];
+const NO_TOP = ['top'];
+
+function unit(v) {
+  const l = Math.hypot(v[0], v[1], v[2]) || 1;
+  return [v[0] / l, v[1] / l, v[2] / l];
+}
+
+/**
+ * Builds a planServices() plan into ChunkedBuilders. Pipes go to a builder
+ * named after their kind (lag, rust, galv, red, conduit, cable, duct, or
+ * any custom kind); brackets, hangers and trays to 'strut'; ledges to
+ * 'ledge'; valves to 'red'/'rust'/'galv'. H = ceiling the hangers hang from.
+ */
+export function buildServices(cb, plan, rng, H) {
+  for (const p of plan.pipes) {
+    const name = p.k;
+    const seg = PIPE_SEG[p.k] || 6;
+    const vScale = PIPE_V[p.k] || 0.6;
+    let v = 0;
+    const pts = p.pts;
+    // Bends: each segment runs on past the corner by r*tan(angle/2), so
+    // the two overlap into a solid joint without extra elbow geometry.
+    const ext = pts.map((q, j) => {
+      if (j === 0 || j === pts.length - 1) return 0;
+      const a = pts[j - 1], c = pts[j + 1];
+      const d1 = unit([q[0] - a[0], q[1] - a[1], q[2] - a[2]]), d2 = unit([c[0] - q[0], c[1] - q[1], c[2] - q[2]]);
+      const cos = Math.max(-0.99, Math.min(1, d1[0] * d2[0] + d1[1] * d2[1] + d1[2] * d2[2]));
+      return Math.min(1, Math.sqrt((1 - cos) / (1 + cos))) * p.r;
+    });
+    for (let i = 0; i < pts.length - 1; i++) {
+      const a = pts[i], c = pts[i + 1];
+      const len = Math.hypot(c[0] - a[0], c[1] - a[1], c[2] - a[2]);
+      const d = [(c[0] - a[0]) / len, (c[1] - a[1]) / len, (c[2] - a[2]) / len];
+      const a2 = [a[0] - d[0] * ext[i], a[1] - d[1] * ext[i], a[2] - d[2] * ext[i]];
+      const c2 = [c[0] + d[0] * ext[i + 1], c[1] + d[1] * ext[i + 1], c[2] + d[2] * ext[i + 1]];
+      const b = cb.at(name, (a[0] + c[0]) / 2, (a[2] + c[2]) / 2);
+      b.cylinder(a2, c2, p.r, seg, { vScale, v0: v - ext[i] * vScale });
+      v += len * vScale;
+      // Flanged joints every few metres on bare metal pipe.
+      if (p.flanges && p.r >= 0.035 && len > 1.2) {
+        const n = Math.floor(len / 3.2);
+        for (let k = 1; k <= n; k++) {
+          const t = k / (n + 1), t2 = t + 0.05 / len;
+          const f0 = [a[0] + (c[0] - a[0]) * t, a[1] + (c[1] - a[1]) * t, a[2] + (c[2] - a[2]) * t];
+          const f1 = [a[0] + (c[0] - a[0]) * t2, a[1] + (c[1] - a[1]) * t2, a[2] + (c[2] - a[2]) * t2];
+          b.cylinder(f0, f1, p.r * 1.4, seg);
+        }
+      }
+      // Lagging has metal bands at its seams.
+      if (p.k === 'lag' && len > 1.5 && Math.abs(c[1] - a[1]) < 0.01) {
+        const n = Math.floor(len / 1.7);
+        for (let k = 1; k <= n; k++) {
+          const t = k / (n + 1), t2 = t + 0.03 / len;
+          const f0 = [a[0] + (c[0] - a[0]) * t, a[1], a[2] + (c[2] - a[2]) * t];
+          const f1 = [a[0] + (c[0] - a[0]) * t2, a[1], a[2] + (c[2] - a[2]) * t2];
+          cb.at('galv', f0[0], f0[2]).cylinder(f0, f1, p.r * 1.03, seg);
+        }
+      }
+      // A valve now and then.
+      if ((p.k === 'rust' || p.k === 'red') && p.r >= 0.05 && len > 2 && !p.ceiling && rng.chance(0.18)) {
+        const t = rng.range(0.3, 0.7);
+        const m = [a[0] + (c[0] - a[0]) * t, a[1], a[2] + (c[2] - a[2]) * t];
+        valve(cb, m, [c[0] - a[0], 0, c[2] - a[2]], p.r);
+      }
+    }
+  }
+  // Strut channel brackets and their arms.
+  for (const s of plan.struts) {
+    cb.at('strut', s.x, s.z).box(s.x, (s.y0 + s.y1) / 2, s.z, s.a === 0 ? 0.042 : 0.045, s.y1 - s.y0, s.a === 0 ? 0.045 : 0.042, 0, 1, NO_CAPS);
+  }
+  for (const [x, y, z, sx, sy, sz] of plan.arms) cb.at('strut', x, z).box(x, y, z, sx, sy, sz, 0, 1, NO_TOP);
+  // Ledges.
+  for (const [x0, z0, x1, z1] of plan.ledges) {
+    cb.at('ledge', (x0 + x1) / 2, (z0 + z1) / 2).aabb(x0, 0, z0, x1, LEDGE.h, z1, 1, ['bottom']);
+  }
+  // Cable trays with their load.
+  for (const t of plan.trays) {
+    const b = cb.at('strut', (t.a[0] + t.b[0]) / 2, (t.a[1] + t.b[1]) / 2);
+    const x0 = Math.min(t.a[0], t.b[0]), x1 = Math.max(t.a[0], t.b[0]);
+    const z0 = Math.min(t.a[1], t.b[1]), z1 = Math.max(t.a[1], t.b[1]);
+    const w = t.w / 2;
+    if (t.axis === 0) {
+      b.aabb(x0, t.y - 0.01, z0 - w, x1, t.y, z0 + w);
+      b.aabb(x0, t.y, z0 - w, x1, t.y + 0.08, z0 - w + 0.012);
+      b.aabb(x0, t.y, z0 + w - 0.012, x1, t.y + 0.08, z0 + w);
+    } else {
+      b.aabb(x0 - w, t.y - 0.01, z0, x0 + w, t.y, z1);
+      b.aabb(x0 - w, t.y, z0, x0 - w + 0.012, t.y + 0.08, z1);
+      b.aabb(x0 + w - 0.012, t.y, z0, x0 + w, t.y + 0.08, z1);
+    }
+    const cables = cb.at('cable', (x0 + x1) / 2, (z0 + z1) / 2);
+    for (let k = 0; k < 5; k++) {
+      const o = -w + 0.04 + k * ((t.w - 0.08) / 4);
+      const r = 0.018 + (k % 2) * 0.008;
+      const y = t.y + r + (k % 3 === 1 ? 0.02 : 0);
+      if (t.axis === 0) cables.cylinder([x0, y, z0 + o], [x1, y, z0 + o], r, 5);
+      else cables.cylinder([x0 + o, y, z0], [x0 + o, y, z1], r, 5);
+    }
+  }
+  // Hangers: threaded rods and a trapeze bar.
+  for (const h of plan.hangers) {
+    const b = cb.at('strut', h.x, h.z);
+    const p0 = [h.x + h.lat[0] * h.o0, h.z + h.lat[1] * h.o0];
+    const p1 = [h.x + h.lat[0] * h.o1, h.z + h.lat[1] * h.o1];
+    for (const p of [p0, p1]) b.cylinder([p[0], H, p[1]], [p[0], h.y - 0.02, p[1]], 0.008, 4);
+    const cx = (p0[0] + p1[0]) / 2, cz = (p0[1] + p1[1]) / 2;
+    const len = h.o1 - h.o0 + 0.04;
+    b.box(cx, h.y - 0.02, cz, h.axis === 0 ? 0.04 : len, 0.04, h.axis === 0 ? len : 0.04);
+  }
+}
+
+// Handwheel valve on a pipe: body, stem and a red wheel.
+export function valve(cb, m, along, r) {
+  const b = cb.at('red', m[0], m[2]);
+  const l = Math.hypot(along[0], along[2]) || 1;
+  const d = [along[0] / l, 0, along[2] / l];
+  cb.at('rust', m[0], m[2]).cylinder([m[0] - d[0] * r * 1.6, m[1], m[2] - d[2] * r * 1.6], [m[0] + d[0] * r * 1.6, m[1], m[2] + d[2] * r * 1.6], r * 1.5, 8, { caps: true });
+  const top = [m[0], m[1] + r * 1.5 + 0.12, m[2]];
+  cb.at('galv', m[0], m[2]).cylinder([m[0], m[1] + r, m[2]], top, 0.012, 5);
+  const R = 0.11;
+  for (let k = 0; k < 8; k++) {
+    const a0 = (k / 8) * Math.PI * 2, a1 = ((k + 1) / 8) * Math.PI * 2;
+    b.cylinder([top[0] + Math.cos(a0) * R, top[1], top[2] + Math.sin(a0) * R], [top[0] + Math.cos(a1) * R, top[1], top[2] + Math.sin(a1) * R], 0.012, 4);
+  }
+  for (let k = 0; k < 3; k++) {
+    const a = (k / 3) * Math.PI * 2;
+    b.cylinder(top, [top[0] + Math.cos(a) * R, top[1], top[2] + Math.sin(a) * R], 0.008, 4);
+  }
 }

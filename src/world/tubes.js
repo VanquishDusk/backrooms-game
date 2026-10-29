@@ -68,16 +68,45 @@ export class TubeBuilder {
     }
   }
 
+  // Tapered cylinder (cone frustum) from a (radius ra) to b (radius rb).
+  frustum(a, b, ra, rb, seg = 10, { caps = false } = {}) {
+    _d.set(b[0] - a[0], b[1] - a[1], b[2] - a[2]);
+    const len = _d.length();
+    if (len < 1e-4) return;
+    _d.divideScalar(len);
+    _u.crossVectors(_d, Math.abs(_d.y) > 0.95 ? RIGHT : UP).normalize();
+    _w.crossVectors(_d, _u);
+    const slope = (ra - rb) / len;
+    const base = this.vertexCount;
+    for (let i = 0; i <= seg; i++) {
+      const t = (i / seg) * Math.PI * 2;
+      const c = Math.cos(t), s = Math.sin(t);
+      const rx = _u.x * c + _w.x * s, ry = _u.y * c + _w.y * s, rz = _u.z * c + _w.z * s;
+      const nl = Math.hypot(1, slope);
+      const nx = (rx + _d.x * slope) / nl, ny = (ry + _d.y * slope) / nl, nz = (rz + _d.z * slope) / nl;
+      this.vert(a[0] + rx * ra, a[1] + ry * ra, a[2] + rz * ra, nx, ny, nz, i / seg, 0);
+      this.vert(b[0] + rx * rb, b[1] + ry * rb, b[2] + rz * rb, nx, ny, nz, i / seg, len);
+    }
+    for (let i = 0; i < seg; i++) {
+      const k = base + i * 2;
+      this.idx.push(k, k + 2, k + 1, k + 1, k + 2, k + 3);
+    }
+    if (caps) {
+      if (rb > 0.001) this.cylinder(b, [b[0] + _d.x * 0.001, b[1] + _d.y * 0.001, b[2] + _d.z * 0.001], rb, seg, { caps: true });
+      if (ra > 0.001) this.cylinder([a[0] - _d.x * 0.001, a[1] - _d.y * 0.001, a[2] - _d.z * 0.001], a, ra, seg, { caps: true });
+    }
+  }
+
   // Low-poly sphere (pipe elbows, bulbs).
-  sphere(c, r, seg = 8, rings = 5) {
+  sphere(c, r, seg = 8, rings = 5, sy = 1) {
     const base = this.vertexCount;
     for (let j = 0; j <= rings; j++) {
       const phi = (j / rings) * Math.PI;
-      const sy = Math.cos(phi), sr = Math.sin(phi);
+      const yy = Math.cos(phi), sr = Math.sin(phi);
       for (let i = 0; i <= seg; i++) {
         const t = (i / seg) * Math.PI * 2;
         const nx = Math.cos(t) * sr, nz = Math.sin(t) * sr;
-        this.vert(c[0] + nx * r, c[1] + sy * r, c[2] + nz * r, nx, sy, nz, i / seg, j / rings);
+        this.vert(c[0] + nx * r, c[1] + yy * r * sy, c[2] + nz * r, nx, yy, nz, i / seg, j / rings);
       }
     }
     for (let j = 0; j < rings; j++) {

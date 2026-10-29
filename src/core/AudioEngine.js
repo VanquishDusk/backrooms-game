@@ -529,6 +529,90 @@ export class AudioEngine {
     }
   }
 
+  // A fluorescent tube or bulb bursting: a pop and falling glass.
+  shatter(pan = 0, vol = 0.35) {
+    if (!this.ctx) return;
+    const t0 = this.ctx.currentTime;
+    const pop = this.noiseSource();
+    const pf = this.ctx.createBiquadFilter();
+    pf.type = 'highpass';
+    pf.frequency.value = 1200;
+    const pg = this.ctx.createGain();
+    this.env(pg, t0, vol, 0.001, 0.08);
+    pop.connect(pf).connect(pg).connect(this.out(pan));
+    pop.start(t0, Math.random(), 0.12);
+    for (let i = 0; i < 9; i++) {
+      const t = t0 + 0.12 + Math.random() * 0.5;
+      const o = this.ctx.createOscillator();
+      o.type = 'sine';
+      o.frequency.value = 3000 + Math.random() * 4000;
+      const g = this.ctx.createGain();
+      this.env(g, t, vol * 0.18, 0.001, 0.05 + Math.random() * 0.08);
+      o.connect(g).connect(this.out(pan));
+      o.start(t);
+      o.stop(t + 0.2);
+    }
+  }
+
+  // A generator winding down: pitch and level falling away.
+  powerDown(pan = 0, vol = 0.35) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    const o = this.ctx.createOscillator();
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(110, t);
+    o.frequency.exponentialRampToValueAtTime(18, t + 3.2);
+    const lp = this.ctx.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.setValueAtTime(900, t);
+    lp.frequency.exponentialRampToValueAtTime(120, t + 3.2);
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 3.4);
+    o.connect(lp).connect(g).connect(this.out(pan));
+    o.start(t);
+    o.stop(t + 3.5);
+    this.thud(pan, vol * 0.8);
+  }
+
+  // An old lift's bell.
+  bell(pan = 0, vol = 0.25) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    for (const [f, k] of [[880, 1], [1320, 0.4], [2200, 0.2]]) {
+      const o = this.ctx.createOscillator();
+      o.type = 'sine';
+      o.frequency.value = f;
+      const g = this.ctx.createGain();
+      this.env(g, t, vol * k, 0.003, 1.6);
+      o.connect(g).connect(this.out(pan));
+      o.start(t);
+      o.stop(t + 1.7);
+    }
+  }
+
+  // Lift motor and cables: a rising grind.
+  liftMotor(vol = 0.35) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    const o = this.ctx.createOscillator();
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(40, t);
+    o.frequency.linearRampToValueAtTime(70, t + 1.5);
+    const lp = this.ctx.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = 300;
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(vol, t + 0.4);
+    g.gain.setValueAtTime(vol, t + 2.4);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 3);
+    o.connect(lp).connect(g).connect(this.master);
+    o.start(t);
+    o.stop(t + 3.1);
+    this.clank(0, vol * 0.6);
+  }
+
   // Small hammer tap.
   tink(pan = 0, vol = 0.15) {
     if (!this.ctx) return;

@@ -38,6 +38,16 @@ export class Player {
     this.frozen = false;
     this.speedMul = 1;
     this.flipped = false;
+    // Headroom above you, set by the level: under a low ceiling you crouch
+    // or crawl automatically.
+    this.ceiling = Infinity;
+    this.eye = EYE;
+    this.staminaRegenMul = 1;
+  }
+
+  // 1 = standing, ~0.6 = crouching, ~0.35 = crawling.
+  get stance() {
+    return this.eye / EYE;
   }
 
   // Stats that travel with you between levels.
@@ -99,7 +109,10 @@ export class Player {
     const moving = mag > 0.05;
 
     this.coveringEars = input.coverEars;
-    const wantRun = input.sprint && moving && my > -0.2 && !this.coveringEars;
+    const eyeTarget = Math.max(0.5, Math.min(EYE, this.ceiling - 0.24));
+    this.eye += (eyeTarget - this.eye) * Math.min(1, dt * 9);
+    const low = this.eye < 1.45;
+    const wantRun = input.sprint && moving && my > -0.2 && !this.coveringEars && !low;
     if (this.staminaLock > 0) this.staminaLock -= dt;
     this.sprinting = wantRun && this.stamina > 0 && this.staminaLock <= 0;
     if (this.sprinting) {
@@ -110,11 +123,12 @@ export class Player {
         events.push('exhausted');
       }
     } else {
-      this.stamina = Math.min(100, this.stamina + (moving ? 9 : 15) * dt);
+      this.stamina = Math.min(100, this.stamina + (moving ? 9 : 15) * this.staminaRegenMul * dt);
     }
 
     let speed = (this.sprinting ? RUN : WALK) * Math.min(1, Math.max(mag, 0));
     if (this.coveringEars) speed *= EARS_SPEED;
+    if (low) speed *= this.eye < 1.0 ? 0.42 : 0.68;
     speed *= this.speedMul;
     const sin = Math.sin(this.yaw), cos = Math.cos(this.yaw);
     // Forward is -z at yaw 0.
@@ -150,7 +164,7 @@ export class Player {
     const bobY = Math.sin(this.bob * 2) * 0.04 * this.bobAmp;
     const bobX = Math.cos(this.bob) * 0.03 * this.bobAmp;
     const cos = Math.cos(this.yaw), sin = Math.sin(this.yaw);
-    camera.position.set(this.pos.x + cos * bobX, this.pos.y + EYE + bobY, this.pos.z - sin * bobX);
+    camera.position.set(this.pos.x + cos * bobX, this.pos.y + this.eye + bobY * this.stance, this.pos.z - sin * bobX);
     camera.rotation.set(this.pitch, this.yaw, this.roll, 'YXZ');
   }
 }

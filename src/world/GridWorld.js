@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { EDGE_OPEN, EDGE_WALL, EDGE_EXIT } from './GridMap.js';
+import { EDGE_OPEN, EDGE_WALL, EDGE_EXIT, EDGE_BARS } from './GridMap.js';
 import { SURFACE, createWorldMaterial, createGlitchMaterial } from './materials.js';
 import { mergeGeometries } from './props.js';
 
@@ -109,6 +109,7 @@ export class GridWorld {
    * @param {number[]} [opts.panelSize]  light fixture [width, length]
    * @param {number} [opts.panelDrop]  how far fixtures hang below the ceiling
    * @param {(x:number,z:number)=>number} [opts.dampAt]  carpet wetness 0..1
+   * @param {(x:number,y:number)=>number} [opts.ceilingAt]  ceiling height per cell (default: map height)
    * @param {object} opts.shared  shared uniforms
    */
   constructor(opts) {
@@ -132,6 +133,7 @@ export class GridWorld {
     this.panelSize = opts.panelSize || [0.62, 1.22];
     this.panelDrop = opts.panelDrop || 0.012;
     this.dampAt = opts.dampAt || (() => 1);
+    this.ceilingAt = opts.ceilingAt || null;
     const ts = { wall: 1 / 0.9, floor: 1 / 1.6, ceiling: 1 / 1.2, tile: 1 / 1.2, wood: 1 / 1.5, ...opts.texScale };
     const tx = this.textures;
     this.materials = {
@@ -213,6 +215,22 @@ export class GridWorld {
             const zc = z0 + k * (cs / 5);
             wood.box(x0, zc - 0.04, x1, zc + 0.04, top - 0.3, top, [false, false]);
             wood.flat(x0, zc - 0.04, x1, zc + 0.04, top - 0.3, false);
+          }
+        } else if (this.ceilingAt) {
+          // Ceilings at different heights, with a face where a high ceiling
+          // meets a lower one across an opening.
+          const ch = this.ceilingAt(x, y);
+          geos.ceiling.flat(x0, z0, x1, z1, ch, false);
+          const step = geoFor('wall');
+          for (let d = 0; d < 4; d++) {
+            const nx = x + (d === 0 ? 1 : d === 1 ? -1 : 0), ny = y + (d === 2 ? 1 : d === 3 ? -1 : 0);
+            if (!map.inBounds(nx, ny) || map.getEdge(map.edge(x, y, d)) === EDGE_WALL) continue;
+            const nh = this.ceilingAt(nx, ny);
+            if (nh >= ch - 0.01) continue;
+            if (d === 0) step.wallX(x1, z0, z1, nh, ch, -1);
+            else if (d === 1) step.wallX(x0, z0, z1, nh, ch, 1);
+            else if (d === 2) step.wallZ(z1, x0, x1, nh, ch, -1);
+            else step.wallZ(z0, x0, x1, nh, ch, 1);
           }
         } else {
           geos.ceiling.flat(x0, z0, x1, z1, H, false);
@@ -467,12 +485,16 @@ export class GridWorld {
     const boxes = [];
     for (let y = 0; y <= map.rows; y++) {
       for (let x = 0; x < map.cols; x++) {
-        if (map.getH(x, y) === EDGE_WALL) boxes.push(x * cs - t, y * cs - t, (x + 1) * cs + t, y * cs + t);
+        const v = map.getH(x, y);
+        if (v === EDGE_WALL) boxes.push(x * cs - t, y * cs - t, (x + 1) * cs + t, y * cs + t);
+        else if (v === EDGE_BARS) boxes.push(x * cs, y * cs - 0.05, (x + 1) * cs, y * cs + 0.05);
       }
     }
     for (let y = 0; y < map.rows; y++) {
       for (let x = 0; x <= map.cols; x++) {
-        if (map.getV(x, y) === EDGE_WALL) boxes.push(x * cs - t, y * cs - t, x * cs + t, (y + 1) * cs + t);
+        const v = map.getV(x, y);
+        if (v === EDGE_WALL) boxes.push(x * cs - t, y * cs - t, x * cs + t, (y + 1) * cs + t);
+        else if (v === EDGE_BARS) boxes.push(x * cs - 0.05, y * cs, x * cs + 0.05, (y + 1) * cs);
       }
     }
     for (const p of this.pillars) {

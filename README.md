@@ -2,7 +2,7 @@
 
 A replayable 3D horror game set in the Backrooms, playable in the browser on desktop and mobile.
 
-Playable now: **Level 0 — "The Lobby" / "The Yellow Hell"**, its sub-level **Level 0.2 — "The Remodel"**, **Level 1 — "The Habitable Zone"**, **Level 1.3**, **Level 1.5 — "Inverted"** and **Level 2 — "Abandoned Utility Halls"**. More levels will follow.
+Playable now: **Level 0 — "The Lobby" / "The Yellow Hell"**, its sub-level **Level 0.2 — "The Remodel"**, **Level 1 — "The Habitable Zone"**, **Level 1.3**, **Level 1.5 — "Inverted"**, **Level 2 — "Abandoned Utility Halls"** and **Level 3 — "Electrical Station"**. More levels will follow.
 
 ## Play
 
@@ -113,9 +113,42 @@ Reached by following Level 1's pipe hallway until it narrows into a maintenance 
 - **Entities:** Hounds, Smilers (only in the dark), Skin-Stealers, Deathmoths (around the lights, and your flashlight) and Clumps (waiting in dead ends).
 - **Doors:** steel maintenance doors sit at the back of dead ends and in plant-room walls. Almost all are locked. A rare few are unlocked, and each looks and sounds different:
   - **Faded green with a chalk "1"**, under a lone bulb, with water dripping nearby. It leads back to **Level 1**.
-  - **Rust red with hazard tape and a lightning bolt**, with a pulsing red lamp and arcing electricity. It leads on to **Level 3** (coming soon).
+  - **Rust red with hazard tape and a lightning bolt**, with a pulsing red lamp and arcing electricity. It leads on to **Level 3**.
   - **Sometimes, a wooden office door with a brass "4"**, with warm light spilling under it and a scrap of carpet in front. It leads to **Level 4** (coming soon).
 - **Supply crates** sit in some dead ends: Almond Water, batteries, first aid, junk, or a burst of steam.
+
+## Level 3 — Electrical Station (Survival Difficulty 4)
+
+Reached through Level 2's red hazard-taped door. You arrive in front of it, and walking back into it returns you to Level 2.
+
+- **The station:** a dark maze of brick service corridors.
+  - Walls are unevenly coloured red, dark or tan brick, or glazed brown tile.
+  - Floors are dusty concrete or worn grey tile, under a peeling ceiling and dim buzzing tubes.
+  - Wiring, conduit and junction boxes line the walls, along with pipes of **black fluid** you can see moving through brass-collared sight glasses. It leaks into black puddles.
+- **Low passages:** some stretches are so low you automatically **crouch** or **crawl** (slower, no sprinting). Skin-Stealers can't follow you into the crawlspaces.
+- **Bars:**
+  - Indestructible bars block many corridors, some with locked gates and OUT OF BOUNDS signs.
+  - Whole **galleries** are sealed behind bars: brightly lit, with damaged angel statues, paintings, a chair facing the wall and a television showing static.
+  - Sometimes a **shadow** stands in a gallery and watches you.
+- **Generator rooms:**
+  - Green steel switchgear with copper busbars, insulators, fuse banks and cables, plus a generator set and control cabinets.
+  - Switchgear and loose wires **spark**, and getting too close hurts.
+  - When a **generator fails** you hear it wind down, and a whole section goes dark.
+- **Boiler rooms:** riveted brass boiler drums, a pear-shaped vessel, pumps, brass risers with handwheels, and a glowing furnace. The heat makes the air shimmer.
+- **Assembly hall:** a huge tall hall with running conveyors, stamping presses, a gantry crane and dome lamps. The output bins **keep producing supplies** (Almond Water, batteries, first aid).
+- **Sanctums:** tall, dark, cathedral-like rooms.
+  - Inside are marble floors, columns, pews, candles, sacred paintings and a huge **angel statue**.
+  - **Entities won't enter.** Your sanity recovers inside, and you can't be hurt there.
+- **Base Gamma:** an empty M.E.G. outpost.
+  - Bunks, a radio tuned to nothing, supply crates and a note.
+  - Entities stay out of here too.
+  - From the base, **painted arrows on the floor** lead to the lift.
+- **Hazards:**
+  - Lights sometimes **shatter** near you.
+  - **Purple discoloration** tints your vision and drains your sanity.
+  - The heat makes your stamina recover more slowly.
+- **Entities:** Hounds and Skin-Stealers.
+- **Exit:** an old **freight lift**, a wood-panelled car with a scissor gate, a LIFT sign and a floor dial. Its motor hums and its bell rings now and then. Step inside to go down to **Level 4** (coming soon).
 
 The main menu has a **Levels** section (0, 1, …) and a **Sublevels** section (0.2, 1.3, …). Each level unlocks there once you reach it.
 
@@ -123,7 +156,7 @@ Every run comes from a seed, which shows on the pause, death and escape screens.
 
 ## Entity library
 
-Reusable entities live in `src/entities/lib/`. Level 2 uses Hounds, Smilers, Skin-Stealers, Deathmoths and Clumps; the rest aren't placed in a level yet. Each has its own model, procedural skin, animations, sounds and AI (idle, movement, detection, attack), and they're lit by the level's lighting and your flashlight.
+Reusable entities live in `src/entities/lib/`. Level 2 uses Hounds, Smilers, Skin-Stealers, Deathmoths and Clumps, and Level 3 uses Hounds and Skin-Stealers; the rest aren't placed in a level yet. Each has its own model, procedural skin, animations, sounds and AI (idle, movement, detection, attack), and they're lit by the level's lighting and your flashlight.
 
 | Entity | What it does |
 |---|---|
@@ -178,7 +211,8 @@ src/core/                     engine: Game loop/state, Input, Player, AudioEngin
 src/world/                    reusable grid-level toolkit: GridMap (layout + pathing + line of sight),
                               GridWorld (meshes, collision, baked lightmap, destructible cells),
                               materials (shaders), textures (procedural), props (doors, clutter, fixtures),
-                              tubes (fast pipe/box geometry writer, chunked meshes)
+                              tubes (fast pipe/box geometry writer, chunked meshes),
+                              services (wall pipe bundles, ceiling runs, 45-degree corners), fixtures (tubes, bulbs, lamps)
 src/entities/                 Stalker (Level 0's dark figure), Hound (Level 1's blackout hunter)
 src/entities/lib/             reusable entity library: Entity base (AI helpers), humanoid rig, skins, 9 entities, EntityManager
 entities.html                 entity viewer
@@ -188,7 +222,8 @@ src/levels/level0_2/          Level 0.2 generator and runtime (the collapse)
 src/levels/level1/            Level 1 generator and runtime (sectors, blackouts, crates, the hallway out)
 src/levels/level1_3/          Level 1.3 generator and runtime (Detox Zones, The Ward, the Decay)
 src/levels/level1_5/          Level 1.5 generator and runtime (the negative, the denizens, She)
-src/levels/level2/            Level 2 generator, service planner (pipes, 45-degree corners, collision) and runtime
+src/levels/level2/            Level 2 generator and runtime
+src/levels/level3/            Level 3 generator, room dressing (generator/boiler rooms, assembly hall, Sanctums, Base Gamma, galleries) and runtime
 ```
 
 All textures and sounds are generated in code, so there are no asset files.
@@ -199,4 +234,4 @@ All textures and sounds are generated in code, so there are no asset files.
 2. Grid-style levels can reuse `GridMap` and `GridWorld` with their own generator, textures and lighting.
 3. Register the level in `src/levels/registry.js`.
 
-Levels hand off with `ctx.onEscape(targetId, 'noclip' | 'door' | 'walk')`, and player stats carry over. An exit that targets a level that isn't built yet shows a "coming soon" screen, using the names in `UPCOMING`. Level 2's odd doors already target `level3` and `level4`.
+Levels hand off with `ctx.onEscape(targetId, 'noclip' | 'door' | 'walk')`, and player stats carry over. An exit that targets a level that isn't built yet shows a "coming soon" screen, using the names in `UPCOMING`. Level 2's office door and Level 3's lift already target `level4`.

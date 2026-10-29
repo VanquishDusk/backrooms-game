@@ -3,11 +3,13 @@
 // onto this, so future levels can reuse it with their own generators.
 //
 // Edge values: 0 = open, 1 = wall, 2 = exit wall (blocks sight and paths,
-// but the player can noclip through it).
+// but the player can noclip through it), 3 = bars (block movement and
+// paths, but light and sight pass through).
 
 export const EDGE_OPEN = 0;
 export const EDGE_WALL = 1;
 export const EDGE_EXIT = 2;
+export const EDGE_BARS = 3;
 
 // Directions: 0 = +x, 1 = -x, 2 = +y (+z in world), 3 = -y.
 export const DIRS = [
@@ -184,13 +186,13 @@ export class GridMap {
       if (tMaxX < tMaxY) {
         if (tMaxX > 1) break;
         const ex = stepX > 0 ? cx + 1 : cx;
-        if (ex >= 0 && ex <= this.cols && cy >= 0 && cy < this.rows && this.getV(ex, cy)) count++;
+        if (ex >= 0 && ex <= this.cols && cy >= 0 && cy < this.rows && opaque(this.getV(ex, cy))) count++;
         cx += stepX;
         tMaxX += tDeltaX;
       } else {
         if (tMaxY > 1) break;
         const ey = stepY > 0 ? cy + 1 : cy;
-        if (cx >= 0 && cx < this.cols && ey >= 0 && ey <= this.rows && this.getH(cx, ey)) count++;
+        if (cx >= 0 && cx < this.cols && ey >= 0 && ey <= this.rows && opaque(this.getH(cx, ey))) count++;
         cy += stepY;
         tMaxY += tDeltaY;
       }
@@ -212,4 +214,8 @@ export class GridMap {
     const y = Math.min(this.rows - 1, Math.max(0, Math.floor(wz / this.cellSize)));
     return [x, y];
   }
+}
+
+function opaque(v) {
+  return v !== EDGE_OPEN && v !== EDGE_BARS;
 }

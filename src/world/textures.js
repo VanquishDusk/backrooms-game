@@ -1099,3 +1099,435 @@ export function signAtlasTexture(renderer, labels = ['C-7', 'D-12', 'B-3', 'E-9'
   }
   return finish(c, renderer);
 }
+
+// ---- Level 3 -------------------------------------------------------------
+
+// Old brick laid in unevenly coloured courses: reds, browns, tans, a few
+// grey and black, with sooty patches and white efflorescence.
+export function unevenBrickTexture(renderer, palette = 'red') {
+  const W = 512, H = 512;
+  const c = document.createElement('canvas');
+  c.width = W;
+  c.height = H;
+  const ctx = c.getContext('2d');
+  const tones = {
+    red: [[150, 70, 50], [125, 60, 45], [170, 95, 65], [110, 75, 60], [180, 120, 80], [90, 70, 62], [140, 85, 60]],
+    dark: [[80, 52, 42], [70, 48, 40], [95, 62, 48], [60, 50, 46], [110, 74, 54], [50, 42, 38]],
+    tan: [[180, 140, 95], [165, 120, 80], [195, 160, 110], [150, 110, 80], [175, 130, 90], [130, 100, 75]],
+  }[palette];
+  ctx.fillStyle = '#4a4038';
+  ctx.fillRect(0, 0, W, H);
+  const rows = 22, bw = W / 4;
+  const bh = H / rows;
+  for (let r = 0; r < rows; r++) {
+    for (let k = -1; k < 5; k++) {
+      const x = k * bw + (r % 2 ? bw / 2 : 0), y = r * bh;
+      const t = tones[Math.floor(Math.random() * tones.length)];
+      const v = 0.82 + Math.random() * 0.3;
+      ctx.fillStyle = `rgb(${t[0] * v | 0},${t[1] * v | 0},${t[2] * v | 0})`;
+      ctx.fillRect(x + 2, y + 2, bw - 4, bh - 3);
+      // Face texture and chipped corners.
+      ctx.fillStyle = `rgba(0,0,0,${(Math.random() * 0.18).toFixed(3)})`;
+      ctx.fillRect(x + 2, y + bh - 6, bw - 4, 3);
+      if (Math.random() < 0.2) {
+        ctx.fillStyle = '#4a4038';
+        ctx.fillRect(x + 2 + Math.random() * (bw - 12), y + 2, 6 + Math.random() * 8, 4);
+      }
+    }
+  }
+  blotches(ctx, W, H, 10, '20,15,10', 0.5);
+  blotches(ctx, W, H, 6, '220,215,200', 0.18);
+  // Grime toward the floor.
+  const g = ctx.createLinearGradient(0, H * 0.65, 0, H);
+  g.addColorStop(0, 'rgba(25,20,15,0)');
+  g.addColorStop(1, 'rgba(25,20,15,0.6)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, H * 0.65, W, H * 0.35);
+  speckle(ctx, W, 9000, '20,15,10', 0.25);
+  return finish(c, renderer);
+}
+
+// Glazed brick tile in brown and tan, like an old service tunnel:
+// a dark brown dado below, lighter tile above, a shine on every tile.
+export function glazedTileTexture(renderer) {
+  const W = 512, H = 512;
+  const c = document.createElement('canvas');
+  c.width = W;
+  c.height = H;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#3a2c1e';
+  ctx.fillRect(0, 0, W, H);
+  const rows = 18, cols = 4;
+  const th = H / rows, tw = W / cols;
+  for (let r = 0; r < rows; r++) {
+    const low = r >= rows - 6;
+    for (let k = -1; k <= cols; k++) {
+      const x = k * tw + (r % 2 ? tw / 2 : 0), y = r * th;
+      const v = 0.85 + Math.random() * 0.25;
+      const base = low ? [92, 58, 30] : [168, 120, 62];
+      ctx.fillStyle = `rgb(${base[0] * v | 0},${base[1] * v | 0},${base[2] * v | 0})`;
+      ctx.fillRect(x + 2, y + 2, tw - 4, th - 4);
+      // Glaze highlight along the top edge and a soft sheen.
+      const g = ctx.createLinearGradient(0, y, 0, y + th);
+      g.addColorStop(0, 'rgba(255,240,210,0.35)');
+      g.addColorStop(0.3, 'rgba(255,240,210,0.06)');
+      g.addColorStop(1, 'rgba(0,0,0,0.12)');
+      ctx.fillStyle = g;
+      ctx.fillRect(x + 2, y + 2, tw - 4, th - 4);
+      if (Math.random() < 0.05) {
+        // A cracked or missing tile.
+        ctx.fillStyle = 'rgba(70,62,52,0.9)';
+        ctx.fillRect(x + 4, y + 4, tw * (0.3 + Math.random() * 0.5), th - 8);
+      }
+    }
+  }
+  blotches(ctx, W, H, 8, '30,20,10', 0.35);
+  speckle(ctx, W, 4000, '20,15,10', 0.2);
+  return finish(c, renderer);
+}
+
+// Low dark ceiling, its paint flaking off in sheets.
+export function flakingCeilingTexture(renderer) {
+  const S = 512;
+  const [c, ctx] = makeCanvas(S);
+  // Old whitewash, mostly gone grey-brown, with big sheets peeling and
+  // hanging off the slab and water stains spreading from the joints.
+  ctx.fillStyle = '#5a554c';
+  ctx.fillRect(0, 0, S, S);
+  blotches(ctx, S, S, 6, '25,22,18', 0.55);
+  blotches(ctx, S, S, 14, '150,140,120', 0.18);
+  for (let i = 0; i < 14; i++) {
+    const x = Math.random() * S, y = Math.random() * S;
+    const w = 40 + Math.random() * 120, h = 20 + Math.random() * 60;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    for (let k = 1; k < 10; k++) {
+      const a = (k / 10) * Math.PI * 2;
+      ctx.lineTo(x + Math.cos(a) * w * (0.5 + Math.random() * 0.5), y + Math.sin(a) * h * (0.5 + Math.random() * 0.5));
+    }
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(28,25,21,0.55)';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(190,180,160,0.35)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+  for (let i = 0; i < 10; i++) {
+    const g = ctx.createRadialGradient(Math.random() * S, Math.random() * S, 4, Math.random() * S, Math.random() * S, 80);
+    g.addColorStop(0, 'rgba(70,50,25,0.3)');
+    g.addColorStop(1, 'rgba(70,50,25,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, S, S);
+  }
+  speckle(ctx, S, 9000, '15,12,10', 0.25);
+  return finish(c, renderer);
+}
+
+// Large grey floor tiles, worn and dusty.
+export function greyTileFloorTexture(renderer) {
+  const S = 512;
+  const [c, ctx] = makeCanvas(S);
+  ctx.fillStyle = '#4c4c48';
+  ctx.fillRect(0, 0, S, S);
+  const n = 4, t = S / n;
+  for (let y = 0; y < n; y++) {
+    for (let x = 0; x < n; x++) {
+      const v = 95 + Math.random() * 25;
+      ctx.fillStyle = `rgb(${v},${v},${v - 6})`;
+      ctx.fillRect(x * t + 2, y * t + 2, t - 4, t - 4);
+    }
+  }
+  blotches(ctx, S, S, 12, '40,38,32', 0.4);
+  blotches(ctx, S, S, 16, '170,165,150', 0.15);
+  speckle(ctx, S, 10000, '30,30,28', 0.25);
+  return finish(c, renderer);
+}
+
+// Black and white marble checker, dull with age.
+export function marbleFloorTexture(renderer) {
+  const S = 512;
+  const [c, ctx] = makeCanvas(S);
+  const t = S / 4;
+  for (let y = 0; y < 4; y++) {
+    for (let x = 0; x < 4; x++) {
+      const dark = (x + y) % 2 === 0;
+      ctx.fillStyle = dark ? '#1c1a1a' : '#b8b2a6';
+      ctx.fillRect(x * t, y * t, t, t);
+      ctx.strokeStyle = dark ? 'rgba(120,110,100,0.35)' : 'rgba(80,70,60,0.35)';
+      for (let k = 0; k < 4; k++) {
+        ctx.lineWidth = 0.5 + Math.random();
+        ctx.beginPath();
+        let px = x * t + Math.random() * t, py = y * t;
+        ctx.moveTo(px, py);
+        for (let j = 0; j < 6; j++) {
+          px += (Math.random() - 0.3) * t * 0.35;
+          py += t / 6;
+          ctx.lineTo(px, py);
+        }
+        ctx.stroke();
+      }
+    }
+  }
+  blotches(ctx, S, S, 10, '30,25,20', 0.3);
+  speckle(ctx, S, 4000, '20,20,20', 0.2);
+  return finish(c, renderer);
+}
+
+// Dressed stone blocks (ashlar), dark with age.
+export function stoneBlockTexture(renderer) {
+  const S = 512;
+  const [c, ctx] = makeCanvas(S);
+  ctx.fillStyle = '#2a2622';
+  ctx.fillRect(0, 0, S, S);
+  const rows = 8, bh = S / rows;
+  for (let r = 0; r < rows; r++) {
+    let x = r % 2 ? -S / 6 : 0;
+    while (x < S) {
+      const w = S / 3 * (0.7 + Math.random() * 0.6);
+      const v = 0.85 + Math.random() * 0.25;
+      ctx.fillStyle = `rgb(${120 * v | 0},${112 * v | 0},${100 * v | 0})`;
+      ctx.fillRect(x + 2, r * bh + 2, w - 4, bh - 4);
+      x += w;
+    }
+  }
+  blotches(ctx, S, S, 10, '15,12,10', 0.55);
+  blotches(ctx, S, S, 8, '180,170,150', 0.12);
+  speckle(ctx, S, 9000, '20,18,15', 0.3);
+  return finish(c, renderer);
+}
+
+// Simple metals and paints for machinery.
+export function metalTexture(renderer, kind) {
+  const S = 128;
+  const [c, ctx] = makeCanvas(S);
+  const base = { brass: '#a8822e', copper: '#a85a30', green: '#4a5a3a', black: '#121212', ceramic: '#7a4a30', belt: '#1e1e1c', enamel: '#d8d8cc' }[kind];
+  ctx.fillStyle = base;
+  ctx.fillRect(0, 0, S, S);
+  if (kind === 'brass') {
+    blotches(ctx, S, S, 10, '255,230,150', 0.3);
+    blotches(ctx, S, S, 12, '60,50,20', 0.45);
+    blotches(ctx, S, S, 6, '60,90,60', 0.2); // verdigris
+  } else if (kind === 'copper') {
+    blotches(ctx, S, S, 10, '230,140,90', 0.3);
+    blotches(ctx, S, S, 10, '50,30,20', 0.4);
+  } else if (kind === 'green') {
+    blotches(ctx, S, S, 12, '20,25,15', 0.4);
+    blotches(ctx, S, S, 8, '140,150,110', 0.2);
+    // Chipped paint showing metal.
+    for (let i = 0; i < 40; i++) {
+      ctx.fillStyle = 'rgba(70,60,50,0.7)';
+      ctx.fillRect(Math.random() * S, Math.random() * S, 1 + Math.random() * 6, 1 + Math.random() * 3);
+    }
+  } else if (kind === 'black') {
+    blotches(ctx, S, S, 8, '60,55,70', 0.25);
+  } else if (kind === 'belt') {
+    for (let y = 0; y < S; y += 16) {
+      ctx.fillStyle = 'rgba(70,70,65,0.8)';
+      ctx.fillRect(0, y, S, 4);
+    }
+    blotches(ctx, S, S, 8, '60,55,40', 0.3);
+  } else {
+    blotches(ctx, S, S, 10, '40,30,20', 0.3);
+  }
+  speckle(ctx, S, 1500, '20,20,20', 0.2);
+  return finish(c, renderer);
+}
+
+// Black fluid seen through a pipe's sight glass: streaks and bubbles.
+// Scrolled along v to show it moving.
+export function blackFluidTexture() {
+  const S = 128;
+  const [c, ctx] = makeCanvas(S);
+  ctx.fillStyle = '#050406';
+  ctx.fillRect(0, 0, S, S);
+  for (let i = 0; i < 40; i++) {
+    ctx.fillStyle = `rgba(${60 + Math.random() * 40},${50 + Math.random() * 30},${80 + Math.random() * 60},${(Math.random() * 0.5).toFixed(2)})`;
+    ctx.fillRect(Math.random() * S, Math.random() * S, 1 + Math.random() * 3, 4 + Math.random() * 30);
+  }
+  for (let i = 0; i < 18; i++) {
+    ctx.strokeStyle = 'rgba(180,170,200,0.35)';
+    ctx.beginPath();
+    ctx.arc(Math.random() * S, Math.random() * S, 1 + Math.random() * 3, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+  return finish(c, null);
+}
+
+// Purple discoloration: a soft, ragged stain with transparency.
+export function purpleStainTexture() {
+  const S = 256;
+  const [c, ctx] = makeCanvas(S);
+  for (let i = 0; i < 30; i++) {
+    const x = S / 2 + (Math.random() - 0.5) * S * 0.5, y = S / 2 + (Math.random() - 0.5) * S * 0.5;
+    const r = 20 + Math.random() * 60;
+    const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, `rgba(${120 + Math.random() * 60},40,${160 + Math.random() * 60},0.35)`);
+    g.addColorStop(1, 'rgba(90,20,120,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, S, S);
+  }
+  const tex = new THREE.CanvasTexture(c);
+  return tex;
+}
+
+// Four dark oil paintings: an angel, a haloed figure, a winged procession,
+// a burning sky. Old, cracked varnish.
+export function sacredPaintingsTexture() {
+  const W = 512, H = 160;
+  const c = document.createElement('canvas');
+  c.width = W;
+  c.height = H;
+  const ctx = c.getContext('2d');
+  for (let k = 0; k < 4; k++) {
+    const x0 = k * 128;
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, ['#2a2010', '#1a1408', '#201a12', '#3a1a08'][k]);
+    g.addColorStop(1, '#0a0806');
+    ctx.fillStyle = g;
+    ctx.fillRect(x0, 0, 128, H);
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(x0, 0, 128, H);
+    ctx.clip();
+    const cx = x0 + 64;
+    if (k === 0 || k === 1) {
+      // Halo, robe, face.
+      const hg = ctx.createRadialGradient(cx, 50, 4, cx, 50, 34);
+      hg.addColorStop(0, 'rgba(240,200,110,0.9)');
+      hg.addColorStop(1, 'rgba(240,200,110,0)');
+      ctx.fillStyle = hg;
+      ctx.fillRect(x0, 0, 128, 110);
+      ctx.fillStyle = k === 0 ? '#c8c0a8' : '#6a1a14';
+      ctx.beginPath();
+      ctx.moveTo(cx, 62);
+      ctx.lineTo(cx + 32, H - 10);
+      ctx.lineTo(cx - 32, H - 10);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = '#d8b890';
+      ctx.beginPath();
+      ctx.arc(cx, 52, 11, 0, Math.PI * 2);
+      ctx.fill();
+      if (k === 0) {
+        // Wings.
+        ctx.fillStyle = 'rgba(230,225,210,0.85)';
+        for (const s of [-1, 1]) {
+          ctx.beginPath();
+          ctx.moveTo(cx + s * 8, 70);
+          ctx.quadraticCurveTo(cx + s * 62, 30, cx + s * 54, 120);
+          ctx.quadraticCurveTo(cx + s * 30, 90, cx + s * 8, 92);
+          ctx.fill();
+        }
+      }
+      // The faces have been scratched out.
+      ctx.strokeStyle = 'rgba(20,10,5,0.9)';
+      ctx.lineWidth = 2;
+      for (let j = 0; j < 7; j++) {
+        ctx.beginPath();
+        ctx.moveTo(cx - 10 + Math.random() * 4, 44 + Math.random() * 16);
+        ctx.lineTo(cx + 10 - Math.random() * 4, 44 + Math.random() * 16);
+        ctx.stroke();
+      }
+    } else if (k === 2) {
+      // A procession of small winged figures toward a light.
+      ctx.fillStyle = 'rgba(250,230,170,0.7)';
+      ctx.beginPath();
+      ctx.arc(cx, 30, 16, 0, Math.PI * 2);
+      ctx.fill();
+      for (let j = 0; j < 9; j++) {
+        const px = x0 + 12 + (j % 5) * 24, py = 80 + Math.floor(j / 5) * 34;
+        ctx.fillStyle = '#b8b0a0';
+        ctx.fillRect(px, py, 6, 20);
+        ctx.beginPath();
+        ctx.arc(px + 3, py - 4, 4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    } else {
+      // Burning sky over a tower.
+      const sg = ctx.createLinearGradient(0, 0, 0, H);
+      sg.addColorStop(0, '#5a1a08');
+      sg.addColorStop(0.6, '#c85a14');
+      sg.addColorStop(1, '#1a0a04');
+      ctx.fillStyle = sg;
+      ctx.fillRect(x0, 0, 128, H);
+      ctx.fillStyle = '#0a0604';
+      ctx.fillRect(cx - 8, 50, 16, H);
+      ctx.beginPath();
+      ctx.moveTo(cx - 12, 52);
+      ctx.lineTo(cx, 28);
+      ctx.lineTo(cx + 12, 52);
+      ctx.fill();
+    }
+    // Craquelure and grime.
+    ctx.strokeStyle = 'rgba(0,0,0,0.35)';
+    ctx.lineWidth = 0.6;
+    for (let j = 0; j < 40; j++) {
+      ctx.beginPath();
+      const px = x0 + Math.random() * 128, py = Math.random() * H;
+      ctx.moveTo(px, py);
+      ctx.lineTo(px + (Math.random() - 0.5) * 20, py + (Math.random() - 0.5) * 20);
+      ctx.stroke();
+    }
+    const vg = ctx.createRadialGradient(cx, H / 2, 20, cx, H / 2, 100);
+    vg.addColorStop(0, 'rgba(0,0,0,0)');
+    vg.addColorStop(1, 'rgba(0,0,0,0.6)');
+    ctx.fillStyle = vg;
+    ctx.fillRect(x0, 0, 128, H);
+    ctx.restore();
+  }
+  return finish(c, null);
+}
+
+// Level 3 signs, eight tiles: OUT OF BOUNDS, DANGER HIGH VOLTAGE, LIFT,
+// M.E.G. BASE GAMMA, KEEP OUT, GENERATOR, BOILER ROOM, an arrow.
+export const L3_SIGNS = 8;
+export function level3SignTexture(renderer) {
+  const T = 128, W = T * L3_SIGNS;
+  const c = document.createElement('canvas');
+  c.width = W;
+  c.height = T / 2;
+  const ctx = c.getContext('2d');
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const sign = (k, bg, fg, lines, font = 'bold 15px sans-serif') => {
+    ctx.fillStyle = bg;
+    ctx.fillRect(k * T, 0, T, T / 2);
+    ctx.strokeStyle = fg;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(k * T + 4, 4, T - 8, T / 2 - 8);
+    ctx.fillStyle = fg;
+    ctx.font = font;
+    lines.forEach((l, i) => ctx.fillText(l, k * T + T / 2, T / 4 + (i - (lines.length - 1) / 2) * 17));
+  };
+  sign(0, '#141414', '#e8b81c', ['OUT  OF', 'BOUNDS']);
+  sign(1, '#d8c41c', '#141414', ['DANGER', 'HIGH VOLTAGE']);
+  sign(2, '#1a1a18', '#e0d8c0', ['↕ LIFT'], 'bold 22px sans-serif');
+  sign(3, '#e8e4d8', '#1a3a7a', ['M.E.G.', 'BASE GAMMA']);
+  sign(4, '#a81a14', '#ffffff', ['KEEP OUT']);
+  sign(5, '#2a3a2a', '#e0e0d0', ['GENERATOR', 'ROOM']);
+  sign(6, '#3a2a1a', '#e0d0b0', ['BOILER', 'ROOM']);
+  sign(7, '#e8e4d8', '#1a1a1a', ['→ EXIT →'], 'bold 18px sans-serif');
+  for (let i = 0; i < 400; i++) {
+    ctx.fillStyle = `rgba(60,45,25,${(Math.random() * 0.25).toFixed(3)})`;
+    ctx.fillRect(Math.random() * W, Math.random() * T / 2, 2 + Math.random() * 10, 1 + Math.random() * 3);
+  }
+  return finish(c, renderer);
+}
+
+// Wood-panelled freight lift interior, and its door plate.
+export function liftPanelTexture(renderer) {
+  const S = 256;
+  const [c, ctx] = makeCanvas(S);
+  ctx.fillStyle = '#4a3220';
+  ctx.fillRect(0, 0, S, S);
+  for (let x = 0; x < S; x += 64) {
+    ctx.fillStyle = 'rgba(20,10,4,0.6)';
+    ctx.fillRect(x, 0, 3, S);
+  }
+  for (let x = 0; x < S; x += 2) {
+    ctx.fillStyle = `rgba(30,15,5,${(Math.random() * 0.2).toFixed(3)})`;
+    ctx.fillRect(x, 0, 1, S);
+  }
+  blotches(ctx, S, S, 8, '15,8,3', 0.4);
+  return finish(c, renderer);
+}
