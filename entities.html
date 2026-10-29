@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>Backrooms Entities</title>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+  <style>
+    :root { --fg: #ece3b0; --dim: #b4ab7a; --accent: #f3e27a; }
+    html, body { margin: 0; height: 100%; overflow: hidden; background: #000; color: var(--fg); font-family: 'VT323', 'Courier New', monospace; touch-action: none; user-select: none; }
+    #view, #view canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+    #ui { position: fixed; left: 0; right: 0; top: 0; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; pointer-events: none; }
+    .row { display: flex; flex-wrap: wrap; gap: 6px; pointer-events: auto; }
+    button { font-family: inherit; font-size: 18px; letter-spacing: 1px; background: rgba(18,16,6,0.78); color: var(--fg); border: 2px solid rgba(236,227,176,0.3); padding: 4px 10px; cursor: pointer; }
+    button.on { background: var(--accent); color: #1a1708; border-color: var(--accent); }
+    #info { position: fixed; left: 12px; right: 12px; bottom: 12px; pointer-events: none; text-shadow: 0 0 6px #000; }
+    #info h1 { margin: 0; font-size: clamp(30px, 6vw, 48px); color: var(--accent); letter-spacing: 3px; }
+    #info p { margin: 2px 0; font-size: 19px; max-width: 760px; }
+    #state { color: var(--dim); }
+    #flash { position: fixed; inset: 0; background: radial-gradient(ellipse at center, transparent 30%, rgba(160,0,0,0.75)); opacity: 0; pointer-events: none; transition: opacity 0.6s; }
+  </style>
+  <script type="importmap">{ "imports": { "three": "./vendor/three.module.min.js" } }</script>
+</head>
+<body>
+  <div id="view"></div>
+  <div id="flash"></div>
+  <div id="ui">
+    <div class="row" id="types"></div>
+    <div class="row" id="poses"></div>
+    <div class="row" id="toggles"></div>
+  </div>
+  <div id="info"><h1 id="name"></h1><p id="blurb"></p><p id="state"></p></div>
+  <script type="module" src="src/entityViewer.js"></script>
+</body>
+</html>

@@ -94,6 +94,39 @@ The main menu has a **Levels** section (0, 1, …) and a **Sublevels** section (
 
 Every run comes from a seed, which shows on the pause, death and escape screens. Type a seed on the main menu to replay a layout.
 
+## Entity library
+
+Reusable entities live in `src/entities/lib/`. None of them are placed in a level yet. Each has its own model, procedural skin, animations, sounds and AI (idle, movement, detection, attack), and they're lit by the level's lighting and your flashlight.
+
+| Entity | What it does |
+|---|---|
+| **Smiler** | Glowing eyes and a grin, only in the dark. Drifts closer while you're in the dark with it, lunges if you linger or shine a light on it, then vanishes. |
+| **Hound** | A hairless human body on all fours. Hunts by sound (sprinting carries far) and sprints in bursts. Stare it down while standing still and it hesitates. |
+| **Faceling** | Ordinary people with blank faces. `passive` ones stop and watch you; `hostile` and `child` ones stalk, then chase. |
+| **Skin-Stealer** | Looks like a lost wanderer, waving and calling for help. Get close, turn your back, or wait too long, and it sheds its disguise. |
+| **Deathmoth** | Dog-sized moths that circle lights and get drawn to your flashlight. `drone` mostly flutters around you; `soldier` dives at you. |
+| **Clump** | Fused limbs and flesh. Hides in tight spaces, lunges when you pass, then drags itself after you. |
+| **Duller** | A washed-out grey figure that fades when still. Unpredictable moods; its touch festers (health drains for a while). |
+| **Partygoer** | Yellow, smiling =). Dances, waves, invites you over, then the smile tears wider. |
+| **Wretch** | Skinless, hunched, lopsided. Twitches and shambles until provoked (proximity or light), then charges in a zig-zag. |
+
+To use them in a level:
+
+```js
+import { EntityManager } from '../../entities/lib/index.js';
+// in the level constructor
+this.entities = new EntityManager({ scene, world: this.world, audio: ctx.audio, rng: this.rng, shared });
+this.entities.spawnFar('hound', player, { min: 15, max: 30 });
+this.entities.spawn('faceling', { x, z, variant: 'hostile' });
+// in update(dt, player)
+const res = this.entities.update(dt, player, ctx);
+if (res.dead) ctx.onDeath(res.cause);
+// in dispose()
+this.entities.dispose();
+```
+
+Open **`entities.html`** to inspect them. Pick an entity, switch poses (idle, move, detect, attack) and variants, toggle the lights and your flashlight, or turn on **Live AI** to let it come for you (the camera). Drag to orbit, and scroll or pinch to zoom.
+
 ## Controls
 
 | | Desktop | Touch |
@@ -119,6 +152,8 @@ src/world/                    reusable grid-level toolkit: GridMap (layout + pat
                               GridWorld (meshes, collision, baked lightmap, destructible cells),
                               materials (shaders), textures (procedural), props (doors, clutter, fixtures)
 src/entities/                 Stalker (Level 0's dark figure), Hound (Level 1's blackout hunter)
+src/entities/lib/             reusable entity library: Entity base (AI helpers), humanoid rig, skins, 9 entities, EntityManager
+entities.html                 entity viewer
 src/levels/registry.js        list of levels + the level interface
 src/levels/level0/            Level 0 generator and runtime (events, hazards, exits)
 src/levels/level0_2/          Level 0.2 generator and runtime (the collapse)

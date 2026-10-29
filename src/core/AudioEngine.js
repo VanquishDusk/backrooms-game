@@ -522,6 +522,196 @@ export class AudioEngine {
     s.start(t, Math.random() * 2, 0.7);
   }
 
+  // ---- Entity library sounds (all take pan, vol) -------------------------
+
+  // Breathy, high hiss through teeth (Smilers).
+  hiss(pan = 0, vol = 0.25) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    const s = this.noiseSource();
+    const f = this.ctx.createBiquadFilter();
+    f.type = 'bandpass';
+    f.frequency.setValueAtTime(5200, t);
+    f.frequency.linearRampToValueAtTime(3800, t + 0.9);
+    f.Q.value = 2;
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(vol, t + 0.25);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 1.1);
+    s.connect(f).connect(g).connect(this.out(pan));
+    s.start(t, Math.random(), 1.2);
+  }
+
+  // Wing buzz: amplitude-modulated noise (Deathmoths).
+  chitter(pan = 0, vol = 0.2) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    const s = this.noiseSource();
+    const f = this.ctx.createBiquadFilter();
+    f.type = 'bandpass';
+    f.frequency.value = 350 + Math.random() * 150;
+    f.Q.value = 1.2;
+    const g = this.ctx.createGain();
+    g.gain.value = 0;
+    const lfo = this.ctx.createOscillator();
+    lfo.frequency.value = 26 + Math.random() * 8;
+    const lg = this.ctx.createGain();
+    lg.gain.value = vol;
+    lfo.connect(lg).connect(g.gain);
+    const env = this.ctx.createGain();
+    this.env(env, t, 1, 0.08, 0.7);
+    s.connect(f).connect(g).connect(env).connect(this.out(pan));
+    s.start(t, Math.random(), 0.9);
+    lfo.start(t);
+    lfo.stop(t + 0.9);
+  }
+
+  // Wet, bubbling throat noise (Clumps, Wretches).
+  gurgle(pan = 0, vol = 0.3) {
+    if (!this.ctx) return;
+    const t0 = this.ctx.currentTime;
+    const dest = this.out(pan);
+    for (let i = 0; i < 6; i++) {
+      const t = t0 + i * (0.06 + Math.random() * 0.08);
+      const o = this.ctx.createOscillator();
+      o.type = 'sine';
+      const f = 120 + Math.random() * 160;
+      o.frequency.setValueAtTime(f, t);
+      o.frequency.exponentialRampToValueAtTime(f * 2.2, t + 0.05);
+      const g = this.ctx.createGain();
+      this.env(g, t, vol * (0.4 + Math.random() * 0.6), 0.005, 0.07);
+      o.connect(g).connect(dest);
+      o.start(t);
+      o.stop(t + 0.1);
+    }
+  }
+
+  // Joints popping and bones cracking (Clumps).
+  boneCrack(pan = 0, vol = 0.35) {
+    if (!this.ctx) return;
+    const t0 = this.ctx.currentTime;
+    for (let i = 0; i < 2 + Math.floor(Math.random() * 4); i++) {
+      const t = t0 + i * (0.04 + Math.random() * 0.15);
+      const s = this.noiseSource();
+      const f = this.ctx.createBiquadFilter();
+      f.type = 'highpass';
+      f.frequency.value = 1800 + Math.random() * 2000;
+      const g = this.ctx.createGain();
+      this.env(g, t, vol, 0.001, 0.03);
+      s.connect(f).connect(g).connect(this.out(pan));
+      s.start(t, Math.random() * 2, 0.05);
+    }
+  }
+
+  // A low, wordless human moan (Wretches, Dullers).
+  groan(pan = 0, vol = 0.25) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    const o = this.ctx.createOscillator();
+    o.type = 'sawtooth';
+    const f = 85 + Math.random() * 40;
+    o.frequency.setValueAtTime(f, t);
+    o.frequency.linearRampToValueAtTime(f * 0.8, t + 1.2);
+    const f1 = this.ctx.createBiquadFilter();
+    f1.type = 'bandpass';
+    f1.frequency.value = 500;
+    f1.Q.value = 4;
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(vol, t + 0.3);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 1.4);
+    o.connect(f1).connect(g).connect(this.out(pan));
+    o.start(t);
+    o.stop(t + 1.5);
+  }
+
+  // A tinny party horn (Partygoers).
+  partyHorn(pan = 0, vol = 0.2) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    const o = this.ctx.createOscillator();
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(420, t);
+    o.frequency.linearRampToValueAtTime(470, t + 0.5);
+    const bp = this.ctx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.frequency.value = 1300;
+    bp.Q.value = 3;
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(vol, t + 0.04);
+    g.gain.setValueAtTime(vol, t + 0.45);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.6);
+    o.connect(bp).connect(g).connect(this.out(pan));
+    o.start(t);
+    o.stop(t + 0.65);
+  }
+
+  // Giggling: quick pitched trills. `wrong` detunes and slows it.
+  giggle(pan = 0, vol = 0.2, wrong = false) {
+    if (!this.ctx) return;
+    const t0 = this.ctx.currentTime;
+    const dest = this.out(pan);
+    for (let i = 0; i < 5; i++) {
+      const t = t0 + i * (wrong ? 0.2 : 0.11);
+      const o = this.ctx.createOscillator();
+      o.type = 'triangle';
+      const f = (wrong ? 330 : 620) * (1 + (i % 2) * 0.12) * (wrong ? 1 - i * 0.06 : 1);
+      o.frequency.setValueAtTime(f, t);
+      o.frequency.exponentialRampToValueAtTime(f * 0.85, t + 0.08);
+      const g = this.ctx.createGain();
+      this.env(g, t, vol, 0.005, 0.09);
+      o.connect(g).connect(dest);
+      o.start(t);
+      o.stop(t + 0.12);
+    }
+  }
+
+  // A tearing scream (Skin-Stealer reveal, Smiler lunge).
+  shriek(pan = 0, vol = 0.45) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    const dest = this.out(pan);
+    for (const [f0, f1] of [[700, 1400], [760, 1200], [1100, 1900]]) {
+      const o = this.ctx.createOscillator();
+      o.type = 'sawtooth';
+      o.frequency.setValueAtTime(f0, t);
+      o.frequency.exponentialRampToValueAtTime(f1, t + 0.2);
+      o.frequency.exponentialRampToValueAtTime(f0 * 0.6, t + 0.9);
+      const bp = this.ctx.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.value = 1800;
+      bp.Q.value = 1;
+      const g = this.ctx.createGain();
+      this.env(g, t, vol / 3, 0.02, 0.9);
+      o.connect(bp).connect(g).connect(dest);
+      o.start(t);
+      o.stop(t + 1);
+    }
+  }
+
+  // A long, carrying howl (Hounds).
+  howl(pan = 0, vol = 0.2) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    const o = this.ctx.createOscillator();
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(260, t);
+    o.frequency.linearRampToValueAtTime(420, t + 0.6);
+    o.frequency.linearRampToValueAtTime(330, t + 2.0);
+    const lp = this.ctx.createBiquadFilter();
+    lp.type = 'bandpass';
+    lp.frequency.value = 900;
+    lp.Q.value = 5;
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(vol, t + 0.4);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 2.2);
+    o.connect(lp).connect(g).connect(this.out(pan));
+    o.start(t);
+    o.stop(t + 2.3);
+  }
+
   // Structural creak: a slow, pitched groan.
   creak(pan = 0, vol = 0.3) {
     if (!this.ctx) return;
