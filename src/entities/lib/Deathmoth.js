@@ -109,9 +109,14 @@ export class Deathmoth extends Entity {
     this.pos.y += (dy / d) * step;
     this.pos.z += (dz / d) * step;
     this.world.collide(this.pos, this.radius);
-    this.pos.y = Math.max(0.4, Math.min(this.map.height - 0.25, this.pos.y));
+    this.pos.y = Math.max(0.4, Math.min(this.top() - 0.25, this.pos.y));
     this.turnTo(Math.atan2(this.pos.x - ox, this.pos.z - oz) || this.heading, dt, 5);
     this.moveSpeed = step / dt;
+  }
+
+  // Ceiling height here (levels with ceilings of different heights).
+  top(x = this.pos.x, z = this.pos.z) {
+    return this.world.ceilingHeight ? this.world.ceilingHeight(x, z) : this.map.height;
   }
 
   // Is the player's flashlight a brighter lure than the ceiling lights?
@@ -144,7 +149,7 @@ export class Deathmoth extends Entity {
         const l = this.target;
         this.orbitA += dt * (1.6 + Math.sin(this.time * 0.9) * 0.8);
         const r = 0.7 + Math.sin(this.time * 1.7) * 0.35;
-        this.fly(l.x + Math.cos(this.orbitA) * r, this.map.height - 0.55 + wobble(2) * 0.6, l.z + Math.sin(this.orbitA) * r, 2.6, dt);
+        this.fly(l.x + Math.cos(this.orbitA) * r, Math.min((l.glowY ?? Infinity) + 0.1, this.top(l.x, l.z) - 0.55) + wobble(2) * 0.6, l.z + Math.sin(this.orbitA) * r, 2.6, dt);
         if (this.lured(player)) this.setState('drawn');
         if (soldier && d < 6.5 && !this.cooldown) this.setState('dive');
         if (!soldier && d < 1.6) this.setState('flee');
@@ -174,12 +179,12 @@ export class Deathmoth extends Entity {
         } else if (this.stateTime > 2) this.setState('climb');
         break;
       case 'climb':
-        this.fly(this.pos.x - Math.sin(this.heading) * 3, this.map.height - 0.4, this.pos.z - Math.cos(this.heading) * 3, 4, dt);
+        this.fly(this.pos.x - Math.sin(this.heading) * 3, this.top() - 0.4, this.pos.z - Math.cos(this.heading) * 3, 4, dt);
         if (this.stateTime > 1.2) this.setState(this.lured(player) ? 'drawn' : 'seek');
         break;
       case 'flee': {
         const ax = this.pos.x - player.pos.x, az = this.pos.z - player.pos.z, l = Math.hypot(ax, az) || 1;
-        this.fly(this.pos.x + (ax / l) * 3, this.map.height - 0.4, this.pos.z + (az / l) * 3, 3.5, dt);
+        this.fly(this.pos.x + (ax / l) * 3, this.top() - 0.4, this.pos.z + (az / l) * 3, 3.5, dt);
         if (this.stateTime > 2) this.setState('seek');
         break;
       }

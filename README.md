@@ -2,7 +2,7 @@
 
 A replayable 3D horror game set in the Backrooms, playable in the browser on desktop and mobile.
 
-Playable now: **Level 0 — "The Lobby" / "The Yellow Hell"**, its sub-level **Level 0.2 — "The Remodel"**, **Level 1 — "The Habitable Zone"**, **Level 1.3**, **Level 1.5 — "Inverted"**, **Level 2 — "Abandoned Utility Halls"**, **Level 3 — "Electrical Station"** and **Level 4 — "Abandoned Office"**. More levels will follow.
+Playable now: **Level 0 — "The Lobby" / "The Yellow Hell"**, its sub-level **Level 0.2 — "The Remodel"**, **Level 1 — "The Habitable Zone"**, **Level 1.3**, **Level 1.5 — "Inverted"**, **Level 2 — "Abandoned Utility Halls"**, **Level 3 — "Electrical Station"**, **Level 4 — "Abandoned Office"** and **Level 5 — "Terror Hotel"**. More levels will follow.
 
 ## Play
 
@@ -148,7 +148,7 @@ Reached through Level 2's red hazard-taped door. You arrive in front of it, and 
   - **Purple discoloration** tints your vision and drains your sanity.
   - The heat makes your stamina recover more slowly.
 - **Entities:** Hounds and Skin-Stealers.
-- **Exit:** an old **freight lift**, a wood-panelled car with a scissor gate, a LIFT sign and a floor dial. Its motor hums and its bell rings now and then. Step inside to go down to **Level 4**.
+- **Exit:** an old **freight lift**, a wood-panelled car with a scissor gate, a LIFT sign and a floor dial. Its motor hums and its bell rings now and then. Step inside to go down to **Level 4**. When there's a second lift, it goes down to **Level 5** instead (and now and then the only one does).
 
 ## Level 4 — Abandoned Office (Survival Difficulty 1)
 
@@ -174,7 +174,36 @@ Reached by Level 3's freight lift or Level 2's wooden office door. It's the safe
   - A dark doorway under a dead EXIT sign to **Level 6**.
   - Rarely, a **basement** stairway to **Level 71**.
   - **Exits move:** once you've seen one, lose sight of it and it may be gone when you come back, standing at another core instead.
-- Levels 5, 6 and 71 are coming soon.
+- Levels 6 and 71 are coming soon.
+
+## Level 5 — Terror Hotel (Survival Difficulty 2)
+
+Reached by Level 4's stairwells and elevators, or one of Level 3's freight lifts. An endless 1920s hotel, and its boiler room.
+
+- **The Main Hall:**
+  - Long corridors of numbered mahogany doors, most of them locked. Burgundy damask above dark wainscoting, a red carpet with a gold lattice, brass lantern sconces, side tables, paintings, abandoned room service carts.
+  - Open rooms behind some doors: a bed and nightstands, a wardrobe, a writing desk and mirror, a lamp. Suites have a sofa.
+  - **Lobbies and lounges** where the corridors meet: crimson faux-marble columns with gilded rope edges and capitals carrying dark girders painted with a frieze, a beamed ochre ceiling, wrought-iron candle chandeliers, lanterns on the columns, a medallion rug on sage carpet, striped armchairs and sofas round pedestal tables with white orchids, potted palms.
+  - **The grand lobby** has a reception desk with key cubbies and a desk bell, a brass luggage cart, a grandfather clock, arched front doors glowing with an afternoon that never ends (they're locked), and the **grand stair**.
+  - **The Homely Hotel:** a dining room with a buffet. Eat to heal, and take meat with you. Samantha the cat lives here and trades readings for meat.
+  - **M.E.G. Housekeeping:** shelves of linen, a cot, crates of supplies and a note.
+  - Letters from **The Originals** have been slipped under a few doors.
+- **The Beverly Room (the Eternal Ballroom):** parquet, gilt pilasters, tall mirrors and velvet drapes, a coffered ceiling, crystal chandeliers, round tables set for dinner, a drinks table, a mahjong game left mid-hand, and a bandstand with a piano, a double bass and drums. Nobody is playing, but the music never stops: smooth jazz, loud by the bandstand and muffled through the walls everywhere else.
+- **The Boiler Room** (through STAFF ONLY doors and the ballroom's back door):
+  - Narrow brick passages lined with bundles of white lagged pipe, rusty and yellow gas lines, valves and caged bulbs.
+  - **Boiler halls** with big grey-blue fire-tube boilers (burner, fan, inspection ports, rusty risers), green and yellow tanks, barrels, workbenches and debris.
+  - **Catwalk galleries:** a narrow green catwalk with black railings over a pit full of machinery and lagged pipe.
+  - Tank rooms and pump rooms.
+  - **Almond Water** runs in the pipes: fill bottles at the taps.
+  - The deeper you go, the hotter it gets. In the deepest halls the heat hurts you, slowly.
+- **Entities:** Deathmoths everywhere (circling the chandeliers and sconces), Hounds, Woodlins, Skin-Stealers, a Watcher in the ballroom, Nguithr'xurh on the corridor ceilings, Deathrats, and in the boiler room a Growler and a Wrangler. Samantha in the Homely Hotel.
+- **Exits:**
+  - The **grand stair** in the grand lobby goes back up to **Level 4**. You arrive at its foot.
+  - **Elevators:** bronze art deco doors with a floor dial above. Floors 1 to 12 take you to another elevator elsewhere in the hotel. One goes down to **Level 3**. One goes to **13**: don't. Some dials twitch towards 13 now and then.
+  - The **maintenance lift** in the boiler room. Not recommended.
+  - A **dark wooden door** with no number among the guest rooms: **Level 9**.
+  - Stairs by the **furnace**, in the deepest boiler hall, go down to **Level 6**.
+- Levels 6 and 9 are coming soon.
 
 The main menu has a **Levels** section (0, 1, …) and a **Sublevels** section (0.2, 1.3, …). Each level unlocks there once you reach it.
 
@@ -182,7 +211,7 @@ Every run comes from a seed, which shows on the pause, death and escape screens.
 
 ## Entity library
 
-Reusable entities live in `src/entities/lib/`. Level 2 uses Hounds, Smilers, Skin-Stealers, Deathmoths and Clumps, Level 3 uses Hounds and Skin-Stealers, and Level 4 uses Hounds, Dullers and Smilers; the rest aren't placed in a level yet. Each has its own model, procedural skin, animations, sounds and AI (idle, movement, detection, attack), and they're lit by the level's lighting and your flashlight.
+Reusable entities live in `src/entities/lib/`. Level 2 uses Hounds, Smilers, Skin-Stealers, Deathmoths and Clumps, Level 3 uses Hounds and Skin-Stealers, Level 4 uses Hounds, Dullers and Smilers, and Level 5 uses Deathmoths, Hounds, Woodlins, Skin-Stealers, Watchers, Nguithr'xurh, Growlers, Deathrats, Wranglers and Samantha; Facelings, Partygoers and Wretches aren't placed in a level yet. Each has its own model, procedural skin, animations, sounds and AI (idle, movement, detection, attack), and they're lit by the level's lighting and your flashlight.
 
 | Entity | What it does |
 |---|---|
@@ -259,6 +288,7 @@ src/levels/level1_5/          Level 1.5 generator and runtime (the negative, the
 src/levels/level2/            Level 2 generator and runtime
 src/levels/level3/            Level 3 generator, room dressing (generator/boiler rooms, assembly hall, Sanctums, Base Gamma, galleries) and runtime
 src/levels/level4/            Level 4 generator (corridor grid, rooms, service cores), furniture and runtime (moving exits, trap windows)
+src/levels/level5/            Level 5 generator (hotel, ballroom, boiler room maze), hotel and boiler room dressing, runtime (elevators, stairs, heat)
 ```
 
 All textures and sounds are generated in code, so there are no asset files.
@@ -269,4 +299,4 @@ All textures and sounds are generated in code, so there are no asset files.
 2. Grid-style levels can reuse `GridMap` and `GridWorld` with their own generator, textures and lighting.
 3. Register the level in `src/levels/registry.js`.
 
-Levels hand off with `ctx.onEscape(targetId, 'noclip' | 'door' | 'walk')`, and player stats carry over. An exit that targets a level that isn't built yet shows a "coming soon" screen, using the names in `UPCOMING`. Level 4's exits already target `level5`, `level6` and `level71`.
+Levels hand off with `ctx.onEscape(targetId, 'noclip' | 'door' | 'walk')`, and player stats carry over. An exit that targets a level that isn't built yet shows a "coming soon" screen, using the names in `UPCOMING`. Level 4's and Level 5's exits already target `level6`, `level9` and `level71`.

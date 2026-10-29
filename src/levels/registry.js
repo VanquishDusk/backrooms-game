@@ -6,6 +6,7 @@ import { LEVEL1_5 } from './level1_5/Level15.js';
 import { LEVEL2 } from './level2/Level2.js';
 import { LEVEL3 } from './level3/Level3.js';
 import { LEVEL4 } from './level4/Level4.js';
+import { LEVEL5 } from './level5/Level5.js';
 
 // Every playable level registers here. A level definition is:
 //
@@ -28,8 +29,8 @@ import { LEVEL4 } from './level4/Level4.js';
 // Levels hand control onward with ctx.onEscape(targetId, 'noclip' | 'door' | 'walk').
 // The player's sanity, health, battery and Almond Water carry over.
 //
-// Unbuilt targets show a "coming soon" screen (see UPCOMING). Level 4's
-// stairs, elevators and odd doors already point at 'level5', 'level6' and 'level71'.
+// Unbuilt targets show a "coming soon" screen (see UPCOMING): Level 4 and
+// Level 5 already have exits to 'level6', 'level9' and 'level71'.
 
 export const LEVELS = {
   [LEVEL0.id]: LEVEL0,
@@ -40,12 +41,13 @@ export const LEVELS = {
   [LEVEL2.id]: LEVEL2,
   [LEVEL3.id]: LEVEL3,
   [LEVEL4.id]: LEVEL4,
+  [LEVEL5.id]: LEVEL5,
 };
 
 // Names for levels that exits point at but that aren't built yet.
 export const UPCOMING = {
-  level5: 'LEVEL 5 — TERROR HOTEL',
   level6: 'LEVEL 6 — LIGHTS OUT',
+  level9: 'LEVEL 9 — THE SUBURBS',
   level71: 'LEVEL 71',
 };
 

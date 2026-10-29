@@ -1867,3 +1867,808 @@ export function officeDoorTexture(renderer, glass = true, tone = '#8a6440') {
   ctx.fillRect(0, H - 26, W, 26);
   return finish(c, renderer);
 }
+
+// ---- Level 5 (the hotel) ----------------------------------------------------
+
+function canvasWH(w, h) {
+  const c = document.createElement('canvas');
+  c.width = w;
+  c.height = h;
+  return [c, c.getContext('2d')];
+}
+
+// Warm ochre plaster ceiling, softly mottled.
+export function ochrePlasterTexture(renderer) {
+  const S = 256;
+  const [c, ctx] = makeCanvas(S);
+  ctx.fillStyle = '#eaae4e';
+  ctx.fillRect(0, 0, S, S);
+  blotches(ctx, S, S, 8, '255,205,110', 0.3);
+  blotches(ctx, S, S, 10, '170,105,40', 0.14);
+  speckle(ctx, S, 3000, '120,70,20', 0.12);
+  return finish(c, renderer);
+}
+
+// Dark carved wood with a painted band down the middle (ceiling beams).
+export function paintedBeamTexture(renderer) {
+  const [c, ctx] = canvasWH(256, 64);
+  ctx.fillStyle = '#3a2414';
+  ctx.fillRect(0, 0, 256, 64);
+  for (let x = 0; x < 256; x += 2) {
+    ctx.fillStyle = `rgba(${Math.random() < 0.5 ? '15,8,3' : '90,60,30'},${(Math.random() * 0.25).toFixed(3)})`;
+    ctx.fillRect(x, 0, 1, 64);
+  }
+  ctx.fillStyle = '#5a3a1a';
+  ctx.fillRect(0, 20, 256, 24);
+  for (let x = 8; x < 256; x += 32) {
+    ctx.fillStyle = '#c89a40';
+    ctx.beginPath();
+    ctx.arc(x, 32, 7, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#8a2a1c';
+    ctx.beginPath();
+    ctx.arc(x, 32, 3.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#3a6a64';
+    ctx.fillRect(x + 12, 29, 8, 6);
+  }
+  ctx.fillStyle = '#b08a3a';
+  ctx.fillRect(0, 19, 256, 2);
+  ctx.fillRect(0, 43, 256, 2);
+  return finish(c, renderer);
+}
+
+// The frieze on the big girders and wall tops: oval cartouches with birds
+// and urns between red panels and gilded rosettes.
+export function hotelFriezeTexture(renderer) {
+  const [c, ctx] = canvasWH(512, 128);
+  ctx.fillStyle = '#2a1a10';
+  ctx.fillRect(0, 0, 512, 128);
+  ctx.fillStyle = '#b08a3a';
+  ctx.fillRect(0, 6, 512, 4);
+  ctx.fillRect(0, 118, 512, 4);
+  for (const x0 of [0, 256]) {
+    // Red panel with a rosette.
+    ctx.fillStyle = '#7a2418';
+    ctx.fillRect(x0 + 12, 22, 70, 84);
+    ctx.fillStyle = '#d0a848';
+    ctx.beginPath();
+    for (let k = 0; k < 16; k++) {
+      const a = (k / 16) * Math.PI * 2, r = k % 2 ? 12 : 22;
+      ctx.lineTo(x0 + 47 + Math.cos(a) * r, 64 + Math.sin(a) * r);
+    }
+    ctx.fill();
+    ctx.fillStyle = '#6a3010';
+    ctx.beginPath();
+    ctx.arc(x0 + 47, 64, 7, 0, Math.PI * 2);
+    ctx.fill();
+    // Oval cartouche: cream ground, two painted birds and an urn.
+    ctx.fillStyle = '#e0c898';
+    ctx.beginPath();
+    ctx.ellipse(x0 + 172, 64, 70, 40, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#b08a3a';
+    ctx.lineWidth = 4;
+    ctx.stroke();
+    ctx.fillStyle = '#5a3a20';
+    for (const s of [-1, 1]) {
+      ctx.beginPath();
+      ctx.moveTo(x0 + 172 + s * 18, 66);
+      ctx.quadraticCurveTo(x0 + 172 + s * 50, 34, x0 + 172 + s * 62, 60);
+      ctx.quadraticCurveTo(x0 + 172 + s * 40, 58, x0 + 172 + s * 22, 78);
+      ctx.fill();
+    }
+    ctx.fillStyle = '#8a3a20';
+    ctx.beginPath();
+    ctx.ellipse(x0 + 172, 66, 9, 13, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillRect(x0 + 166, 78, 12, 6);
+  }
+  blotches(ctx, 512, 128, 10, '10,5,0', 0.3);
+  return finish(c, renderer);
+}
+
+// Crimson faux marble with pale veins (columns).
+export function redMarbleTexture(renderer) {
+  const S = 256;
+  const [c, ctx] = makeCanvas(S);
+  ctx.fillStyle = '#7a1e1a';
+  ctx.fillRect(0, 0, S, S);
+  blotches(ctx, S, S, 8, '150,40,30', 0.4);
+  blotches(ctx, S, S, 8, '40,8,8', 0.4);
+  for (let i = 0; i < 9; i++) {
+    ctx.strokeStyle = `rgba(240,200,190,${(0.25 + Math.random() * 0.4).toFixed(2)})`;
+    ctx.lineWidth = 0.6 + Math.random() * 1.4;
+    ctx.beginPath();
+    let x = Math.random() * S, y = 0;
+    ctx.moveTo(x, y);
+    while (y < S) {
+      x += (Math.random() - 0.3) * 30;
+      y += 12 + Math.random() * 20;
+      ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  }
+  return finish(c, renderer);
+}
+
+// Gilded rope: diagonal twisted strands.
+export function goldRopeTexture(renderer) {
+  const S = 64;
+  const [c, ctx] = makeCanvas(S);
+  ctx.fillStyle = '#7a5a20';
+  ctx.fillRect(0, 0, S, S);
+  for (let k = -S; k < S * 2; k += 12) {
+    ctx.strokeStyle = '#e0b850';
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.moveTo(0, k);
+    ctx.lineTo(S, k + S * 0.6);
+    ctx.stroke();
+  }
+  return finish(c, renderer);
+}
+
+// Cream stone walls, dressed in shallow blocks.
+export function creamStoneTexture(renderer) {
+  const S = 512;
+  const [c, ctx] = makeCanvas(S);
+  ctx.fillStyle = '#d4c4a2';
+  ctx.fillRect(0, 0, S, S);
+  blotches(ctx, S, S, 10, '255,240,210', 0.2);
+  blotches(ctx, S, S, 10, '150,130,100', 0.15);
+  const rows = 8, bh = S / rows;
+  ctx.strokeStyle = 'rgba(120,100,70,0.35)';
+  ctx.lineWidth = 2;
+  for (let r = 0; r < rows; r++) {
+    ctx.beginPath();
+    ctx.moveTo(0, r * bh);
+    ctx.lineTo(S, r * bh);
+    ctx.stroke();
+    for (let x = (r % 2 ? S / 4 : 0); x < S; x += S / 2) {
+      ctx.beginPath();
+      ctx.moveTo(x, r * bh);
+      ctx.lineTo(x, (r + 1) * bh);
+      ctx.stroke();
+    }
+  }
+  speckle(ctx, S, 4000, '120,100,70', 0.12);
+  return finish(c, renderer);
+}
+
+// Hotel corridor wall, full height once: mahogany wainscoting, a chair
+// rail, burgundy damask with a muted gold figure above, a gilded band and
+// cornice.
+export function damaskWallTexture(renderer) {
+  const W = 256, H = 512;
+  const [c, ctx] = canvasWH(W, H);
+  ctx.fillStyle = '#5c1619';
+  ctx.fillRect(0, 0, W, H);
+  // Damask: a classic symmetric figure (flame, scrolling leaves, crown)
+  // in a half-drop repeat, drawn twice: a dark tone-on-tone ground, then gold.
+  const half = (cx, cy, s, k) => {
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - s * 1.0);
+    ctx.bezierCurveTo(cx + k * s * 0.18, cy - s * 0.7, cx + k * s * 0.32, cy - s * 0.45, cx + k * s * 0.12, cy - s * 0.15);
+    ctx.bezierCurveTo(cx + k * s * 0.55, cy - s * 0.5, cx + k * s * 0.85, cy - s * 0.2, cx + k * s * 0.6, cy + s * 0.15);
+    ctx.bezierCurveTo(cx + k * s * 0.45, cy + s * 0.35, cx + k * s * 0.2, cy + s * 0.25, cx + k * s * 0.28, cy + s * 0.05);
+    ctx.bezierCurveTo(cx + k * s * 0.4, cy + s * 0.45, cx + k * s * 0.15, cy + s * 0.75, cx, cy + s * 1.0);
+    ctx.closePath();
+    ctx.fill();
+  };
+  const motif = (cx, cy, s, col) => {
+    ctx.fillStyle = col;
+    half(cx, cy, s, 1);
+    half(cx, cy, s, -1);
+    // Crown and base buds.
+    for (const [dy, r] of [[-1.12, 0.09], [1.1, 0.07]]) {
+      ctx.beginPath();
+      ctx.arc(cx, cy + dy * s, r * s, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    for (const k of [-1, 1]) {
+      ctx.beginPath();
+      ctx.ellipse(cx + k * s * 0.72, cy - s * 0.62, s * 0.1, s * 0.05, k * 0.6, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  };
+  const draw = (col, s) => {
+    for (let row = 0, y = 34; y < H * 0.78; y += 52, row++) {
+      for (let x = row % 2 ? 0 : 32; x <= W + 32; x += 64) motif(x, y, s, col);
+    }
+  };
+  draw('rgba(30,4,6,0.45)', 22);
+  draw('rgba(196,150,70,0.42)', 19);
+  ctx.fillStyle = '#5c1619';
+  for (let row = 0, y = 34; y < H * 0.78; y += 52, row++) {
+    for (let x = row % 2 ? 0 : 32; x <= W + 32; x += 64) {
+      ctx.beginPath();
+      ctx.ellipse(x, y - 4, 3, 7, 0, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  blotches(ctx, W, H, 8, '20,2,4', 0.22);
+  speckle(ctx, W, 2500, '20,5,5', 0.15);
+  // Wainscot: mahogany panels below the rail (about 0.95 m on a 3.4 m wall).
+  const rail = H * (1 - 0.95 / 3.4);
+  ctx.fillStyle = '#3a1a0c';
+  ctx.fillRect(0, rail, W, H - rail);
+  for (let x = 0; x < W; x += 2) {
+    ctx.fillStyle = `rgba(${Math.random() < 0.5 ? '15,6,2' : '100,50,25'},${(Math.random() * 0.2).toFixed(3)})`;
+    ctx.fillRect(x, rail, 1, H - rail);
+  }
+  ctx.strokeStyle = 'rgba(15,6,2,0.8)';
+  ctx.lineWidth = 3;
+  for (const x of [12, 140]) ctx.strokeRect(x, rail + 18, 104, H - rail - 46);
+  ctx.strokeStyle = 'rgba(160,100,50,0.4)';
+  ctx.lineWidth = 1;
+  for (const x of [15, 143]) ctx.strokeRect(x, rail + 21, 98, H - rail - 52);
+  ctx.fillStyle = '#2a1006';
+  ctx.fillRect(0, rail - 6, W, 10);
+  ctx.fillStyle = '#b08a3a';
+  ctx.fillRect(0, rail - 7, W, 2);
+  ctx.fillStyle = '#1e0c04';
+  ctx.fillRect(0, H - 16, W, 16);
+  // Gilded band and dark cornice at the top.
+  ctx.fillStyle = '#b08a3a';
+  ctx.fillRect(0, 22, W, 4);
+  ctx.fillStyle = '#2a1006';
+  ctx.fillRect(0, 0, W, 22);
+  return finish(c, renderer);
+}
+
+// Hotel corridor carpet: deep red with a gold lattice and navy flowers.
+export function hotelCarpetTexture(renderer) {
+  const S = 256;
+  const [c, ctx] = makeCanvas(S);
+  ctx.fillStyle = '#6e1a16';
+  ctx.fillRect(0, 0, S, S);
+  ctx.strokeStyle = 'rgba(200,150,60,0.6)';
+  ctx.lineWidth = 3;
+  for (let k = -S; k < S * 2; k += 64) {
+    ctx.beginPath();
+    ctx.moveTo(k, 0);
+    ctx.lineTo(k + S, S);
+    ctx.moveTo(k + S, 0);
+    ctx.lineTo(k, S);
+    ctx.stroke();
+  }
+  for (let y = 0; y <= S; y += 64) {
+    for (let x = 0; x <= S; x += 64) {
+      ctx.fillStyle = '#1e2a4a';
+      ctx.beginPath();
+      ctx.arc(x + 32, y + 32, 9, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#c8a048';
+      ctx.beginPath();
+      ctx.arc(x + 32, y + 32, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  const img = ctx.getImageData(0, 0, S, S);
+  for (let i = 0; i < img.data.length; i += 4) {
+    const n = (Math.random() - 0.5) * 18;
+    img.data[i] += n;
+    img.data[i + 1] += n;
+    img.data[i + 2] += n;
+  }
+  ctx.putImageData(img, 0, 0);
+  return finish(c, renderer);
+}
+
+// A lobby rug, painted to its size in metres: cream field of teal and red
+// medallions inside a red border.
+export function medallionRugTexture(renderer, wm = 8, hm = 8) {
+  const k = Math.min(64, 1024 / Math.max(wm, hm));
+  const W = Math.round(wm * k), H = Math.round(hm * k);
+  const [c, ctx] = canvasWH(W, H);
+  const b = 0.45 * k; // border width
+  ctx.fillStyle = '#b8342a';
+  ctx.fillRect(0, 0, W, H);
+  // Border pattern: cream lozenges.
+  ctx.fillStyle = '#e8d8b0';
+  const st = 0.25 * k;
+  for (let x = st; x < W - st; x += st) for (const y of [b * 0.3, H - b * 0.3 - st * 0.4]) ctx.fillRect(x, y, st * 0.4, st * 0.4);
+  for (let y = st; y < H - st; y += st) for (const x of [b * 0.3, W - b * 0.3 - st * 0.4]) ctx.fillRect(x, y, st * 0.4, st * 0.4);
+  ctx.fillStyle = '#1e3a4a';
+  ctx.fillRect(b * 0.62, b * 0.62, W - b * 1.24, H - b * 1.24);
+  ctx.fillStyle = '#d8c89a';
+  ctx.fillRect(b * 0.7, b * 0.7, W - b * 1.4, H - b * 1.4);
+  ctx.fillStyle = '#e8dcb8';
+  ctx.fillRect(b, b, W - 2 * b, H - 2 * b);
+  const m = 0.34 * k;
+  for (let y = b + m * 0.6, row = 0; y < H - b - m * 0.3; y += m, row++) {
+    for (let x = b + m * 0.6 + (row % 2) * m * 0.5; x < W - b - m * 0.3; x += m) {
+      const s = m / 36;
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.scale(s, s);
+      ctx.translate(-x, -y);
+      ctx.fillStyle = '#4a9a92';
+      ctx.beginPath();
+      ctx.ellipse(x, y, 13, 9, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#c8402e';
+      ctx.fillRect(x - 4, y - 4, 8, 8);
+      ctx.fillStyle = '#e8b858';
+      ctx.fillRect(x - 1.5, y - 1.5, 3, 3);
+      ctx.restore();
+    }
+  }
+  const img = ctx.getImageData(0, 0, W, H);
+  for (let i = 0; i < img.data.length; i += 4) {
+    const n = (Math.random() - 0.5) * 16;
+    img.data[i] += n;
+    img.data[i + 1] += n;
+    img.data[i + 2] += n;
+  }
+  ctx.putImageData(img, 0, 0);
+  const t = finish(c, renderer);
+  t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping;
+  return t;
+}
+
+// Pale sage carpet under the rugs.
+export function sageCarpetTexture(renderer) {
+  return officeCarpetTexture(renderer, '#9aa07c');
+}
+
+// Herringbone parquet (the ballroom floor).
+export function parquetTexture(renderer) {
+  const S = 256;
+  const [c, ctx] = makeCanvas(S);
+  ctx.fillStyle = '#5a3418';
+  ctx.fillRect(0, 0, S, S);
+  const bw = 16, bl = 64;
+  for (let y = -bl; y < S + bl; y += bw * 2) {
+    for (let x = -bl; x < S + bl; x += bl) {
+      for (const [dx, dy, w, h] of [[0, 0, bl, bw], [bl - bw, bw, bw, bl]]) {
+        const v = 0.8 + Math.random() * 0.35;
+        ctx.fillStyle = `rgb(${130 * v | 0},${82 * v | 0},${42 * v | 0})`;
+        ctx.fillRect(x + dx + ((y / (bw * 2)) % 2) * bw, y + dy, w - 1, h - 1);
+      }
+    }
+  }
+  for (let i = 0; i < 4000; i++) {
+    ctx.fillStyle = `rgba(30,15,5,${(Math.random() * 0.15).toFixed(3)})`;
+    ctx.fillRect(Math.random() * S, Math.random() * S, 3, 1);
+  }
+  return finish(c, renderer);
+}
+
+// Mahogany for furniture and doors.
+export function mahoganyTexture(renderer, tone = '#4a1e10') {
+  const S = 128;
+  const [c, ctx] = makeCanvas(S);
+  ctx.fillStyle = tone;
+  ctx.fillRect(0, 0, S, S);
+  for (let x = 0; x < S; x += 2) {
+    ctx.fillStyle = `rgba(${Math.random() < 0.5 ? '15,5,2' : '120,60,30'},${(Math.random() * 0.22).toFixed(3)})`;
+    ctx.fillRect(x + Math.sin(x * 0.3) * 2, 0, 1 + Math.random(), S);
+  }
+  return finish(c, renderer);
+}
+
+// Striped upholstery: cream and gold with a thin red line.
+export function stripedFabricTexture(renderer) {
+  const S = 64;
+  const [c, ctx] = makeCanvas(S);
+  for (let x = 0; x < S; x += 16) {
+    ctx.fillStyle = '#c8a86a';
+    ctx.fillRect(x, 0, 8, S);
+    ctx.fillStyle = '#e0cca0';
+    ctx.fillRect(x + 8, 0, 8, S);
+    ctx.fillStyle = '#8a3a2a';
+    ctx.fillRect(x + 7, 0, 1, S);
+  }
+  speckle(ctx, S, 400, '60,40,20', 0.15);
+  return finish(c, renderer);
+}
+
+// A guest room door: mahogany, six panels, brass kick plate.
+export function guestDoorTexture(renderer, tone = '#4a1e10') {
+  const [c, ctx] = canvasWH(128, 256);
+  ctx.fillStyle = tone;
+  ctx.fillRect(0, 0, 128, 256);
+  for (let x = 0; x < 128; x += 2) {
+    ctx.fillStyle = `rgba(${Math.random() < 0.5 ? '10,3,1' : '110,55,25'},${(Math.random() * 0.2).toFixed(3)})`;
+    ctx.fillRect(x, 0, 1, 256);
+  }
+  for (const [x, y, w, h] of [[14, 14, 44, 60], [70, 14, 44, 60], [14, 86, 44, 70], [70, 86, 44, 70], [14, 168, 44, 64], [70, 168, 44, 64]]) {
+    ctx.strokeStyle = 'rgba(10,3,1,0.85)';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(x, y, w, h);
+    ctx.strokeStyle = 'rgba(150,80,40,0.35)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(x + 3, y + 3, w - 6, h - 6);
+  }
+  ctx.fillStyle = '#b08a3a';
+  ctx.fillRect(4, 240, 120, 12);
+  return finish(c, renderer);
+}
+
+// Mahjong tiles: ivory faces with simple suit marks, and the green backs.
+export function mahjongTexture(renderer) {
+  const [c, ctx] = canvasWH(256, 64);
+  ctx.fillStyle = '#2a6a3a';
+  ctx.fillRect(0, 0, 256, 64);
+  for (let k = 0; k < 8; k++) {
+    const x = k * 32;
+    ctx.fillStyle = '#ece4d0';
+    ctx.fillRect(x + 2, 2, 28, 40);
+    const col = ['#1a4a9a', '#c82020', '#1a7a3a'][k % 3];
+    ctx.fillStyle = col;
+    if (k % 3 === 0) for (let j = 0; j < 3; j++) ctx.fillRect(x + 8 + j * 6, 10, 3, 24);
+    else if (k % 3 === 1) {
+      ctx.font = 'bold 20px serif';
+      ctx.fillText('中', x + 6, 30);
+    } else for (let j = 0; j < 4; j++) {
+      ctx.beginPath();
+      ctx.arc(x + 10 + (j % 2) * 12, 14 + Math.floor(j / 2) * 14, 4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  return finish(c, renderer);
+}
+
+// Boiler paints: grey-blue enamel, green, yellow, rust streaked, tagged.
+export function boilerPaintTexture(renderer, base = '#6a7a80') {
+  const S = 256;
+  const [c, ctx] = makeCanvas(S);
+  ctx.fillStyle = base;
+  ctx.fillRect(0, 0, S, S);
+  blotches(ctx, S, S, 10, '40,45,45', 0.3);
+  blotches(ctx, S, S, 8, '200,210,210', 0.12);
+  for (let i = 0; i < 20; i++) {
+    const x = Math.random() * S, y = Math.random() * S * 0.6;
+    const g = ctx.createLinearGradient(0, y, 0, y + 80);
+    g.addColorStop(0, 'rgba(140,70,20,0.45)');
+    g.addColorStop(1, 'rgba(140,70,20,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(x, y, 2 + Math.random() * 4, 80);
+  }
+  // Graffiti scrawls.
+  ctx.strokeStyle = 'rgba(30,20,20,0.55)';
+  ctx.lineWidth = 3;
+  for (let i = 0; i < 3; i++) {
+    ctx.beginPath();
+    let x = Math.random() * S, y = 80 + Math.random() * 120;
+    ctx.moveTo(x, y);
+    for (let k = 0; k < 8; k++) {
+      x += (Math.random() - 0.3) * 24;
+      y += (Math.random() - 0.5) * 30;
+      ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  }
+  speckle(ctx, S, 4000, '30,30,30', 0.2);
+  return finish(c, renderer);
+}
+
+// Green-painted steel catwalk grating.
+export function catwalkTexture(renderer) {
+  const S = 128;
+  const [c, ctx] = makeCanvas(S);
+  ctx.fillStyle = '#1e4a2a';
+  ctx.fillRect(0, 0, S, S);
+  ctx.fillStyle = '#2e6a3c';
+  for (let y = 0; y < S; y += 8) ctx.fillRect(0, y, S, 5);
+  ctx.fillStyle = '#123018';
+  for (let x = 0; x < S; x += 32) ctx.fillRect(x, 0, 3, S);
+  blotches(ctx, S, S, 8, '60,50,30', 0.3);
+  speckle(ctx, S, 1500, '200,210,190', 0.12);
+  return finish(c, renderer);
+}
+
+// Bright white pipe lagging: painted canvas over insulation, with seams.
+export function whiteLagTexture(renderer) {
+  const S = 128;
+  const [c, ctx] = makeCanvas(S);
+  ctx.fillStyle = '#e4e2da';
+  ctx.fillRect(0, 0, S, S);
+  blotches(ctx, S, S, 10, '200,195,180', 0.35);
+  blotches(ctx, S, S, 5, '150,130,100', 0.18);
+  for (let y = 0; y < S; y += 32) {
+    ctx.fillStyle = 'rgba(150,145,130,0.4)';
+    ctx.fillRect(0, y, S, 2);
+  }
+  ctx.strokeStyle = 'rgba(160,150,130,0.35)';
+  ctx.lineWidth = 1;
+  for (let k = 0; k < 8; k++) {
+    ctx.beginPath();
+    const y = Math.random() * S;
+    ctx.moveTo(0, y);
+    ctx.lineTo(S, y + (Math.random() - 0.5) * 10);
+    ctx.stroke();
+  }
+  speckle(ctx, S, 900, '90,85,70', 0.15);
+  return finish(c, renderer);
+}
+
+// Dirty boiler room concrete: oil stains, grit, drains.
+export function dirtyConcreteTexture(renderer) {
+  const S = 256;
+  const [c, ctx] = makeCanvas(S);
+  ctx.fillStyle = '#6e6a62';
+  ctx.fillRect(0, 0, S, S);
+  blotches(ctx, S, S, 12, '40,36,30', 0.4);
+  blotches(ctx, S, S, 8, '120,100,70', 0.25);
+  blotches(ctx, S, S, 6, '20,18,15', 0.35);
+  speckle(ctx, S, 6000, '30,28,25', 0.3, 2);
+  speckle(ctx, S, 2000, '160,150,130', 0.2, 1.5);
+  cracks(ctx, S, 4, 'rgba(25,22,18,0.55)');
+  return finish(c, renderer);
+}
+
+// Four oil paintings in a row: a valley at dusk, a gentleman whose face
+// has been scratched out, a steamship, a still life of lilies.
+export function hotelPaintingsTexture(renderer) {
+  const [c, ctx] = canvasWH(512, 128);
+  // Valley.
+  let g = ctx.createLinearGradient(0, 0, 0, 128);
+  g.addColorStop(0, '#d89a50');
+  g.addColorStop(0.5, '#e8c890');
+  g.addColorStop(1, '#5a4a2a');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 128, 128);
+  ctx.fillStyle = '#4a5a3a';
+  ctx.beginPath();
+  ctx.moveTo(0, 80);
+  ctx.quadraticCurveTo(40, 50, 70, 78);
+  ctx.quadraticCurveTo(100, 60, 128, 72);
+  ctx.lineTo(128, 128);
+  ctx.lineTo(0, 128);
+  ctx.fill();
+  ctx.fillStyle = '#2a3a22';
+  ctx.beginPath();
+  ctx.moveTo(0, 100);
+  ctx.quadraticCurveTo(60, 84, 128, 104);
+  ctx.lineTo(128, 128);
+  ctx.lineTo(0, 128);
+  ctx.fill();
+  // Portrait.
+  ctx.fillStyle = '#2a1a12';
+  ctx.fillRect(128, 0, 128, 128);
+  g = ctx.createRadialGradient(192, 50, 4, 192, 50, 70);
+  g.addColorStop(0, 'rgba(120,80,40,0.8)');
+  g.addColorStop(1, 'rgba(40,20,10,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(128, 0, 128, 128);
+  ctx.fillStyle = '#141010';
+  ctx.beginPath();
+  ctx.moveTo(150, 128);
+  ctx.quadraticCurveTo(160, 84, 192, 80);
+  ctx.quadraticCurveTo(224, 84, 234, 128);
+  ctx.fill();
+  ctx.fillStyle = '#d8b898';
+  ctx.beginPath();
+  ctx.ellipse(192, 54, 17, 23, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#f0ece0';
+  ctx.fillRect(184, 80, 16, 12);
+  ctx.strokeStyle = 'rgba(30,20,15,0.9)';
+  ctx.lineWidth = 2;
+  for (let k = 0; k < 14; k++) {
+    ctx.beginPath();
+    ctx.moveTo(178 + Math.random() * 28, 36 + Math.random() * 10);
+    ctx.lineTo(178 + Math.random() * 28, 60 + Math.random() * 14);
+    ctx.stroke();
+  }
+  // Steamship.
+  g = ctx.createLinearGradient(0, 0, 0, 128);
+  g.addColorStop(0, '#7a8a9a');
+  g.addColorStop(0.6, '#c8c0a8');
+  g.addColorStop(0.62, '#2a3a4a');
+  g.addColorStop(1, '#1a2430');
+  ctx.fillStyle = g;
+  ctx.fillRect(256, 0, 128, 128);
+  ctx.fillStyle = '#1a1414';
+  ctx.beginPath();
+  ctx.moveTo(276, 76);
+  ctx.lineTo(364, 76);
+  ctx.lineTo(354, 90);
+  ctx.lineTo(284, 90);
+  ctx.fill();
+  ctx.fillStyle = '#e0dcd0';
+  ctx.fillRect(296, 64, 50, 12);
+  ctx.fillStyle = '#8a2a1a';
+  for (const x of [306, 326]) ctx.fillRect(x, 44, 8, 20);
+  ctx.fillStyle = 'rgba(60,60,60,0.5)';
+  ctx.beginPath();
+  ctx.ellipse(330, 30, 30, 10, -0.2, 0, Math.PI * 2);
+  ctx.fill();
+  // Lilies.
+  ctx.fillStyle = '#1e1a14';
+  ctx.fillRect(384, 0, 128, 128);
+  ctx.fillStyle = '#6a4a2a';
+  ctx.beginPath();
+  ctx.moveTo(430, 128);
+  ctx.lineTo(434, 90);
+  ctx.lineTo(462, 90);
+  ctx.lineTo(466, 128);
+  ctx.fill();
+  ctx.strokeStyle = '#3a5a2a';
+  ctx.lineWidth = 2;
+  for (let k = 0; k < 6; k++) {
+    ctx.beginPath();
+    ctx.moveTo(448, 92);
+    ctx.lineTo(420 + k * 11, 40 + (k % 2) * 16);
+    ctx.stroke();
+  }
+  ctx.fillStyle = '#efe8d8';
+  for (let k = 0; k < 6; k++) {
+    ctx.beginPath();
+    ctx.ellipse(420 + k * 11, 38 + (k % 2) * 16, 8, 5, k, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  // Varnish: everything yellowed and dark at the edges.
+  for (let k = 0; k < 4; k++) {
+    g = ctx.createRadialGradient(k * 128 + 64, 64, 30, k * 128 + 64, 64, 95);
+    g.addColorStop(0, 'rgba(0,0,0,0)');
+    g.addColorStop(1, 'rgba(20,12,4,0.65)');
+    ctx.fillStyle = g;
+    ctx.fillRect(k * 128, 0, 128, 128);
+  }
+  ctx.fillStyle = 'rgba(160,110,30,0.12)';
+  ctx.fillRect(0, 0, 512, 128);
+  speckle(ctx, 512, 3000, '20,10,0', 0.2);
+  return finish(c, renderer);
+}
+
+export const L5_SIGNS = 8;
+// Hotel signage, one per row: 0 HOMELY HOTEL, 1 THE BEVERLY ROOM,
+// 2 BOILER ROOM / STAFF ONLY, 3 M.E.G. HOUSEKEEPING, 4 MAINTENANCE LIFT,
+// 5 RECEPTION, 6 DINING ROOM, 7 ELEVATORS.
+export function level5SignTexture(renderer) {
+  const W = 256, R = 64;
+  const [c, ctx] = canvasWH(W, R * L5_SIGNS);
+  const sign = (k, bg, fg, text, sub, font = 'bold 26px Georgia, serif', border = '#c8a048') => {
+    const y = k * R;
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, y, W, R);
+    if (border) {
+      ctx.strokeStyle = border;
+      ctx.lineWidth = 3;
+      ctx.strokeRect(5, y + 5, W - 10, R - 10);
+    }
+    ctx.fillStyle = fg;
+    ctx.textAlign = 'center';
+    ctx.font = font;
+    ctx.fillText(text, W / 2, y + (sub ? 32 : 41));
+    if (sub) {
+      ctx.font = 'bold 13px Georgia, serif';
+      ctx.fillText(sub, W / 2, y + 51);
+    }
+  };
+  sign(0, '#1e3a2a', '#ecdcb0', 'HOMELY HOTEL', 'ALL GUESTS WELCOME');
+  sign(1, '#141010', '#d8b050', 'THE BEVERLY ROOM', 'DANCING NIGHTLY');
+  sign(2, '#8a1a12', '#f0ece0', 'BOILER ROOM', 'STAFF ONLY BEYOND THIS POINT', 'bold 26px Arial, sans-serif', '#f0ece0');
+  sign(3, '#2a3a4a', '#e8e8e0', 'M.E.G. HOUSEKEEPING', 'SUPPLIES — TAKE WHAT YOU NEED', 'bold 20px monospace', null);
+  // Hazard stripes for the maintenance lift.
+  ctx.fillStyle = '#d8b020';
+  ctx.fillRect(0, 4 * R, W, R);
+  ctx.fillStyle = '#141414';
+  for (let x = -R; x < W; x += 24) {
+    ctx.beginPath();
+    ctx.moveTo(x, 4 * R);
+    ctx.lineTo(x + 12, 4 * R);
+    ctx.lineTo(x + 12 + R, 5 * R);
+    ctx.lineTo(x + R, 5 * R);
+    ctx.fill();
+  }
+  ctx.fillStyle = '#d8b020';
+  ctx.fillRect(16, 4 * R + 12, W - 32, R - 24);
+  ctx.fillStyle = '#141414';
+  ctx.textAlign = 'center';
+  ctx.font = 'bold 16px Arial, sans-serif';
+  ctx.fillText('MAINTENANCE LIFT', W / 2, 4 * R + 29);
+  ctx.font = 'bold 12px Arial, sans-serif';
+  ctx.fillText('NOT RECOMMENDED', W / 2, 4 * R + 44);
+  sign(5, '#2a1a10', '#d8b050', 'RECEPTION', null);
+  sign(6, '#2a1a10', '#d8b050', 'DINING ROOM', null);
+  sign(7, '#2a1a10', '#d8b050', 'ELEVATORS', null);
+  return finish(c, renderer);
+}
+
+// Engraved brass door numbers 0-9 in a row.
+export function doorDigitsTexture(renderer) {
+  const [c, ctx] = canvasWH(320, 48);
+  ctx.fillStyle = '#b08a3a';
+  ctx.fillRect(0, 0, 320, 48);
+  blotches(ctx, 320, 48, 6, '255,230,160', 0.25);
+  ctx.fillStyle = '#2a1a08';
+  ctx.textAlign = 'center';
+  ctx.font = 'bold 36px Georgia, serif';
+  for (let d = 0; d < 10; d++) ctx.fillText(String(d), d * 32 + 16, 38);
+  return finish(c, renderer);
+}
+
+// The floor indicator over an elevator door: a bronze half-dial from 1 to 13.
+export function elevatorDialTexture(renderer) {
+  const [c, ctx] = canvasWH(256, 128);
+  ctx.fillStyle = '#3a2a14';
+  ctx.fillRect(0, 0, 256, 128);
+  ctx.fillStyle = '#e8dcb8';
+  ctx.beginPath();
+  ctx.arc(128, 120, 104, Math.PI, 0);
+  ctx.fill();
+  ctx.strokeStyle = '#a8803a';
+  ctx.lineWidth = 6;
+  ctx.stroke();
+  ctx.textAlign = 'center';
+  ctx.font = 'bold 15px Georgia, serif';
+  for (let k = 1; k <= 13; k++) {
+    const a = Math.PI + ((k - 1) / 12) * Math.PI;
+    ctx.fillStyle = k === 13 ? '#a01010' : '#2a1a08';
+    ctx.fillText(String(k), 128 + Math.cos(a) * 84, 125 + Math.sin(a) * 84);
+    ctx.fillRect(128 + Math.cos(a) * 100 - 1, 120 + Math.sin(a) * 100 - 1, 3, 3);
+  }
+  return finish(c, renderer);
+}
+
+// A clock face with roman numerals.
+export function clockFaceTexture(renderer) {
+  const S = 128;
+  const [c, ctx] = makeCanvas(S);
+  ctx.fillStyle = '#2a1a0c';
+  ctx.fillRect(0, 0, S, S);
+  ctx.fillStyle = '#ece4cc';
+  ctx.beginPath();
+  ctx.arc(64, 64, 60, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#1e1408';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.font = 'bold 13px Georgia, serif';
+  const R = ['XII', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI'];
+  for (let k = 0; k < 12; k++) {
+    const a = (k / 12) * Math.PI * 2 - Math.PI / 2;
+    ctx.fillText(R[k], 64 + Math.cos(a) * 46, 64 + Math.sin(a) * 46);
+  }
+  // Hands stopped at 3:33.
+  ctx.strokeStyle = '#1e1408';
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.moveTo(64, 64);
+  ctx.lineTo(64 + Math.cos(-Math.PI / 2 + (3.55 / 12) * Math.PI * 2) * 26, 64 + Math.sin(-Math.PI / 2 + (3.55 / 12) * Math.PI * 2) * 26);
+  ctx.stroke();
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.moveTo(64, 64);
+  ctx.lineTo(64 + Math.cos(-Math.PI / 2 + (33 / 60) * Math.PI * 2) * 40, 64 + Math.sin(-Math.PI / 2 + (33 / 60) * Math.PI * 2) * 40);
+  ctx.stroke();
+  return finish(c, renderer);
+}
+
+// Art deco elevator door: dark bronze, a brass border, a sunburst.
+export function elevatorDoorTexture(renderer) {
+  const [c, ctx] = canvasWH(128, 256);
+  ctx.fillStyle = '#3e2a14';
+  ctx.fillRect(0, 0, 128, 256);
+  blotches(ctx, 128, 256, 8, '120,90,40', 0.25);
+  ctx.strokeStyle = '#b08a3a';
+  ctx.lineWidth = 4;
+  ctx.strokeRect(6, 6, 116, 244);
+  ctx.lineWidth = 2;
+  ctx.strokeRect(16, 16, 96, 224);
+  ctx.strokeStyle = 'rgba(200,160,80,0.75)';
+  ctx.lineWidth = 1.5;
+  for (let k = 0; k <= 8; k++) {
+    const a = Math.PI + (k / 8) * Math.PI;
+    ctx.beginPath();
+    ctx.moveTo(64, 150);
+    ctx.lineTo(64 + Math.cos(a) * 44, 150 + Math.sin(a) * 80);
+    ctx.stroke();
+  }
+  ctx.beginPath();
+  ctx.arc(64, 150, 18, Math.PI, 0);
+  ctx.stroke();
+  for (let y = 170; y < 236; y += 12) {
+    ctx.beginPath();
+    ctx.moveTo(24, y);
+    ctx.lineTo(104, y);
+    ctx.stroke();
+  }
+  speckle(ctx, 128, 1200, '20,10,0', 0.25);
+  return finish(c, renderer);
+}

@@ -212,6 +212,7 @@ export class AudioEngine {
   }
 
   stopAmbience() {
+    if (this.jazzOut) this.jazzOut.gain.setValueAtTime(0, this.ctx.currentTime);
     if (!this.ambienceOn) return;
     this.ambienceOn = false;
     for (const n of this.amb) {
@@ -227,7 +228,7 @@ export class AudioEngine {
 
   /**
    * Per-frame mix.
-   * @param {object} s  { hum, exitGain, exitPan, exitType ('static' | 'hum' | 'steam'), drone, sanity, ears, machine?, machinePan? }
+   * @param {object} s  { hum, exitGain, exitPan, exitType ('static' | 'hum' | 'steam'), drone, sanity, ears, machine?, machinePan?, jazz?, jazzMuffle? }
    */
   update(s) {
     if (!this.ctx || !this.ambienceOn) return;
@@ -241,6 +242,7 @@ export class AudioEngine {
     if (this.staticPan) this.staticPan.pan.setTargetAtTime(s.exitPan, t, 0.05);
     this.droneGain.gain.setTargetAtTime(s.drone, t, 0.3);
     this.machineGain.gain.setTargetAtTime(s.machine || 0, t, 0.2);
+    this.updateJazz(s.jazz || 0, s.jazzMuffle ?? 6000);
     if (this.machinePan) this.machinePan.pan.setTargetAtTime(s.machinePan || 0, t, 0.1);
     this.muffle.frequency.setTargetAtTime(s.ears ? 380 : 20000, t, 0.06);
 
@@ -718,6 +720,210 @@ export class AudioEngine {
     o2.start(t);
     o.stop(t + duration + 0.1);
     o2.stop(t + duration + 0.1);
+  }
+
+  // ---- Smooth jazz (Level 5) --------------------------------------------
+  // A small generative combo, as if from an old radio down the hall: walking
+  // bass, Rhodes-ish comping, brushes and ride, and a lazy sax-like line over
+  // a ii-V-I loop in F. Notes are scheduled a little ahead while it's audible.
+
+  updateJazz(level, muffle) {
+    const ctx = this.ctx;
+    if (!this.jazzOut) {
+      if (level < 0.001) return;
+      this.jazzOut = ctx.createGain();
+      this.jazzOut.gain.value = 0;
+      this.jazzLp = ctx.createBiquadFilter();
+      this.jazzLp.type = 'lowpass';
+      this.jazzLp.frequency.value = muffle;
+      const hp = ctx.createBiquadFilter();
+      hp.type = 'highpass';
+      hp.frequency.value = 140;
+      this.jazzBus = ctx.createGain();
+      this.jazzBus.connect(hp).connect(this.jazzLp).connect(this.jazzOut).connect(this.master);
+      // Record crackle.
+      const crackle = this.noiseSource(true);
+      const cf = ctx.createBiquadFilter();
+      cf.type = 'highpass';
+      cf.frequency.value = 3000;
+      const cg = ctx.createGain();
+      cg.gain.value = 0.02;
+      crackle.connect(cf).connect(cg).connect(this.jazzLp);
+      crackle.start();
+      this.jazzNext = ctx.currentTime + 0.1;
+      this.jazzBeat = 0;
+    }
+    const t = ctx.currentTime;
+    this.jazzOut.gain.setTargetAtTime(level, t, 0.3);
+    this.jazzLp.frequency.setTargetAtTime(muffle, t, 0.3);
+    if (level < 0.001) {
+      this.jazzNext = t + 0.1;
+      return;
+    }
+    const spb = 60 / 88; // seconds per beat
+    while (this.jazzNext < t + 0.3) {
+      this.jazzStep(this.jazzBeat, this.jazzNext, spb);
+      this.jazzBeat++;
+      this.jazzNext += spb;
+    }
+  }
+
+  jazzStep(beat, t, spb) {
+    // | Gm7 | C7 | Fmaj7 | Dm7 | Gm7 | C7 | Am7 D7 | Gm7 C7 |
+    const C = {
+      Gm7: [43, [0, 3, 7, 10], [58, 62, 65, 69]], C7: [36, [0, 4, 7, 10], [58, 62, 64, 69]],
+      F7M: [41, [0, 4, 7, 11], [57, 60, 64, 67]], Dm7: [38, [0, 3, 7, 10], [57, 60, 64, 65]],
+      Am7: [45, [0, 3, 7, 10], [60, 64, 67, 71]], D7: [38, [0, 4, 7, 10], [60, 62, 66, 72]],
+    };
+    const prog = [['Gm7'], ['C7'], ['F7M'], ['Dm7'], ['Gm7'], ['C7'], ['Am7', 'D7'], ['Gm7', 'C7']];
+    const bar = Math.floor(beat / 4) % prog.length, b = beat % 4;
+    const names = prog[bar];
+    const name = names.length === 2 ? names[b < 2 ? 0 : 1] : names[0];
+    const [root, tones, voicing] = C[name];
+    const nextBar = prog[(bar + 1) % prog.length];
+    const nextRoot = C[b < 2 && names.length === 2 ? names[1] : nextBar[0]][0];
+    const swing = spb * 0.66;
+    const r = Math.random;
+    // Walking bass: root, chord tones, then a chromatic step into the next root.
+    let note = root;
+    if (b === 1 || b === 2) note = root + tones[1 + Math.floor(r() * 3)] - (r() < 0.3 ? 12 : 0);
+    if (b === 3) note = nextRoot + (r() < 0.5 ? 1 : -1);
+    if (note < 31) note += 12;
+    this.jazzNote(t, note, spb * 0.9, 'bass', 0.32);
+    // Ride: ding, ding-a ding.
+    this.jazzRide(t, 0.06);
+    if (b === 1 || b === 3) {
+      this.jazzRide(t + swing, 0.035);
+      this.jazzBrush(t, 0.05);
+    }
+    // Comping: voicings on 1 and on the "and" of 2, not every time.
+    if ((b === 0 && r() < 0.7) || (b === 1 && r() < 0.45)) {
+      const at = b === 1 ? t + swing : t;
+      for (const v of voicing) this.jazzNote(at + r() * 0.015, v, spb * (b === 1 ? 0.8 : 1.6), 'keys', 0.07);
+    }
+    // A lazy melody: chord tones and passing notes, often silent.
+    if (r() < 0.38) {
+      const scale = [65, 67, 69, 70, 72, 74, 76, 77, 79];
+      const pick = r() < 0.6 ? root + 24 + tones[Math.floor(r() * 4)] : scale[Math.floor(r() * scale.length)];
+      const n = pick < 62 ? pick + 12 : pick > 82 ? pick - 12 : pick;
+      this.jazzNote(t + (r() < 0.4 ? swing : 0), n, spb * (1 + Math.floor(r() * 3)) * 0.9, 'sax', 0.05);
+    }
+  }
+
+  jazzNote(t, midi, dur, kind, vol) {
+    const ctx = this.ctx;
+    const f = 440 * Math.pow(2, (midi - 69) / 12);
+    const g = ctx.createGain();
+    const o = ctx.createOscillator();
+    if (kind === 'bass') {
+      o.type = 'triangle';
+      o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(vol, t + 0.012);
+      g.gain.exponentialRampToValueAtTime(vol * 0.3, t + dur * 0.6);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g);
+    } else if (kind === 'keys') {
+      // Rhodes-ish: a sine with a soft bell partial and a little tremolo.
+      o.type = 'sine';
+      o.frequency.value = f;
+      const o2 = ctx.createOscillator();
+      o2.type = 'sine';
+      o2.frequency.value = f * 4.01;
+      const g2 = ctx.createGain();
+      g2.gain.setValueAtTime(vol * 0.25, t);
+      g2.gain.exponentialRampToValueAtTime(0.0001, t + 0.25);
+      o2.connect(g2).connect(g);
+      o2.start(t);
+      o2.stop(t + dur + 0.1);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(vol, t + 0.008);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g);
+    } else {
+      // Sax-ish: a filtered sawtooth that swells in, with vibrato.
+      o.type = 'sawtooth';
+      o.frequency.value = f;
+      const lfo = ctx.createOscillator();
+      lfo.frequency.value = 5.2;
+      const lg = ctx.createGain();
+      lg.gain.value = f * 0.008;
+      lfo.connect(lg).connect(o.frequency);
+      lfo.start(t);
+      lfo.stop(t + dur + 0.1);
+      const lp = ctx.createBiquadFilter();
+      lp.type = 'lowpass';
+      lp.frequency.value = 1400;
+      lp.Q.value = 2;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(vol, t + 0.12);
+      g.gain.setValueAtTime(vol * 0.85, t + dur * 0.8);
+      g.gain.linearRampToValueAtTime(0.0001, t + dur);
+      o.connect(lp).connect(g);
+    }
+    g.connect(this.jazzBus);
+    o.start(t);
+    o.stop(t + dur + 0.1);
+  }
+
+  jazzRide(t, vol) {
+    const s = this.noiseSource();
+    const f = this.ctx.createBiquadFilter();
+    f.type = 'bandpass';
+    f.frequency.value = 7000;
+    f.Q.value = 2;
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(vol, t + 0.004);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.45);
+    s.connect(f).connect(g).connect(this.jazzBus);
+    s.start(t, Math.random(), 0.5);
+  }
+
+  jazzBrush(t, vol) {
+    const s = this.noiseSource();
+    const f = this.ctx.createBiquadFilter();
+    f.type = 'bandpass';
+    f.frequency.value = 2500;
+    f.Q.value = 0.7;
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(vol, t + 0.03);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.25);
+    s.connect(f).connect(g).connect(this.jazzBus);
+    s.start(t, Math.random(), 0.3);
+  }
+
+  // A small hand bell on a reception desk.
+  deskBell(pan = 0, vol = 0.25) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    for (const [f, k] of [[2350, 1], [3720, 0.5], [5600, 0.25]]) {
+      const o = this.ctx.createOscillator();
+      o.frequency.value = f;
+      const g = this.ctx.createGain();
+      this.env(g, t, vol * k, 0.002, 1.4);
+      o.connect(g).connect(this.out(pan));
+      o.start(t);
+      o.stop(t + 1.5);
+    }
+  }
+
+  // A grandfather clock's tick (or tock).
+  tick(pan = 0, vol = 0.05, tock = false) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    const o = this.ctx.createOscillator();
+    o.type = 'square';
+    o.frequency.value = tock ? 900 : 1150;
+    const g = this.ctx.createGain();
+    this.env(g, t, vol, 0.001, 0.03);
+    const bp = this.ctx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.frequency.value = tock ? 1200 : 1600;
+    o.connect(bp).connect(g).connect(this.out(pan));
+    o.start(t);
+    o.stop(t + 0.05);
   }
 
   // Small hammer tap.

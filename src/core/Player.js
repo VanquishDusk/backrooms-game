@@ -27,6 +27,7 @@ export class Player {
     this.battery = 100;
     this.flashlight = false;
     this.bottles = 0;
+    this.meat = 0;
     this.coveringEars = false;
     this.sprinting = false;
     this.bob = 0;
@@ -52,7 +53,7 @@ export class Player {
 
   // Stats that travel with you between levels.
   carry() {
-    return { sanity: this.sanity, health: this.health, battery: this.battery, bottles: this.bottles };
+    return { sanity: this.sanity, health: this.health, battery: this.battery, bottles: this.bottles, meat: this.meat || 0 };
   }
 
   restore(c) {

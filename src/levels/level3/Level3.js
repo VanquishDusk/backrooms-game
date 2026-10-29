@@ -218,6 +218,9 @@ export class Level3 {
     this.buildCorridorClutter();
     this.buildHazards();
     this.buildLifts();
+    // Most lifts go down to Level 4; a second one (now and then the only one) to the hotel.
+    const lr = rng.fork('lift-targets');
+    this.lifts.forEach((l, k) => (l.target = k === 1 || (this.lifts.length === 1 && lr.chance(0.25)) ? 'level5' : 'level4'));
     this.buildBackDoor();
     this.buildArrows();
     this.fixtures = new Fixtures({ lights: layout.lights, cb: this.cb, group: this.props, rng: drng.fork('fixtures'), H });
@@ -886,14 +889,14 @@ export class Level3 {
         ctx.audio.liftMotor(0.4);
       }
       if (L.moving) {
-        L.l.needle.rotation.z = -Math.min(1.4, (L.t - 1.4) * 0.8);
+        L.l.needle.rotation.z = -Math.min(L.l.target === 'level5' ? 2.2 : 1.4, (L.t - 1.4) * 0.8);
         player.pos.y = -Math.min(0.05, (L.t - 1.4) * 0.01);
       }
       if (L.t > 2.2 && !L.gone) {
         L.gone = true;
         this.done = true;
         player.frozen = false;
-        ctx.onEscape('level4', 'door');
+        ctx.onEscape(L.l.target || 'level4', 'door');
       }
       return;
     }

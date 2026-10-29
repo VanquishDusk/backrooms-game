@@ -148,9 +148,9 @@ export function blockFurnishedSteps(map, world, furnished, start) {
   };
   for (let y = 0; y < map.rows; y++) {
     for (let x = 0; x < map.cols; x++) {
-      if (!furnished(map.idx(x, y))) continue;
       for (const d of [0, 2]) {
         if (!map.canMove(x, y, d)) continue;
+        if (!furnished(map.idx(x, y)) && !furnished(map.idx(x + DIRS[d][0], y + DIRS[d][1]))) continue;
         const [ax, az] = map.cellCenter(x, y), [bx, bz] = map.cellCenter(x + DIRS[d][0], y + DIRS[d][1]);
         if (walk(ax, az, bx, bz) && walk(bx, bz, ax, az)) continue;
         const e = map.edge(x, y, d);

@@ -110,6 +110,8 @@ export class GridWorld {
    * @param {number} [opts.panelDrop]  how far fixtures hang below the ceiling
    * @param {(x:number,z:number)=>number} [opts.dampAt]  carpet wetness 0..1
    * @param {(x:number,y:number)=>number} [opts.ceilingAt]  ceiling height per cell (default: map height)
+   * @param {(x:number,y:number)=>string} [opts.ceilingStyle]  ceiling material name per cell (textures.ceilings);
+   *   the faces between ceilings of different heights use textures.walls.step when given
    * @param {object} opts.shared  shared uniforms
    */
   constructor(opts) {
@@ -134,6 +136,7 @@ export class GridWorld {
     this.panelDrop = opts.panelDrop || 0.012;
     this.dampAt = opts.dampAt || (() => 1);
     this.ceilingAt = opts.ceilingAt || null;
+    this.ceilingStyle = opts.ceilingStyle || (() => 'ceiling');
     const ts = { wall: 1 / 0.9, floor: 1 / 1.6, ceiling: 1 / 1.2, tile: 1 / 1.2, wood: 1 / 1.5, ...opts.texScale };
     const tx = this.textures;
     this.materials = {
@@ -152,6 +155,7 @@ export class GridWorld {
     };
     extra(tx.floors, SURFACE.PLAIN, ts.floor);
     extra(tx.walls, SURFACE.WALL, ts.wall);
+    extra(tx.ceilings, SURFACE.CEILING, ts.ceiling);
     // Per-cell destruction: bit 1 = ceiling gone, bit 2 = floor gone.
     this.broken = new Uint8Array(this.map.cols * this.map.rows);
     this.floorMeshes = [];
@@ -220,8 +224,9 @@ export class GridWorld {
           // Ceilings at different heights, with a face where a high ceiling
           // meets a lower one across an opening.
           const ch = this.ceilingAt(x, y);
-          geos.ceiling.flat(x0, z0, x1, z1, ch, false);
-          const step = geoFor('wall');
+          const cs2 = this.ceilingStyle(x, y);
+          (this.materials[cs2] ? geoFor(cs2) : geos.ceiling).flat(x0, z0, x1, z1, ch, false);
+          const step = geoFor(this.materials.step ? 'step' : 'wall');
           for (let d = 0; d < 4; d++) {
             const nx = x + (d === 0 ? 1 : d === 1 ? -1 : 0), ny = y + (d === 2 ? 1 : d === 3 ? -1 : 0);
             if (!map.inBounds(nx, ny) || map.getEdge(map.edge(x, y, d)) === EDGE_WALL) continue;
@@ -362,6 +367,13 @@ export class GridWorld {
       this.rebuildCollision();
       this.collisionDirty = false;
     }
+  }
+
+  // Ceiling height over a point.
+  ceilingHeight(x, z) {
+    if (!this.ceilingAt) return this.map.height;
+    const [cx, cy] = this.map.cellAt(x, z);
+    return this.ceilingAt(cx, cy);
   }
 
   // Floor height under a point.
