@@ -548,7 +548,7 @@ export class Level4 {
     if (this.rng.chance(0.4)) want.push({ type: 'basement', target: 'level71', deep: true });
     // Rarely, a door with a neon EXIT sign over it, and white light behind
     // it, as if it led out of the Backrooms. It doesn't.
-    if (this.rng.chance(0.3)) want.push({ type: 'neon', target: 'level601' });
+    if (this.rng.chance(0.75)) want.push({ type: 'neon', target: 'level601' });
     this.exits = [];
     const usedCores = new Set();
     for (const w of want) {

@@ -158,6 +158,13 @@ export class Backpack {
         audio.pickup();
         hud.message('You patch yourself up.', 2);
         break;
+      case 'milk':
+        remove();
+        p.sanity = Math.min(100, p.sanity + 35);
+        p.health = Math.min(100, p.health + 15);
+        audio.drink();
+        hud.message('Almond Milk. Cold and creamy. The world feels a little more solid.', 2.5);
+        break;
       case 'meat':
         remove();
         p.health = Math.min(100, p.health + 12);

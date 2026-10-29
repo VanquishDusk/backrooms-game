@@ -644,6 +644,7 @@ export class Game {
     post.flip.value = atm.flip || 0;
     post.glitch.value = atm.glitch || 0;
     post.soften.value = atm.soften || 0;
+    post.craft.value = atm.craft || 0;
     this.renderer.forcePost = !!(atm.invert || atm.flip);
     document.body.classList.toggle('inverted', !!atm.invert && this.state !== 'menu');
 

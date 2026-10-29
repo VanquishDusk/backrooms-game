@@ -1,6 +1,7 @@
 // Every sound is synthesized with WebAudio — no audio files to load.
 
 import { Piano } from './piano.js';
+import { CartoonBand } from './cartoon.js';
 
 export class AudioEngine {
   constructor() {
@@ -218,6 +219,7 @@ export class AudioEngine {
     if (this.windOut) this.windOut.gain.setValueAtTime(0, this.ctx.currentTime);
     if (this.wavesOut) this.wavesOut.gain.setValueAtTime(0, this.ctx.currentTime);
     if (this.piano) this.piano.reset();
+    if (this.band) this.band.reset();
     if (!this.ambienceOn) return;
     this.ambienceOn = false;
     for (const n of this.amb) {
@@ -253,6 +255,10 @@ export class AudioEngine {
     if (s.piano || this.piano) {
       if (!this.piano) this.piano = new Piano(this.ctx, this.master, this.noise);
       this.piano.update(s.piano || 0, s.pianoOpts || {});
+    }
+    if (s.band || this.band) {
+      if (!this.band) this.band = new CartoonBand(this.ctx, this.master, this.noise);
+      this.band.update(s.band || 0, s.bandOpts || {});
     }
     if (this.machinePan) this.machinePan.pan.setTargetAtTime(s.machinePan || 0, t, 0.1);
     this.muffle.frequency.setTargetAtTime(s.ears ? 380 : s.underwater ? 650 : 20000, t, 0.06);
@@ -899,6 +905,93 @@ export class AudioEngine {
     e.connect(ef).connect(eg).connect(this.out(-pan * 0.5));
     e.start(t + 0.35, Math.random(), 1);
     this.thud(pan, vol * 0.4);
+  }
+
+  // A cartoon spring: boi-oi-oing.
+  boing(pan = 0, vol = 0.3) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    const o = this.ctx.createOscillator();
+    o.type = 'triangle';
+    o.frequency.setValueAtTime(180, t);
+    o.frequency.exponentialRampToValueAtTime(520, t + 0.08);
+    o.frequency.exponentialRampToValueAtTime(240, t + 0.5);
+    const lfo = this.ctx.createOscillator();
+    lfo.frequency.value = 22;
+    const lg = this.ctx.createGain();
+    lg.gain.value = 60;
+    lfo.connect(lg).connect(o.frequency);
+    const g = this.ctx.createGain();
+    this.env(g, t, vol, 0.01, 0.55);
+    o.connect(g).connect(this.out(pan));
+    o.start(t);
+    lfo.start(t);
+    o.stop(t + 0.6);
+    lfo.stop(t + 0.6);
+  }
+
+  // A slide whistle, up (spotted you) or down (stunned).
+  slideWhistle(pan = 0, vol = 0.3, up = true) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    const o = this.ctx.createOscillator();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(up ? 500 : 1800, t);
+    o.frequency.exponentialRampToValueAtTime(up ? 1900 : 420, t + 0.45);
+    const lfo = this.ctx.createOscillator();
+    lfo.frequency.value = 7;
+    const lg = this.ctx.createGain();
+    lg.gain.value = 25;
+    lfo.connect(lg).connect(o.frequency);
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(vol, t + 0.04);
+    g.gain.setValueAtTime(vol, t + 0.4);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.55);
+    o.connect(g).connect(this.out(pan));
+    o.start(t);
+    lfo.start(t);
+    o.stop(t + 0.6);
+    lfo.stop(t + 0.6);
+  }
+
+  // Crickets at night.
+  cricket(pan = 0, vol = 0.05) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    const f = 4200 + Math.random() * 600;
+    for (let k = 0; k < 3; k++) {
+      const o = this.ctx.createOscillator();
+      o.frequency.value = f;
+      const g = this.ctx.createGain();
+      const t0 = t + k * 0.07;
+      g.gain.setValueAtTime(0.0001, t0);
+      g.gain.linearRampToValueAtTime(vol, t0 + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.05);
+      o.connect(g).connect(this.out(pan));
+      o.start(t0);
+      o.stop(t0 + 0.06);
+    }
+  }
+
+  // A toy robot's motor.
+  servo(pan = 0, vol = 0.15) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    const o = this.ctx.createOscillator();
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(140, t);
+    o.frequency.linearRampToValueAtTime(220, t + 0.15);
+    o.frequency.linearRampToValueAtTime(160, t + 0.3);
+    const f = this.ctx.createBiquadFilter();
+    f.type = 'bandpass';
+    f.frequency.value = 900;
+    f.Q.value = 3;
+    const g = this.ctx.createGain();
+    this.env(g, t, vol, 0.02, 0.32);
+    o.connect(f).connect(g).connect(this.out(pan));
+    o.start(t);
+    o.stop(t + 0.4);
   }
 
   // A key on an old keyboard.

@@ -17,8 +17,10 @@ uniform float mono;
 uniform float flip;
 uniform float glitch;
 uniform float soften;
+uniform float craft;
 varying vec2 vUv;
 float rand(vec2 co) { return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453); }
+float lum(vec3 c) { return dot(c, vec3(0.299, 0.587, 0.114)); }
 void main() {
   vec2 uv = mix(vUv, 1.0 - vUv, flip);
   // Reality tearing: horizontal bands that slip sideways.
@@ -44,6 +46,21 @@ void main() {
       blur += texture2D(tScene, uv + vec2(cos(a + 0.39), sin(a + 0.39)) * px * 2.2).rgb;
     }
     col = mix(col, min(col, blur / 16.0), soften);
+  }
+  if (craft > 0.0) {
+    // Handmade: ink outlines where colours change, flattened paint, and
+    // paper grain that only changes twelve times a second, like stop-motion.
+    vec2 px = 1.0 / res;
+    float gx = lum(texture2D(tScene, uv + vec2(px.x, 0.0)).rgb) - lum(texture2D(tScene, uv - vec2(px.x, 0.0)).rgb);
+    float gy = lum(texture2D(tScene, uv + vec2(0.0, px.y)).rgb) - lum(texture2D(tScene, uv - vec2(0.0, px.y)).rgb);
+    float edge = smoothstep(0.06, 0.2, length(vec2(gx, gy)));
+    vec3 flat_ = floor(col * 7.0 + 0.5) / 7.0;
+    col = mix(col, flat_, craft * 0.55);
+    col *= 1.0 - edge * 0.5 * craft;
+    float frame = floor(time * 12.0);
+    float paper = rand(floor(uv * res / 2.0) + frame * 7.13);
+    col *= 1.0 + (paper - 0.5) * 0.16 * craft;
+    col = mix(col, col * vec3(1.05, 1.0, 0.9), craft * 0.5);
   }
   // Vignette before inversion, so an inverted view glows at the edges.
   col *= mix(1.0, smoothstep(0.92, 0.22, d), vignette);
@@ -84,6 +101,7 @@ export class Renderer {
         flip: { value: 0 },
         glitch: { value: 0 },
         soften: { value: 0 },
+        craft: { value: 0 },
       },
       vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }',
       fragmentShader: POST_FRAG,

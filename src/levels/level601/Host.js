@@ -33,7 +33,7 @@ export class Host extends Entity {
     this.faceMat = new THREE.MeshBasicMaterial({ map: partyFace(true), transparent: true, depthWrite: false });
     this.mats.push(this.faceMat);
     this.lit.push({ mat: this.faceMat, base: new THREE.Color(1, 1, 1) });
-    const fg = this.geo(new THREE.SphereGeometry(0.178, 20, 14, -0.85, 1.7, 0.6, 1.7));
+    const fg = this.geo(new THREE.SphereGeometry(0.19, 20, 14, -0.85, 1.7, 0.6, 1.7));
     const face = this.mesh(fg, this.faceMat, 0, this.rig.p.headLen / 2, 0);
     face.scale.set(1.08, this.rig.p.headLen / 0.3, 1);
     face.rotation.y = Math.PI / 2;

@@ -30,6 +30,12 @@ export const ITEMS = {
     desc: 'A cut of meat wrapped in a napkin. Something may want it more than you.',
     icon: svg('<path d="M15 4c4 1 5 6 2 9s-8 4-10 2-1-6 2-9 4-2.5 6-2z"/><circle cx="12" cy="10" r="2"/><path d="M6 17l-3 3"/>'),
   },
+  milk: {
+    name: 'ALMOND MILK',
+    short: 'MILK',
+    desc: 'A glass bottle of Almond Milk from a milk van. Creamy. Steadies your mind and mends you a little.',
+    icon: svg('<path d="M9 2h6v3l1 2v14a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V7l1-2z"/><path d="M8 11h8v5H8z"/>'),
+  },
   pipe: {
     name: 'LEAD PIPE',
     short: 'PIPE',
