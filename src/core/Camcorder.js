@@ -45,6 +45,8 @@ export class Camcorder {
     const level = g.levelDef;
     const meta = { level: level.id, name: level.name, title: level.title, seed: g.levelSeed, time: Date.now() };
     const url = canvas.toDataURL('image/jpeg', 0.92);
+    g.extras.photoTaken();
+    g.extras.documentShot(g.camera, canvas);
     g.audio.shutter?.();
     const el = $('flash');
     el.style.transition = 'none';

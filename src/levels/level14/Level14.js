@@ -466,6 +466,11 @@ export class Level14 {
     }
   }
 
+  photoSubjects() {
+    const b = this.childGroup.position;
+    return this.children.slice(0, 3).map((c) => ({ type: 'children', x: c.x + b.x, y: 1, z: c.z + b.z, range: 60 }));
+  }
+
   // Weapons work on the children.
   stun(x, z, { range, seconds }) {
     let n = 0;

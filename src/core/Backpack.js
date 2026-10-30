@@ -214,6 +214,7 @@ export class Backpack {
     let n = 0;
     if (L.entities?.stunNear) n += L.entities.stunNear(x, z, opts).length;
     if (L.stun) n += L.stun(x, z, opts) || 0;
+    if (n) this.game.extras.award('stun');
     return n;
   }
 

@@ -130,6 +130,18 @@ export class Level94 {
     return this.area === 'castle' ? this.castle.world : this.outWorld;
   }
 
+  // Outside, the town grid can't judge sight lines over the hills.
+  get photoNoLos() {
+    return this.area !== 'castle';
+  }
+
+  photoSubjects() {
+    if (this.area !== 'castle' || !this.castle) return [];
+    const p = new THREE.Vector3();
+    this.castle.king.head.getWorldPosition(p);
+    return [{ type: 'king', x: p.x, y: p.y, z: p.z, range: 40, noLos: true }];
+  }
+
   get entities() {
     return this.area === 'castle' ? this.castleEntities : this.townEntities;
   }
@@ -407,6 +419,7 @@ export class Level94 {
     }
     if ((ph === 'dawn' || ph === 'day') && this.nightOn) {
       this.nightOn = false;
+      if (player.health > 0) ctx.award?.('night94');
       for (const e of [...this.townEntities.list]) this.townEntities.remove(e);
       ctx.hud.message('The sun\'s coming up. The Animations fold up flat and slide away under the doors.', 4);
     }
@@ -673,6 +686,7 @@ export class Level94 {
     }
     if (N.t > 60) {
       N.won = true;
+      ctx.award?.('king');
       for (const n of N.list) W.group.remove(n.sp);
       N.list.length = 0;
       this.shared.globalLight.value = 1;

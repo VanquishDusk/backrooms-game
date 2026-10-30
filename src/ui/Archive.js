@@ -2,6 +2,7 @@ import { LEVELS, FIRST_LEVEL } from '../levels/registry.js';
 import { listPhotos, deletePhoto } from '../core/photos.js';
 import { randomSeedString } from '../core/rng.js';
 import { LEVEL_INFO } from './levelInfo.js';
+import { STICKERS, ALL_SUBJECTS, subjectInfo } from '../core/extras.js';
 
 // The main menu's archive: every level as a VHS tape on a shelf, with your
 // newest photo of it as the cover. Levels you haven't found are blank
@@ -29,6 +30,14 @@ export class Archive {
     tap('tv-del', () => this.erase());
     tap('tv-save', () => this.save());
     tap('tape-back', () => game.showScreen('menu'));
+    for (const b of document.querySelectorAll('.atab')) {
+      b.addEventListener('click', (e) => {
+        e.preventDefault();
+        game.audio.unlock();
+        game.audio.click();
+        this.tab(b.dataset.tab);
+      });
+    }
     tap('tape-play', () => this.def && game.startRun(randomSeedString(), this.def.id));
     window.addEventListener('keydown', (e) => {
       if (game.screen !== 'tape') return;
@@ -78,14 +87,17 @@ export class Archive {
       const cover = open && shots.length
         ? `<img src="${shots[0].url}" alt="">`
         : `<span class="static"></span><span class="nosig">${open ? 'NO FOOTAGE' : 'NO SIGNAL'}</span>`;
+      const st = this.game.stats;
+      const stamp = open && st.survived?.[def.id] ? '<span class="stamp">SURVIVED</span>' : '';
+      const deaths = open ? st.deathsAt?.[def.id] || 0 : 0;
       const cls = def.difficulty != null ? `CLASS ${def.difficulty}` : 'CLASS ?';
       b.innerHTML = `
-        <span class="tape-window">${cover}</span>
+        <span class="tape-window">${cover}${stamp}</span>
         <span class="tape-label">
           <b>${open ? def.name.toUpperCase() : 'LEVEL ???'}</b>
           <em>${open ? def.title : '???'}</em>
         </span>
-        <span class="tape-foot"><i>${open ? cls : 'UNDISCOVERED'}</i><i>${open ? `${shots.length} PHOTO${shots.length === 1 ? '' : 'S'}` : ''}</i></span>
+        <span class="tape-foot"><i>${open ? cls : 'UNDISCOVERED'}</i><i>${open ? `${deaths ? `<span class="skulls">☠${deaths}</span> · ` : ''}${shots.length} PHOTO${shots.length === 1 ? '' : 'S'}` : ''}</i></span>
         <span class="tape-reels"><i></i><i></i></span>`;
       b.addEventListener('click', (e) => {
         e.preventDefault();
@@ -103,6 +115,57 @@ export class Archive {
       shelf.appendChild(b);
     });
     $('archive-count').textContent = `${found} / ${defs.length} FOUND`;
+    this.renderGuide();
+    this.renderStickers();
+  }
+
+  tab(name) {
+    for (const b of document.querySelectorAll('.atab')) b.classList.toggle('on', b.dataset.tab === name);
+    for (const p of document.querySelectorAll('.apane')) p.classList.toggle('hidden', p.dataset.pane !== name);
+  }
+
+  renderGuide() {
+    const guide = this.game.extras.guide;
+    const el = $('guide');
+    el.textContent = '';
+    let n = 0;
+    ALL_SUBJECTS.forEach((type, k) => {
+      const g = guide[type];
+      const info = subjectInfo(type);
+      const c = document.createElement('div');
+      c.className = `gcard${g ? '' : ' unknown'}`;
+      c.style.setProperty('--tilt', `${((k * 37) % 7 - 3) * 0.5}deg`);
+      if (g) {
+        n++;
+        c.innerHTML = `<div class="gpic"><img src="${g.thumb}" alt=""></div><b></b><p></p><small></small>`;
+        c.querySelector('b').textContent = info.name;
+        c.querySelector('p').textContent = info.blurb;
+        c.querySelector('small').textContent = `SEEN IN ${g.level.toUpperCase()}`;
+      } else {
+        c.innerHTML = '<div class="gpic"><span class="static"></span></div><b>???</b><p>Not documented yet.</p>';
+      }
+      el.appendChild(c);
+    });
+    $('guide-count').textContent = `${n}/${ALL_SUBJECTS.length}`;
+  }
+
+  renderStickers() {
+    const got = this.game.extras.got;
+    const el = $('stickers');
+    el.textContent = '';
+    let n = 0;
+    for (const s of STICKERS) {
+      const has = !!got[s.id];
+      if (has) n++;
+      const d = document.createElement('div');
+      d.className = `sticker${has ? ' got' : ''}`;
+      d.innerHTML = '<span class="sicon"></span><span class="stext"><b></b><span></span></span>';
+      d.querySelector('.sicon').textContent = s.icon;
+      d.querySelector('b').textContent = has ? s.name : '???';
+      d.querySelector('.stext span').textContent = s.desc;
+      el.appendChild(d);
+    }
+    $('sticker-count').textContent = `${n}/${STICKERS.length}`;
   }
 
   open(def, index = 0) {

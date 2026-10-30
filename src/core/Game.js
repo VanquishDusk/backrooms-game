@@ -10,6 +10,7 @@ import { Hud } from '../ui/Hud.js';
 import { Backpack } from './Backpack.js';
 import { Camcorder } from './Camcorder.js';
 import { Archive } from '../ui/Archive.js';
+import { Extras, dailySeed } from './extras.js';
 import { LEVELS, FIRST_LEVEL, UPCOMING, ENDINGS } from '../levels/registry.js';
 
 const $ = (id) => document.getElementById(id);
@@ -69,6 +70,14 @@ export class Game {
 
     this.applyQuality();
     this.bindUi();
+    this.levelDefs = LEVELS;
+    this.extras = new Extras(this);
+    // Every drink counts towards a sticker.
+    const drink = this.audio.drink.bind(this.audio);
+    this.audio.drink = () => {
+      drink();
+      this.extras.drank();
+    };
     this.backpack = new Backpack(this);
     this.camcorder = new Camcorder(this);
     this.archive = new Archive(this);
@@ -106,6 +115,7 @@ export class Game {
       });
 
     click('btn-start', () => this.startRun(randomSeedString()));
+    click('btn-daily', () => this.startRun(dailySeed().seed));
     click('btn-seed', () => {
       const s = $('seed-input').value.trim().toUpperCase();
       this.startRun(s || randomSeedString());
@@ -246,7 +256,12 @@ export class Game {
     if (st.escapes) parts.push(`ESCAPED ${st.escapes}`);
     if (st.remodels) parts.push(`SURVIVED 0.2 ×${st.remodels}`);
     if (st.bestTime != null) parts.push(`BEST ${formatTime(st.bestTime)}`);
+    if (st.longestRoute) parts.push(`LONGEST TRIP ${st.longestRoute} LEVELS`);
     $('records').textContent = parts.join(' · ');
+    // Tonight's tape: the same seed for everyone, today.
+    const d = dailySeed();
+    const today = st.daily && st.daily.key === d.key ? st.daily : null;
+    $('daily-info').textContent = today ? (today.escaped ? 'TONIGHT\'S TAPE · YOU MADE IT OUT' : `TONIGHT'S TAPE · FURTHEST: ${today.best} LEVEL${today.best === 1 ? '' : 'S'}`) : `TONIGHT'S TAPE · ${d.key} · NOT PLAYED`;
   }
 
   onResize() {
@@ -282,6 +297,7 @@ export class Game {
       onCaught: (stalker, cause) => runId === this.runId && this.caught(stalker, cause),
       onEscape: (target, style) => runId === this.runId && this.escape(target, style),
       placeItem: (item, x, z) => this.backpack.place(item, x, z),
+      award: (id) => runId === this.runId && this.extras.award(id),
       move: () => this.input.getMove(),
       moveIntent: () => {
         const m = this.input.getMove();
@@ -310,6 +326,7 @@ export class Game {
     this.runStartLevel = levelId;
     this.visit = 0;
     this.runTime = 0;
+    this.extras.runStart(seed);
     this.stats.runs++;
     save('stats', this.stats);
     this.showScreen('loading');
@@ -330,6 +347,7 @@ export class Game {
       const levelSeed = this.visit === 0 ? this.seed : `${this.seed}#${this.visit}`;
       this.loadLevel(levelId, levelSeed);
       this.player.restore(carry);
+      this.extras.enter(levelId);
       this.stats.visits = this.stats.visits || {};
       this.stats.visits[levelId] = (this.stats.visits[levelId] || 0) + 1;
       if (levelId !== FIRST_LEVEL && !this.stats.unlocked.includes(levelId)) {
@@ -440,6 +458,18 @@ export class Game {
     this.showScreen('menu');
   }
 
+  // The levels this run went through, for the end screens.
+  showRoute(prefix) {
+    $(`${prefix}-route`).textContent = this.extras.routeText();
+    const st = this.extras.stickersThisRun();
+    $(`${prefix}-stickers`).textContent = st ? `NEW STICKERS  ${st}` : '';
+  }
+
+  recordRoute() {
+    const n = new Set(this.extras.route.filter((id) => LEVELS[id])).size;
+    if (n > (this.stats.longestRoute || 0)) this.stats.longestRoute = n;
+  }
+
   endRun() {
     this.backpack.close();
     this.input.enabled = false;
@@ -455,11 +485,16 @@ export class Game {
     this.state = 'dead';
     this.player.dead = true;
     this.stats.deaths++;
+    this.stats.deathsAt = this.stats.deathsAt || {};
+    this.stats.deathsAt[this.levelDef.id] = (this.stats.deathsAt[this.levelDef.id] || 0) + 1;
+    this.recordRoute();
     save('stats', this.stats);
+    this.extras.died();
     this.endRun();
     this.fade(0.6, 0.4);
     $('dead-cause').textContent = cause;
     $('dead-stats').textContent = `${this.levelDef.name.toUpperCase()} · SURVIVED ${formatTime(this.runTime)} · SEED ${this.seed}`;
+    this.showRoute('dead');
     this.showScreen('dead');
   }
 
@@ -508,6 +543,9 @@ export class Game {
     const runId = this.runId;
     const time = this.runTime;
     const from = this.levelDef.id;
+    // Getting out of a level stamps its tape.
+    this.stats.survived = this.stats.survived || {};
+    this.stats.survived[from] = true;
     setTimeout(() => {
       if (runId !== this.runId) return;
       $('glitch').classList.remove('on');
@@ -522,6 +560,8 @@ export class Game {
         return;
       }
       this.stats.escapes++;
+      this.extras.escaped(target);
+      this.recordRoute();
       // Reaching a level that isn't built yet still counts: it unlocks in
       // the level select once it is.
       if (!this.stats.unlocked.includes(target)) this.stats.unlocked.push(target);
@@ -534,6 +574,7 @@ export class Game {
       $('esc-title').textContent = ending ? ending.title : walk ? 'YOU FOLLOWED THE PIPES' : door ? 'YOU WENT THROUGH THE DOOR' : 'YOU NOCLIPPED THROUGH';
       $('esc-next').textContent = ending ? ending.text : `${UPCOMING[target] || target.toUpperCase()} · COMING SOON`;
       $('esc-stats').textContent = `ESCAPED IN ${formatTime(time)}${best ? ' · NEW BEST' : ''} · SEED ${this.seed}`;
+      this.showRoute('esc');
       this.showScreen('escaped');
     }, door ? 900 : walk ? 1800 : 2000);
   }
@@ -610,6 +651,7 @@ export class Game {
       $('btn-ears').classList.toggle('alert', !!level.hudInfo(player).warn && !player.coveringEars);
       level.update(dt, player);
       this.camcorder.update(dt);
+      this.extras.tick(dt);
       if (this.state === 'playing') this.backpack.update(dt);
       else this.backpack.close();
       this.runTime += dt;

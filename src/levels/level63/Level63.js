@@ -709,6 +709,7 @@ export class Level63 {
     this.still = player.speed < 0.15 ? this.still + dt : 0;
     if (this.still > 1.2) {
       this.sitting = true;
+      ctx.award?.('medi');
       this.nextThought = 2.5;
       player.vel.set(0, 0);
       ctx.hud.message('You sit. Everything is very quiet.', 3);

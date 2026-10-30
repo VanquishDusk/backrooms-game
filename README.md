@@ -314,6 +314,16 @@ Reached by escaping Level 601.
   - The grand hall loops forever until you've been **invited**. The invitation is on the edge of the model town, and taking it sets off every Robo-Man watching.
 - **The Animated King:** on his throne at the end of a long red carpet. He talks, then sets you a test: the lights go down, everything turns black and white, and animated versions of your nightmares (a Hound, a Smiler, a Partygoer, a Deathmoth) come at you for a minute. Weapons stun them. Last the minute and he laughs, claps, and sends you off in a burst of light: back to the town, or to one of the main levels.
 
+## Stickers, the Field Guide, and tonight's tape
+
+Little things to come back for:
+
+- **Stickers:** 27 small goals ("Get out of Level 0 in under a minute", "Sink the Thing on Level 7", "Fill all four backpack slots", "Make it to dawn in Level 94", "Pass through 8 levels in one run"...). Each pops up as a sticker when you earn it and goes on the sticker board in the Archive.
+- **The Field Guide:** photograph an entity (V or the camera button) and it's documented: your photo becomes its picture in the guide, with its description. 23 to find, including the Host, the Animations, the Robo-Men, the Animated King, the Thing on Level 7, the children of Level 14, and Enric.
+- **Tape stamps:** get out of a level alive and its tape gets a red SURVIVED stamp; each tape also counts how many times you got lost there (☠).
+- **Your route:** the death and escape screens show every level the run went through (L0 → L1 → L2...), and any stickers you earned on the way. The menu remembers your longest trip.
+- **Tonight's tape:** one seed a day, the same for everyone. Play it from the menu; the menu remembers how far you got.
+
 ## The archive and the camera
 
 The main menu's **Archive** shows every level as a VHS tape on a shelf, with your newest photo of it as the cover. Levels you haven't found yet are blank tapes marked **???** until you reach them. Pick a tape to watch your footage of that level (step through it, save a photo to your device or erase it), read about the level, see how often you've been there, and play it.

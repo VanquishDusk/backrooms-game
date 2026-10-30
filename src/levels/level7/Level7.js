@@ -655,6 +655,7 @@ export class Level7 {
     const pan = 0;
     if (th.hp <= 0) {
       th.state = 'dying';
+      ctx.award?.('thing');
       th.t = 0;
       ctx.audio.roar(pan, 1, 3.5, false);
       ctx.hud.message('The harpoon goes deep. It screams, thrashes, and starts to sink.', 4);
@@ -901,6 +902,14 @@ export class Level7 {
     player.sanity = Math.min(100, player.sanity + 30);
     this.warmth = Math.min(100, this.warmth + 15);
     this.ctx.audio.drink();
+  }
+
+  // For the camera's Field Guide.
+  photoSubjects() {
+    const th = this.thing;
+    if (th.state === 'lurk' || th.state === 'dead') return [];
+    const h = this.serpent.headPoint();
+    return [{ type: 'thing', x: h.x, y: h.y, z: h.z, range: 70 }];
   }
 
   // ---- Values the game reads every frame ---------------------------------------------

@@ -204,8 +204,13 @@ export class Level15 {
       }
       this.enricLine++;
       this.nextEnric = 6.5;
+      if (!this.metEnric) ctx.award?.('enric');
       this.metEnric = true;
     }
+  }
+
+  photoSubjects() {
+    return [{ type: 'enric', x: this.enric.x, y: 1.1, z: this.enric.z, range: 25 }];
   }
 
   // ---- Per frame ----------------------------------------------------------------------------

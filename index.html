@@ -106,6 +106,8 @@
           <div class="menu-side">
             <p class="now-showing"><span class="dot"></span>NOW SHOWING &middot; <span id="menu-level">LEVEL 0 &mdash; THE LOBBY</span></p>
             <button class="mbtn primary big-enter" id="btn-start">ENTER</button>
+            <button class="mbtn" id="btn-daily">TONIGHT'S TAPE</button>
+            <p class="daily-info" id="daily-info"></p>
             <div class="seed-row">
               <input id="seed-input" placeholder="SEED (optional)" maxlength="16" autocomplete="off" autocapitalize="characters" spellcheck="false">
               <button class="mbtn small" id="btn-seed">PLAY SEED</button>
@@ -122,8 +124,23 @@
               <h2>THE ARCHIVE</h2>
               <span id="archive-count"></span>
             </div>
-            <p class="archive-sub">Every level you find goes on a tape. Your photos become the covers.</p>
-            <div class="shelf" id="unlocked-levels"></div>
+            <div class="archive-tabs">
+              <button class="atab on" data-tab="tapes">TAPES</button>
+              <button class="atab" data-tab="guide">FIELD GUIDE <span id="guide-count"></span></button>
+              <button class="atab" data-tab="stickers">STICKERS <span id="sticker-count"></span></button>
+            </div>
+            <div class="apane" data-pane="tapes">
+              <p class="archive-sub">Every level you find goes on a tape. Your photos become the covers. Get out of a level alive and it gets a stamp.</p>
+              <div class="shelf" id="unlocked-levels"></div>
+            </div>
+            <div class="apane hidden" data-pane="guide">
+              <p class="archive-sub">Photograph an entity to document it. Your photo goes in the guide.</p>
+              <div class="guide" id="guide"></div>
+            </div>
+            <div class="apane hidden" data-pane="stickers">
+              <p class="archive-sub">Small things to do in the Backrooms. Each one gets you a sticker.</p>
+              <div class="stickers" id="stickers"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -187,6 +204,7 @@
           <li><b>Level 14</b> (sometimes, through Level 4's windows, or falling from Level 63): it's beautiful. Don't listen. Cover your ears, follow the sound of water and stay near it. Don't stand still among the guests, and don't stare at the children.</li>
           <li><b>Level 15</b> (a white door in Level 14's forest): safe, but there's no Almond Water. Talk to Enric. Read the computers: three files fit together into a map to the door with no symbol over it. It's the way out.</li>
           <li><b>Level 63</b> (a rare metal door in Level 5): high in the sky and completely safe. Sit at a Meditation Point to clear your head. Monkey bars only hold as long as your stamina. Falling isn't fatal; you wake up somewhere else.</li>
+          <li>Photograph an entity to add it to the <b>Field Guide</b>. Earn <b>stickers</b> for little goals. Try <b>Tonight's Tape</b>: one seed a day, the same for everyone.</li>
           <li>Press <b>V</b> (or the camera button) to take a photo. Your photos become the covers of your tapes in the menu's <b>Archive</b>.</li>
           <li><b>Level 0.2</b> falls apart once you're inside. Find the door back to Level 0 before the collapse reaches it. Cover your mouth in the dust. Outlets charge your flashlight.</li>
         </ul>
@@ -238,6 +256,8 @@
         <h2 class="bad">YOU ARE LOST</h2>
         <p class="sub" id="dead-cause"></p>
         <p class="sub" id="dead-stats"></p>
+        <p class="route" id="dead-route"></p>
+        <p class="sub new-stickers" id="dead-stickers"></p>
         <div class="buttons">
           <button class="mbtn primary" id="btn-dead-new">TRY AGAIN (NEW LAYOUT)</button>
           <button class="mbtn" id="btn-dead-retry">RETRY SAME LAYOUT</button>
@@ -251,6 +271,8 @@
         <h2 class="good" id="esc-title">YOU NOCLIPPED THROUGH</h2>
         <p class="sub" id="esc-next"></p>
         <p class="sub" id="esc-stats"></p>
+        <p class="route" id="esc-route"></p>
+        <p class="sub new-stickers" id="esc-stickers"></p>
         <div class="buttons">
           <button class="mbtn primary" id="btn-esc-new">PLAY AGAIN (NEW LAYOUT)</button>
           <button class="mbtn" id="btn-esc-menu">MENU</button>
@@ -258,6 +280,8 @@
       </div>
     </section>
   </div>
+
+  <div id="sticker-toast"><span class="st-icon"></span><span class="st-text"><i class="st-kicker"></i><b class="st-title"></b><span class="st-sub"></span></span></div>
 
   <div id="rotate-hint">Turn your phone sideways for the best view</div>
 
