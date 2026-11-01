@@ -165,6 +165,9 @@ export class Backpack {
         audio.drink();
         hud.message('Almond Milk. Cold and creamy. The world feels a little more solid.', 2.5);
         break;
+      case 'mask':
+        hud.message('You already have it on. It doesn\'t stop everything.', 2.5);
+        break;
       case 'meat':
         remove();
         p.health = Math.min(100, p.health + 12);
@@ -410,6 +413,7 @@ export class Backpack {
       medkit: group(M(box(0.28, 0.1, 0.2), mat(0xe8e4dc), 0, 0.05), M(box(0.12, 0.102, 0.035), mat(0xb01818), 0, 0.05), M(box(0.035, 0.102, 0.12), mat(0xb01818), 0, 0.05)),
       meat: group(M(new THREE.SphereGeometry(0.1, 8, 6), mat(0x8a3a28), 0, 0.05), M(box(0.24, 0.01, 0.24), mat(0xe8e4d8), 0, 0.005)),
       milk: group(M(box(0.09, 0.2, 0.09), mat(0xf2f0e8), 0, 0.1), M(box(0.092, 0.06, 0.092), mat(0x5a8ad0), 0, 0.12), M(box(0.06, 0.04, 0.09), mat(0xe8e6de), 0, 0.22)),
+      mask: group(M(box(0.18, 0.03, 0.12), mat(0xe8eef0), 0, 0.015), M(box(0.2, 0.005, 0.01), mat(0xd8d8d8), 0, 0.03, 0.05)),
       pipe: group(M(cyl(0.028, 0.72), mat(0x7a7c78), 0, 0.03, 0, Math.PI / 2), M(cyl(0.045, 0.08), mat(0x7a7c78), 0.33, 0.045, 0, Math.PI / 2)),
       flare: group(M(cyl(0.02, 0.26), mat(0xb02018), 0, 0.02, 0, Math.PI / 2), M(cyl(0.021, 0.04), mat(0x2a2a2a), 0.14, 0.02, 0, Math.PI / 2)),
     };

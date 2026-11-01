@@ -36,6 +36,12 @@ export const ITEMS = {
     desc: 'A glass bottle of Almond Milk from a milk van. Creamy. Steadies your mind and mends you a little.',
     icon: svg('<path d="M9 2h6v3l1 2v14a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V7l1-2z"/><path d="M8 11h8v5H8z"/>'),
   },
+  mask: {
+    name: 'FACE MASK',
+    short: 'MASK',
+    desc: 'A paper face mask. While you carry it, it filters some of whatever is in the air.',
+    icon: svg('<path d="M4 9c3-2 13-2 16 0v4c-2 4-6 6-8 6s-6-2-8-6z"/><path d="M2 9h2M20 9h2M8 12h8"/>'),
+  },
   pipe: {
     name: 'LEAD PIPE',
     short: 'PIPE',

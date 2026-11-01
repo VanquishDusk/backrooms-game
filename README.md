@@ -2,7 +2,7 @@
 
 A replayable 3D horror game set in the Backrooms, playable in the browser on desktop and mobile.
 
-Playable now: **Level 0 — "The Lobby" / "The Yellow Hell"**, its sub-level **Level 0.2 — "The Remodel"**, **Level 1 — "The Habitable Zone"**, **Level 1.3**, **Level 1.5 — "Inverted"**, **Level 2 — "Abandoned Utility Halls"**, **Level 3 — "Electrical Station"**, **Level 4 — "Abandoned Office"**, **Level 5 — "Terror Hotel"**, **Level 6 — "Lights Out"**, **Level 7 — "Thalassophobia"**, **Level 8 — "Cave Systems"**, **Level 9 — "The Suburbs"**, **Level 10 — "Bumper Crop"**, **Level 11 — "The City That Never Sleeps"**, **Level 12 — "Matrix"**, **Level 13 — "The Boiling Frogs"**, **Level 14 — "Paradise"**, **Level 15 — "Futuristic Halls"**, **Level 63 — "Tranquility"**, **Level 94 — "Motion"** and **Level 601 — "The End"**. More levels will follow.
+Playable now: **Level 0 — "The Lobby" / "The Yellow Hell"**, its sub-level **Level 0.2 — "The Remodel"**, **Level 1 — "The Habitable Zone"**, **Level 1.3**, **Level 1.5 — "Inverted"**, **Level 2 — "Abandoned Utility Halls"**, **Level 3 — "Electrical Station"**, **Level 4 — "Abandoned Office"**, **Level 5 — "Terror Hotel"**, **Level 6 — "Lights Out"**, **Level 7 — "Thalassophobia"**, **Level 8 — "Cave Systems"**, **Level 9 — "The Suburbs"**, **Level 10 — "Bumper Crop"**, **Level 11 — "The City That Never Sleeps"**, **Level 11.3 — "The Red Light District"**, **Level 12 — "Matrix"**, **Level 13 — "The Boiling Frogs"**, **Level 14 — "Paradise"**, **Level 15 — "Futuristic Halls"**, **Level 63 — "Tranquility"**, **Level 94 — "Motion"** and **Level 601 — "The End"**. More levels will follow.
 
 ## Play
 
@@ -312,9 +312,23 @@ Reached by following the arrow signs in Level 9, or a dirt track in Level 10 unt
   - Fall through an open sewer grate in the gutter: **Level 34** or **218**.
   - Go in through the door of a boarded-up building: **Level 713**. One swallowed by ivy: **Level 990**.
   - Touch a military recruitment poster: **Level 49**.
+  - Go in through the open door of a building where every window glows deep red (out where the buildings are low): **Level 11.3**.
   - Touch a ground-floor window that's too white, with a face in the glass (a Window Entity): **Level 12**.
   - Board the bus that's sometimes waiting at a stop, doors open and no driver: **Level 147**.
-- Every exit except Level 63 and Level 12 is coming soon.
+- Every exit except Level 63, Level 12 and Level 11.3 is coming soon.
+
+## Level 11.3 — The Red Light District (Survival Difficulty 5)
+
+Reached through a red-windowed building on the outskirts of Level 11.
+
+- **The city:** Level 11 gone wrong. The same endless steel-and-glass city under a moonless sky, every window, sign and lamp burning crimson, the traffic lights blinking red. Midrise apartments and warehouses at the waterfront, towers further in. The buildings are empty, stripped bare; the taps are dry.
+- **You arrive** on a bridge over black water, looking at the city across it. The bridge is broken off behind you.
+- **The Vortex:** a red storm that never moves, high over the city's heart, full of red lightning. Rain comes and goes, hot or cold, with red lightning and thunder across the whole sky.
+- **The air is bad:** it wears on your sanity, worse deeper in, and brings hallucinations: figures at the edge of your sight that vanish when you look, footsteps, whispers, voices. A **face mask** (sometimes found in the empty shops) halves it while you carry it.
+- **Servants** (Entity 187) follow you in packs. They keep their distance, freeze when you look straight at them, and spread out round you. Then, if enough of them get close, if you get cornered in an alley or a shop, or if you let them follow you long enough, they all come at once. Out by the water they're ragged and clumsy; deeper in, suited, neat and fast.
+- **Ambassadors:** tall figures in long coats with smooth white plates for faces. They talk. Every time one speaks it costs you sanity and the Servants come running, and if you look at one up close you find yourself walking towards it (not with a mask on).
+- **The Embassy:** a domed capitol deep in the city, lit pink and red from below, humming. Servants guard it, and an Ambassador waits on its steps.
+- **Exit:** the bridges at the waterfront, every third avenue, run out over the water forever. Walk far enough along one and it comes down into **Level 11**. The bridge heads are guarded.
 
 ## Level 12 — Matrix (Survival Difficulty 0)
 
@@ -424,8 +438,8 @@ Reached by escaping Level 601.
 
 Little things to come back for:
 
-- **Stickers:** 39 small goals ("Get out of Level 0 in under a minute", "Sink the Thing on Level 7", "Fill all four backpack slots", "Make it to dawn in Level 94", "Pass through 8 levels in one run"...). Each pops up as a sticker when you earn it and goes on the sticker board in the Archive.
-- **The Field Guide:** photograph an entity (V or the camera button) and it's documented: your photo becomes its picture in the guide, with its description. 29 to find, including the Host, the Animations, the Robo-Men, the Animated King, the Thing on Level 7, the children of Level 14, and Enric.
+- **Stickers:** 42 small goals ("Get out of Level 0 in under a minute", "Sink the Thing on Level 7", "Fill all four backpack slots", "Make it to dawn in Level 94", "Pass through 8 levels in one run"...). Each pops up as a sticker when you earn it and goes on the sticker board in the Archive.
+- **The Field Guide:** photograph an entity (V or the camera button) and it's documented: your photo becomes its picture in the guide, with its description. 31 to find, including the Host, the Animations, the Robo-Men, the Animated King, the Thing on Level 7, the children of Level 14, and Enric.
 - **Tape stamps:** get out of a level alive and its tape gets a red SURVIVED stamp; each tape also counts how many times you got lost there (☠).
 - **Your route:** the death and escape screens show every level the run went through (L0 → L1 → L2...), and any stickers you earned on the way. The menu remembers your longest trip.
 - **Tonight's tape:** one seed a day, the same for everyone. Play it from the menu; the menu remembers how far you got.
@@ -556,6 +570,7 @@ src/levels/level9/            Level 9 (streamed blocks of houses, streets and la
 src/levels/level10/           Level 10 (streamed farm plots, wheat, hedgerows, tracks and causeways, barns, lakes, rain, the worms, exits)
 src/levels/level13/           Level 13 (streamed corridors and apartments per floor, elevators and stairs, the comfort pull, the TV, exits)
 src/levels/level12/           Level 12 (the white room, the clock and the ritual, streamed white void with decaying furniture and copycat doors)
+src/levels/level11_3/         Level 11.3 (Level 11's city retuned red: water and bridges, the Embassy, the Vortex sky, rain and lightning, Servants and Ambassadors, the bad air)
 src/levels/level11/           Level 11 (block plans, facade/sign/ad textures and the road shader, block shells and street detail, cranes and pizzas, sun and shadows, streaming, exits)
 src/levels/level14/           Level 14 (streamed forest, sky, waterfall cliff and pool, guests, children, the cacophony)
 src/levels/level15/           Level 15 (streamed vaulted halls and rooms, machines, corpses, I.L.N. computers, Enric, the way out)

@@ -28,6 +28,9 @@ export const STICKERS = [
   { id: 'room12', icon: '⬜', name: '[NULL]', desc: 'Reach Level 12.' },
   { id: 'out12', icon: '🚪', name: 'THE RITUAL', desc: 'Open the door in Level 12.' },
   { id: 'home13', icon: '📺', name: 'HOME SWEET HOME', desc: 'Reach Level 13.' },
+  { id: 'red113', icon: '🟥', name: 'RED LIGHT', desc: 'Reach Level 11.3.' },
+  { id: 'embassy113', icon: '🏛', name: 'DIPLOMATIC INCIDENT', desc: 'Lay eyes on the Embassy in Level 11.3.' },
+  { id: 'out113', icon: '🌉', name: 'BRIDGE OUT', desc: 'Escape Level 11.3 over a bridge.' },
   { id: 'sea7', icon: '🌊', name: 'SEA LEGS', desc: 'Reach Level 7.' },
   { id: 'thing', icon: '🐍', name: 'MONSTER HUNTER', desc: 'Sink the Thing on Level 7.' },
   { id: 'sky63', icon: '☁', name: 'HEAD IN THE CLOUDS', desc: 'Find Level 63.' },
@@ -67,6 +70,8 @@ const EXTRA_SUBJECTS = {
   worms: { name: 'The Worms', blurb: 'A metre under Level 10\'s soil, a writhing mass. Stand still long enough and they come up to see what you are.' },
   luckycrane: { name: 'Lucky Crane', blurb: 'A folded paper crane that flies in flocks over Level 11. Touch one that comes down to you, and your luck turns.' },
   livingpizza: { name: 'Living Pizza', blurb: 'A slice of pizza with eyes, hopping about the pavements of Level 11. It doesn\'t want to be eaten.' },
+  servant: { name: 'Servant', blurb: 'Entity 187. People who aren\'t, in the Red Light District. They follow in packs, freeze when watched, and close in all at once.' },
+  ambassador: { name: 'Ambassador', blurb: 'Tall, in a long coat, a smooth white plate for a face. It talks. The Servants listen. Don\'t walk towards it.' },
   enric: { name: 'Enric', blurb: 'The only person living in Level 15. Two years and counting.' },
 };
 
@@ -148,7 +153,7 @@ export class Extras {
       this.award('out0');
       if (g.runTime < 60) this.award('fast0');
     }
-    const reach = { level5: 'deep5', level6: 'dark6', level7: 'sea7', level8: 'cave8', level9: 'sub9', level10: 'farm10', level11: 'city11', level12: 'room12', level13: 'home13', level63: 'sky63', level601: 'end601', level14: 'red14' };
+    const reach = { level5: 'deep5', level6: 'dark6', level7: 'sea7', level8: 'cave8', level9: 'sub9', level10: 'farm10', level11: 'city11', level12: 'room12', level13: 'home13', level11_3: 'red113', level63: 'sky63', level601: 'end601', level14: 'red14' };
     if (reach[id]) this.award(reach[id]);
     if (id === 'level94' && from === 'level601') this.award('home94');
     const distinct = new Set(this.route).size;

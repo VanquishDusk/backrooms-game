@@ -103,15 +103,16 @@ export const STYLES = {
   white: { bay: 3, base: 'baseLight', refl: 0.42 },
   boarded: { bay: 3, base: 'brickBase', refl: 0 },
   overgrown: { bay: 3, base: 'brickBase', refl: 0.1 },
+  redwin: { bay: 3, base: 'brickBase', refl: 0.15 },
 };
 export const TEX_W = 12; // a facade texture covers four bays...
 export const TEX_H = 6 * FH; // ...and six floors
 
 // ---- The plan of a block (cheap: no geometry) ------------------------------------------
 
-export function blockPlan(i, j, seed, spawn, special = null) {
+export function blockPlan(i, j, seed, spawn, special = null, dens = null) {
   const h = (k) => hash(i, j, k, seed);
-  const d = density(i, j, seed, spawn);
+  const d = dens ?? density(i, j, seed, spawn);
   const isSpawn = i === spawn[0] && j === spawn[1];
   const plan = { i, j, d, special, lots: [], isSpawn };
   const x0 = i * B, z0 = j * B;
@@ -172,7 +173,7 @@ function makeLot(hh, x0, x1, z0, z1, row, d, forceShop) {
   const tower = d > 0.62 || (d > 0.42 && hh(9) < 0.18);
   if (type === 'abandoned') {
     floors = 1 + Math.floor(tall * 2);
-    style = hh(4) < 0.4 ? 'overgrown' : 'boarded';
+    style = d < 0.4 && hh(33) < 0.35 ? 'redwin' : hh(4) < 0.4 ? 'overgrown' : 'boarded';
   } else if (tower) {
     floors = Math.round(10 + tall * tall * 26 + d * 4);
     style = ['glass', 'granite', 'stone', 'concrete', 'white', 'glass'][Math.floor(hh(4) * 6)];
@@ -206,7 +207,7 @@ function makeLot(hh, x0, x1, z0, z1, row, d, forceShop) {
   if (type === 'abandoned') {
     const sw = Math.min(w - 2, 6);
     const sx0 = x0 + (w - sw) / 2;
-    lot.shop = { name: null, kind: style, abandoned: true, exit: style === 'overgrown' ? 'level990' : 'level713', x0: sx0, x1: sx0 + sw };
+    lot.shop = { name: null, kind: style, abandoned: true, exit: style === 'redwin' ? 'level11_3' : style === 'overgrown' ? 'level990' : 'level713', x0: sx0, x1: sx0 + sw };
     return lot;
   }
   if (w >= 9) {
@@ -277,15 +278,15 @@ function facade(own, style) {
   const cells = [];
   for (let r = 0; r < 6; r++) for (let c = 0; c < 4; c++) {
     const office = style === 'glass' || style === 'granite' || style === 'concrete';
-    cells.push({ r, c, lit: rnd() < (office ? 0.42 : 0.3), blind: rnd() < 0.3, warm: office ? rnd() < 0.25 : rnd() < 0.85, k: 0.6 + rnd() * 0.4, glass: rnd() });
+    cells.push({ r, c, lit: rnd() < (style === 'redwin' ? 0.85 : office ? 0.42 : 0.3), blind: rnd() < 0.3, warm: office ? rnd() < 0.25 : rnd() < 0.85, k: 0.6 + rnd() * 0.4, glass: rnd() });
   }
   // Window rectangle in a cell, per style.
   const win = {
     stone: [16, 12, 32, 38], tan: [17, 13, 30, 36], white: [12, 12, 40, 36], brick: [19, 10, 26, 40],
-    granite: [9, 4, 46, 56], glass: [2, 2, 60, 48], concrete: [0, 18, 64, 28], boarded: [19, 10, 26, 40], overgrown: [19, 10, 26, 40],
+    granite: [9, 4, 46, 56], glass: [2, 2, 60, 48], concrete: [0, 18, 64, 28], boarded: [19, 10, 26, 40], overgrown: [19, 10, 26, 40], redwin: [19, 10, 26, 40],
   }[style];
   const drawWalls = (ctx) => {
-    if (style === 'brick' || style === 'boarded' || style === 'overgrown') {
+    if (style === 'brick' || style === 'boarded' || style === 'overgrown' || style === 'redwin') {
       ctx.fillStyle = '#7e4636';
       ctx.fillRect(0, 0, W, H);
       for (let y = 0; y < H; y += 6) for (let x = (y / 6) % 2 ? -6 : 0; x < W; x += 12) {
@@ -346,7 +347,7 @@ function facade(own, style) {
       const v = cl.glass * 14;
       ctx.fillStyle = `rgb(${24 + v},${30 + v},${38 + v})`;
       ctx.fillRect(x, y, ww, wh);
-      if (style === 'brick' || style === 'boarded' || style === 'overgrown') {
+      if (style === 'brick' || style === 'boarded' || style === 'overgrown' || style === 'redwin') {
         ctx.strokeStyle = '#e8e2d4';
         ctx.lineWidth = 3;
         ctx.strokeRect(x, y, ww, wh);
@@ -414,7 +415,7 @@ function facade(own, style) {
       const [wx, wy, ww, wh] = win;
       const x = cl.c * bw + wx, y = cl.r * fh + wy;
       const k = cl.k;
-      ctx.fillStyle = cl.warm ? `rgb(${255 * k},${200 * k},${120 * k})` : `rgb(${215 * k},${230 * k},${255 * k})`;
+      ctx.fillStyle = style === 'redwin' ? `rgb(${255 * k},${30 * k},${40 * k})` : cl.warm ? `rgb(${255 * k},${200 * k},${120 * k})` : `rgb(${215 * k},${230 * k},${255 * k})`;
       ctx.fillRect(x, y, ww, wh);
       if (cl.blind) {
         ctx.fillStyle = cl.warm ? `rgb(${255 * k},${225 * k},${170 * k})` : `rgb(${240 * k},${240 * k},${230 * k})`;
@@ -603,11 +604,12 @@ export function buildMaterials(own) {
     return m;
   };
   T.env = envTexture(own);
-  for (const s of [...STYLE_NAMES, 'boarded', 'overgrown']) {
+  for (const s of [...STYLE_NAMES, 'boarded', 'overgrown', 'redwin']) {
     const f = facade(own, s);
     M[s] = L({ map: f.map, specularMap: f.spec, envMap: T.env, reflectivity: STYLES[s].refl, combine: THREE.MixOperation, emissive: 0xffffff, emissiveMap: f.emis, emissiveIntensity: 0 });
     M[s].userData.refl = STYLES[s].refl;
   }
+  M.redwin.emissiveIntensity = 1.5;
   T.asphalt = paintTex(own, 256, 256, (ctx, w, h) => {
     ctx.fillStyle = '#5e5e5c';
     ctx.fillRect(0, 0, w, h);

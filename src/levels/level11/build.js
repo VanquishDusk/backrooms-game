@@ -249,8 +249,8 @@ function building(kit, L, M, out, solid, seed) {
     solid(rect(x0, z0, x1, z1, H));
     out.exits.push({
       type: 'door', x: mid, z: fz + out1 * 0.4, r: 0.75, target: shop.exit, how: 'door',
-      warnR: 6, warn: L.style === 'overgrown' ? 'An old building, swallowed by ivy. The door hangs open on darkness, and something green and damp breathes out of it.' : 'A boarded-up building. One plank over the door has come loose. It\'s pitch black inside.',
-      msg: L.style === 'overgrown' ? 'You squeeze in through the doorway, under the ivy. It smells of rain and leaves. When you look back, there is no door.' : 'You squeeze in past the planks. Dust, darkness, and the door is gone behind you.',
+      warnR: L.style === 'redwin' ? 14 : 6, warn: L.style === 'redwin' ? 'A building where every window glows a deep, wet red. Nothing else on the street is lit like that. Its door hangs open.' : L.style === 'overgrown' ? 'An old building, swallowed by ivy. The door hangs open on darkness, and something green and damp breathes out of it.' : 'A boarded-up building. One plank over the door has come loose. It\'s pitch black inside.',
+      msg: L.style === 'redwin' ? 'You step inside, into red light. When you come out the other side, the whole city is red, and the sky has no moon.' : L.style === 'overgrown' ? 'You squeeze in through the doorway, under the ivy. It smells of rain and leaves. When you look back, there is no door.' : 'You squeeze in past the planks. Dust, darkness, and the door is gone behind you.',
     });
   } else if (shop.kind === 'lobby') {
     fq(base, x0, shop.x0, 0, GF);
@@ -1018,6 +1018,8 @@ function furnish(kit, s, out, solid, seed, G) {
       }
       break;
     }
+    case 'empty':
+      break;
     case 'office':
     case 'counter':
     default: {
