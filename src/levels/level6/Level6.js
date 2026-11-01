@@ -172,6 +172,18 @@ export class Level6 {
       this.cold = { x: cx + DIRS[c.dir][0] * 0.4, z: cz + DIRS[c.dir][1] * 0.4 };
     }
 
+    // The pool: still black water, a faint gleam on it.
+    const pl = this.layout.pool;
+    if (pl) {
+      const [px, pz] = map.cellCenter(pl.x, pl.y);
+      const water = mesh(new THREE.PlaneGeometry(CELL - 0.2, CELL - 0.2).rotateX(-Math.PI / 2), mat('pool', '#0c1418'));
+      water.position.set(px, 0.02, pz);
+      const gleam = mesh(new THREE.PlaneGeometry(0.6, 0.05).rotateX(-Math.PI / 2), glowMat(0x5a7a8a, 0.4));
+      gleam.position.set(px + 0.2, 0.03, pz - 0.1);
+      this.props.add(water, gleam);
+      this.pool = { x: px, z: pz };
+    }
+
     // Wires strung across the floor at ankle height.
     const wire = mat('wire', '#1a1a1a');
     for (const w of this.layout.wires) {
@@ -212,6 +224,20 @@ export class Level6 {
       ctx.hud.message('Steps, going down. The sound of waves.', 3);
       ctx.onEscape('level7', 'walk');
       return;
+    }
+    if (this.pool) {
+      const d = Math.hypot(this.pool.x - player.pos.x, this.pool.z - player.pos.z);
+      if (d < 3 && !this.told.pool) {
+        this.told.pool = true;
+        ctx.hud.message('Your feet splash into water. Cold, still, and deeper the further you go.', 3);
+      }
+      if (d < 0.5) {
+        this.done = true;
+        ctx.audio.splash?.(0, 0.5, true);
+        ctx.hud.message('The floor drops away under the water. You go down, and down, and come up in a cave.', 4);
+        ctx.onEscape('level8', 'noclip');
+        return;
+      }
     }
     if (this.cold) {
       const d = Math.hypot(this.cold.x - player.pos.x, this.cold.z - player.pos.z);
@@ -545,15 +571,25 @@ function generate(rng) {
       cold = { x: cx, y: cy, dir: open(cx, cy) ^ 1 };
     }
   }
+  // A pool of black water filling a dead end: Level 8.
+  let pool = null;
+  {
+    const used = new Set([stairs, cold].filter(Boolean).map((c) => `${c.x},${c.y}`));
+    const opts = deadEnds.slice(1, 20).filter(([x, y]) => !used.has(`${x},${y}`) && dist[map.idx(x, y)] > 12);
+    if (opts.length && rng.chance(0.7)) {
+      const [px, py] = rng.pick(opts);
+      pool = { x: px, y: py };
+    }
+  }
   // Arrival: the start cell, with the door back to Level 5 in a wall.
   const entrance = { x: start[0], y: start[1], dir: 2 };
   const spawn = { x: start[0], y: start[1], dir: open(start[0], start[1]) ?? 3 };
   // Wires: a handful, never right at the start.
   const wires = [];
-  const special = new Set([stairs, cold].filter(Boolean).map((c) => map.idx(c.x, c.y)));
+  const special = new Set([stairs, cold, pool].filter(Boolean).map((c) => map.idx(c.x, c.y)));
   const cells = rng.shuffle([...Array(N * N).keys()].filter((i) => dist[i] > 6 && !special.has(i)));
   for (const i of cells.slice(0, 7)) wires.push({ x: i % N, y: (i / N) | 0 });
-  return { map, stairs, cold, entrance, spawn, wires };
+  return { map, stairs, cold, entrance, spawn, wires, pool };
 }
 
 export const LEVEL6 = {

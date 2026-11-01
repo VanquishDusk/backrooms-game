@@ -2,7 +2,7 @@
 
 A replayable 3D horror game set in the Backrooms, playable in the browser on desktop and mobile.
 
-Playable now: **Level 0 — "The Lobby" / "The Yellow Hell"**, its sub-level **Level 0.2 — "The Remodel"**, **Level 1 — "The Habitable Zone"**, **Level 1.3**, **Level 1.5 — "Inverted"**, **Level 2 — "Abandoned Utility Halls"**, **Level 3 — "Electrical Station"**, **Level 4 — "Abandoned Office"**, **Level 5 — "Terror Hotel"**, **Level 6 — "Lights Out"**, **Level 7 — "Thalassophobia"**, **Level 14 — "Paradise"**, **Level 15 — "Futuristic Halls"**, **Level 63 — "Tranquility"**, **Level 94 — "Motion"** and **Level 601 — "The End"**. More levels will follow.
+Playable now: **Level 0 — "The Lobby" / "The Yellow Hell"**, its sub-level **Level 0.2 — "The Remodel"**, **Level 1 — "The Habitable Zone"**, **Level 1.3**, **Level 1.5 — "Inverted"**, **Level 2 — "Abandoned Utility Halls"**, **Level 3 — "Electrical Station"**, **Level 4 — "Abandoned Office"**, **Level 5 — "Terror Hotel"**, **Level 6 — "Lights Out"**, **Level 7 — "Thalassophobia"**, **Level 8 — "Cave Systems"**, **Level 14 — "Paradise"**, **Level 15 — "Futuristic Halls"**, **Level 63 — "Tranquility"**, **Level 94 — "Motion"** and **Level 601 — "The End"**. More levels will follow.
 
 ## Play
 
@@ -242,7 +242,25 @@ Reached by the stairwell deep in Level 6.
   - A **wooden door** standing on an underwater stone platform among stone columns and giant rusted pipes that rise into the ceiling. Warm light leaks out under it: **Level 9**.
   - Dive too deep into the **Abyss** and you black out: **Level 83**.
   - Keep going **west** across the sea, far enough, and you reach **Level 880**.
-- Levels 8, 83 and 880 are coming soon.
+- Levels 83 and 880 are coming soon.
+
+## Level 8 — Cave Systems (Survival Difficulty 4)
+
+Reached through the underwater cave by the mountain in Level 7, or sometimes through a pool of black water filling a dead end in Level 6.
+
+- **The caves:** a huge network of rough limestone caverns and winding tunnels, pale stalactites and stalagmites everywhere, drips falling, black water. It's almost completely dark, and your **flashlight is weak and drains its battery fast**.
+- **Almond Water** is everywhere: stand in the water and press **E** to drink and fill a bottle.
+- **The Flooded Mouth:** you come up in a freezing pool. Dive back into the middle to return to **Level 7**.
+- **The Almond Lake:** a dark lake under glow-worms.
+- **Hyperspace Lane:** a long winding tunnel lit by glowing blue bacteria, where Nguithr'xurh hang from the ceiling. The **Light Guides** hang in the air ahead of you, move when you move, and wait: they lead you to Kavragost, then down the 9th Road.
+- **Rottnest Jungle:** a vast cavern of glowing mushrooms (some as tall as you), ferns and glowing moss, with Deathrats. **Gravity tilts** sometimes, and you slide. An old vent pipe in the wall leads to **Level 2**.
+- **New Movile Cave:** hot, foul air and bacterial mats on the water. **Toxic gas**: cover your mouth (C) and get through quickly. Deathmoths.
+- **Kavragost:** an abandoned mining town with lanterns still burning in its shacks, scaffolding, rails and a mine cart, and a sign pointing down the 9th Road.
+- **Handyland:** stone hands as big as houses reaching out of the floor, glowing red moss, a Wrangler and Wretches, and a patch of cracked floor that gives way (**Level 69**).
+- **The 9th Road:** a marked route of yellow-banded stakes and rope from Kavragost to a door with a 9 painted on it: **Level 9**.
+- **Floods:** every so often a roar comes up through the rock and the water rises fast, sometimes over your head. Get to high ground. Watch your **breath**.
+- Smilers wait at the ends of the side passages.
+- Levels 9 and 69 are coming soon.
 
 ## Level 14 — Paradise (Survival Difficulty: Paradise)
 
@@ -445,6 +463,7 @@ src/levels/level6/            Level 6 (maze generator, darkness, shifting halls,
 src/levels/level7/            Level 7 (layout and sea floor, the room/sea/scenery builders, the serpent, swimming/boat/fight runtime)
 src/levels/level94/           Level 94 (terrain and sky, town and props kit, castle interior, Animations, Robo-Men, the King, day/night)
 src/levels/level601/          Level 601 (shop layout, shop and computer dressing, the field and the house, the host, the acts)
+src/levels/level8/            Level 8 (marching-squares cave generator, zones, glow, Light Guides, floods, gas, exits)
 src/levels/level14/           Level 14 (streamed forest, sky, waterfall cliff and pool, guests, children, the cacophony)
 src/levels/level15/           Level 15 (streamed vaulted halls and rooms, machines, corpses, I.L.N. computers, Enric, the way out)
 src/levels/level63/           Level 63 generator (platforms, bridges, ladders, monkey bars, Meditation Points) and runtime (sky, clouds, vines, climbing, falling)
@@ -458,4 +477,4 @@ All textures and sounds are generated in code, so there are no asset files.
 2. Grid-style levels can reuse `GridMap` and `GridWorld` with their own generator, textures and lighting.
 3. Register the level in `src/levels/registry.js`.
 
-Levels hand off with `ctx.onEscape(targetId, 'noclip' | 'door' | 'walk')`, and player stats carry over. An exit that targets a level that isn't built yet shows a "coming soon" screen, using the names in `UPCOMING`. Level 4's and Level 5's exits already target `level9` and `level71`, Level 6's target `level129` and `level6_1`, Level 7's target `level8`, `level9`, `level83` and `level880`. (Level 601's `level94` is now built.)
+Levels hand off with `ctx.onEscape(targetId, 'noclip' | 'door' | 'walk')`, and player stats carry over. An exit that targets a level that isn't built yet shows a "coming soon" screen, using the names in `UPCOMING`. Level 4's and Level 5's exits already target `level9` and `level71`, Level 6's target `level129` and `level6_1`, Level 7's target `level9`, `level83` and `level880`, Level 8's target `level9` and `level69`. (Level 601's `level94` is now built.)

@@ -16,6 +16,8 @@ export const STICKERS = [
   { id: 'fast0', icon: '⏱', name: 'IN A HURRY', desc: 'Get out of Level 0 in under a minute.' },
   { id: 'deep5', icon: '🏨', name: 'CHECKED IN', desc: 'Reach Level 5 in one run.' },
   { id: 'dark6', icon: '🌑', name: 'LIGHTS OUT', desc: 'Reach Level 6.' },
+  { id: 'cave8', icon: '🦇', name: 'SPELUNKER', desc: 'Reach Level 8.' },
+  { id: 'road9', icon: '🪧', name: 'THE 9TH ROAD', desc: 'Follow the 9th Road to its end.' },
   { id: 'sea7', icon: '🌊', name: 'SEA LEGS', desc: 'Reach Level 7.' },
   { id: 'thing', icon: '🐍', name: 'MONSTER HUNTER', desc: 'Sink the Thing on Level 7.' },
   { id: 'sky63', icon: '☁', name: 'HEAD IN THE CLOUDS', desc: 'Find Level 63.' },
@@ -49,6 +51,7 @@ const EXTRA_SUBJECTS = {
   king: { name: 'The Animated King', blurb: 'On his throne at the end of the red carpet. He\'d like you to be animated too.' },
   thing: { name: 'The Thing on Level 7', blurb: 'Seventy metres of sea serpent. It comes for anything out in open water.' },
   children: { name: 'The Children', blurb: 'They stand in rows and howl at the moon, waiting to become whole.' },
+  lightguide: { name: 'Light Guide', blurb: 'Little lights in the caves of Level 8. When you move, they move, and wait for you.' },
   enric: { name: 'Enric', blurb: 'The only person living in Level 15. Two years and counting.' },
 };
 
@@ -130,7 +133,7 @@ export class Extras {
       this.award('out0');
       if (g.runTime < 60) this.award('fast0');
     }
-    const reach = { level5: 'deep5', level6: 'dark6', level7: 'sea7', level63: 'sky63', level601: 'end601', level14: 'red14' };
+    const reach = { level5: 'deep5', level6: 'dark6', level7: 'sea7', level8: 'cave8', level63: 'sky63', level601: 'end601', level14: 'red14' };
     if (reach[id]) this.award(reach[id]);
     if (id === 'level94' && from === 'level601') this.award('home94');
     const distinct = new Set(this.route).size;
