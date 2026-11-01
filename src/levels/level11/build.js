@@ -288,6 +288,11 @@ function building(kit, L, M, out, solid, seed) {
     fq('poster', px, px + 0.7, 1.1, 2.15, 0.7, 1.05, 0, 1.1, 0.03);
     out.exits.push({ type: 'poster', x: px + 0.35, z: fz + out1 * 0.5, r: 0.75, face: [0, -out1], target: 'level49', how: 'noclip', warnR: 3, warn: 'A faded recruitment poster: WE WANT YOU. The soldier\'s eyes seem to follow you. You could touch it.', msg: 'You put your hand on the poster. It\'s warm, and it gives, like cloth over nothing. You fall through it.' });
   }
+  if (L.windowEnt) {
+    const wx = shop && shop.x1 < x1 - 2.4 ? x1 - 1.9 : x0 + 0.5;
+    fq('windowEnt', wx, wx + 1.4, 0.9, 2.65, 1.4, 1.75, 0, 0.9, 0.03);
+    out.exits.push({ type: 'poster', x: wx + 0.7, z: fz + out1 * 0.5, r: 0.7, target: 'level12', how: 'noclip', warnR: 4, warn: 'A ground-floor window, too bright, too white. There\'s something in the glass, like a face. It\'s not a reflection.', msg: 'You touch the white window and it isn\'t there. You fall into white.' });
+  }
   if (L.banner >= 0) {
     const bx = north ? x1 - 2.5 : x0 + 2.5;
     const g = new THREE.PlaneGeometry(2.6, 18);

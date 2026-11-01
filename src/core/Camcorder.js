@@ -8,6 +8,41 @@ const $ = (id) => document.getElementById(id);
 const W = 640, H = 480;
 const MONTHS = ['JAN.', 'FEB.', 'MAR.', 'APR.', 'MAY', 'JUN.', 'JUL.', 'AUG.', 'SEP.', 'OCT.', 'NOV.', 'DEC.'];
 
+// A censored frame: plain white, or grey test-card bars drowned in static.
+function censorFrame() {
+  const c = document.createElement('canvas');
+  c.width = W;
+  c.height = H;
+  const ctx = c.getContext('2d');
+  const kind = Math.random();
+  if (kind < 0.25) {
+    ctx.fillStyle = '#fdfdfd';
+    ctx.fillRect(0, 0, W, H);
+  } else {
+    const bars = [235, 200, 170, 140, 110, 80, 50];
+    bars.forEach((v, k) => {
+      ctx.fillStyle = `rgb(${v},${v},${v})`;
+      ctx.fillRect((k * W) / 7, 0, W / 7 + 1, H * 0.68);
+    });
+    [40, 20, 140, 20, 200, 20, 235].forEach((v, k) => {
+      ctx.fillStyle = `rgb(${v},${v},${v})`;
+      ctx.fillRect((k * W) / 7, H * 0.68, W / 7 + 1, H * 0.08);
+    });
+    [[0, 30], [0.18, 240], [0.36, 30], [0.54, 60], [0.72, 15]].forEach(([x, v]) => {
+      ctx.fillStyle = `rgb(${v},${v},${v})`;
+      ctx.fillRect(x * W, H * 0.76, W * 0.18 + 1, H * 0.24);
+    });
+    const img = ctx.getImageData(0, 0, W, H);
+    const a = kind < 0.6 ? 0.9 : 0.45;
+    for (let i = 0; i < img.data.length; i += 4) {
+      const n = Math.random() * 255;
+      for (let k = 0; k < 3; k++) img.data[i + k] = img.data[i + k] * (1 - a) + n * a;
+    }
+    ctx.putImageData(img, 0, 0);
+  }
+  return c.toDataURL('image/jpeg', 0.9);
+}
+
 export class Camcorder {
   constructor(game) {
     this.game = game;
@@ -43,10 +78,13 @@ export class Camcorder {
     this.busy = true;
     const g = this.game;
     const level = g.levelDef;
-    const meta = { level: level.id, name: level.name, title: level.title, seed: g.levelSeed, time: Date.now() };
-    const url = canvas.toDataURL('image/jpeg', 0.92);
+    // Some levels won't be recorded: the footage comes out as static, or a
+    // colourless test card, and even the name is gone.
+    const censored = !!g.level?.censor;
+    const meta = censored ? { level: level.id, name: '[NULL]', title: '[NULL]', seed: g.levelSeed, time: Date.now() } : { level: level.id, name: level.name, title: level.title, seed: g.levelSeed, time: Date.now() };
+    const url = censored ? censorFrame() : canvas.toDataURL('image/jpeg', 0.92);
     g.extras.photoTaken();
-    g.extras.documentShot(g.camera, canvas);
+    if (!censored) g.extras.documentShot(g.camera, canvas);
     g.audio.shutter?.();
     const el = $('flash');
     el.style.transition = 'none';
@@ -62,7 +100,7 @@ export class Camcorder {
         this.busy = false;
         if (!blob) return;
         addPhoto({ ...meta, blob }).then(() => this.onSaved?.());
-        this.toast(out, level);
+        this.toast(out, censored ? { name: '[NULL]' } : level);
       }, 'image/jpeg', 0.72);
     };
     img.onerror = () => (this.busy = false);

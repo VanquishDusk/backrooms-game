@@ -2,7 +2,7 @@
 
 A replayable 3D horror game set in the Backrooms, playable in the browser on desktop and mobile.
 
-Playable now: **Level 0 — "The Lobby" / "The Yellow Hell"**, its sub-level **Level 0.2 — "The Remodel"**, **Level 1 — "The Habitable Zone"**, **Level 1.3**, **Level 1.5 — "Inverted"**, **Level 2 — "Abandoned Utility Halls"**, **Level 3 — "Electrical Station"**, **Level 4 — "Abandoned Office"**, **Level 5 — "Terror Hotel"**, **Level 6 — "Lights Out"**, **Level 7 — "Thalassophobia"**, **Level 8 — "Cave Systems"**, **Level 9 — "The Suburbs"**, **Level 10 — "Bumper Crop"**, **Level 11 — "The City That Never Sleeps"**, **Level 14 — "Paradise"**, **Level 15 — "Futuristic Halls"**, **Level 63 — "Tranquility"**, **Level 94 — "Motion"** and **Level 601 — "The End"**. More levels will follow.
+Playable now: **Level 0 — "The Lobby" / "The Yellow Hell"**, its sub-level **Level 0.2 — "The Remodel"**, **Level 1 — "The Habitable Zone"**, **Level 1.3**, **Level 1.5 — "Inverted"**, **Level 2 — "Abandoned Utility Halls"**, **Level 3 — "Electrical Station"**, **Level 4 — "Abandoned Office"**, **Level 5 — "Terror Hotel"**, **Level 6 — "Lights Out"**, **Level 7 — "Thalassophobia"**, **Level 8 — "Cave Systems"**, **Level 9 — "The Suburbs"**, **Level 10 — "Bumper Crop"**, **Level 11 — "The City That Never Sleeps"**, **Level 12 — "Matrix"**, **Level 14 — "Paradise"**, **Level 15 — "Futuristic Halls"**, **Level 63 — "Tranquility"**, **Level 94 — "Motion"** and **Level 601 — "The End"**. More levels will follow.
 
 ## Play
 
@@ -312,8 +312,24 @@ Reached by following the arrow signs in Level 9, or a dirt track in Level 10 unt
   - Fall through an open sewer grate in the gutter: **Level 34** or **218**.
   - Go in through the door of a boarded-up building: **Level 713**. One swallowed by ivy: **Level 990**.
   - Touch a military recruitment poster: **Level 49**.
+  - Touch a ground-floor window that's too white, with a face in the glass (a Window Entity): **Level 12**.
   - Board the bus that's sometimes waiting at a stop, doors open and no driver: **Level 147**.
-- Every exit except Level 63 is coming soon.
+- Every exit except Level 63 and Level 12 is coming soon.
+
+## Level 12 — Matrix (Survival Difficulty 0)
+
+Reached through a Window Entity in Level 11.
+
+- **The room:** small, white and painfully bright, with a table, a chair, a locked door, a hole under the table that you can't get at, and a clock over the door. Openings in the other three walls lead out into white.
+- **The white:** a white floor that goes on forever into white fog, scattered with old, beaten-up furniture (chairs, tables, lamps, drawers, armchairs, televisions), some of it sunk halfway into the floor. The further out you go, the worse it gets: things tilt and stretch and float, and the picture breaks up into static. So does your memory: sanity drains far from the room, and you can forget the way back for good.
+- **Copycat doors** stand alone in the white, identical to the one in the room. Walk through one and you're back in the room.
+- **It censors itself:** photos come out as a blank white frame or a colourless test card drowned in static, saved as [NULL].
+- **The way out** (Cmdr. Harris's notes are on the table, shown when you sit). The clock's big hand goes round once a minute, so an "hour" here is one minute:
+  1. Sit on the chair (act button, R or click) for fifteen minutes: a quarter turn of the big hand.
+  2. Get up and try the door. It's locked; do it anyway. (Very rarely, it opens.)
+  3. Go out into the white and walk through a copycat door.
+  4. Back in the room, wait exactly one hour (one full turn, give or take a few seconds) and try the door again. Too soon or too late and you have to start over.
+- **Exits:** the door opens onto one of **Level 1**, **Level 4**, **Level 10**, **Level 19**, **Level 23**, **Level 25**, **Level 34** or **Level 287**. Levels 19, 23, 25, 34 and 287 are coming soon.
 
 ## Level 14 — Paradise (Survival Difficulty: Paradise)
 
@@ -389,7 +405,7 @@ Reached by escaping Level 601.
 
 Little things to come back for:
 
-- **Stickers:** 36 small goals ("Get out of Level 0 in under a minute", "Sink the Thing on Level 7", "Fill all four backpack slots", "Make it to dawn in Level 94", "Pass through 8 levels in one run"...). Each pops up as a sticker when you earn it and goes on the sticker board in the Archive.
+- **Stickers:** 38 small goals ("Get out of Level 0 in under a minute", "Sink the Thing on Level 7", "Fill all four backpack slots", "Make it to dawn in Level 94", "Pass through 8 levels in one run"...). Each pops up as a sticker when you earn it and goes on the sticker board in the Archive.
 - **The Field Guide:** photograph an entity (V or the camera button) and it's documented: your photo becomes its picture in the guide, with its description. 29 to find, including the Host, the Animations, the Robo-Men, the Animated King, the Thing on Level 7, the children of Level 14, and Enric.
 - **Tape stamps:** get out of a level alive and its tape gets a red SURVIVED stamp; each tape also counts how many times you got lost there (☠).
 - **Your route:** the death and escape screens show every level the run went through (L0 → L1 → L2...), and any stickers you earned on the way. The menu remembers your longest trip.
@@ -519,6 +535,7 @@ src/levels/level601/          Level 601 (shop layout, shop and computer dressing
 src/levels/level8/            Level 8 (marching-squares cave generator, zones, glow, Light Guides, floods, gas, exits)
 src/levels/level9/            Level 9 (streamed blocks of houses, streets and lamps, fog and the Mangled, the Neighborhood Watch, exits)
 src/levels/level10/           Level 10 (streamed farm plots, wheat, hedgerows, tracks and causeways, barns, lakes, rain, the worms, exits)
+src/levels/level12/           Level 12 (the white room, the clock and the ritual, streamed white void with decaying furniture and copycat doors)
 src/levels/level11/           Level 11 (block plans, facade/sign/ad textures and the road shader, block shells and street detail, cranes and pizzas, sun and shadows, streaming, exits)
 src/levels/level14/           Level 14 (streamed forest, sky, waterfall cliff and pool, guests, children, the cacophony)
 src/levels/level15/           Level 15 (streamed vaulted halls and rooms, machines, corpses, I.L.N. computers, Enric, the way out)

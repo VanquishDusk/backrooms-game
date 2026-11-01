@@ -200,6 +200,7 @@ function makeLot(hh, x0, x1, z0, z1, row, d, forceShop) {
   lot.banner = tower && hh(14) < 0.22 ? Math.floor(hh(15) * 4) : -1;
   lot.billboard = !tower && floors <= 3 && type === 'building' && hh(16) < 0.3 ? Math.floor(hh(17) * 8) : -1;
   lot.poster = type === 'building' && hh(18) < 0.04;
+  lot.windowEnt = type === 'building' && !tower && hh(31) < 0.05;
   lot.hedge = tower && hh(19) < 0.4;
   // The storefront.
   if (type === 'abandoned') {
@@ -827,6 +828,7 @@ export function buildMaterials(own) {
     sandbag: L({ color: 0x9a8a64 }),
     flagMeg: L({ color: 0x14243a, side: THREE.DoubleSide }),
     poster: L({ color: 0xffffff, map: posterTex(own) }),
+    windowEnt: L({ color: 0xffffff, map: windowEntTex(own), emissive: 0xffffff, emissiveMap: windowEntTex(own), emissiveIntensity: 0.15 }),
     car: L({ vertexColors: true, envMap: T.env, reflectivity: 0.25, combine: THREE.MixOperation }),
   });
   // Traffic lights: three lenses for each direction.
@@ -834,6 +836,26 @@ export function buildMaterials(own) {
     M[`sig_${g}_${c}`] = L({ color: 0x1a1a1a, emissive: col, emissiveIntensity: 0 });
   }
   return { T, M };
+}
+
+// A window that isn't quite a window: the glass is too white, and if you
+// look long enough there's a face in it.
+function windowEntTex(own) {
+  return paintTex(own, 128, 160, (ctx, w, h) => {
+    ctx.fillStyle = '#e8e4da';
+    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = '#f8f8f4';
+    ctx.fillRect(10, 10, w - 20, h - 20);
+    ctx.fillStyle = '#d8d6d0';
+    ctx.fillRect(w / 2 - 2, 10, 4, h - 20);
+    ctx.fillRect(10, h / 2 - 2, w - 20, 4);
+    ctx.fillStyle = 'rgba(40,40,40,0.18)';
+    ctx.beginPath();
+    ctx.ellipse(44, 62, 9, 12, 0, 0, Math.PI * 2);
+    ctx.ellipse(84, 62, 9, 12, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillRect(48, 108, 32, 4);
+  }, false);
 }
 
 function posterTex(own) {

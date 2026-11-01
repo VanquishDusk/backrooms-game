@@ -19,5 +19,6 @@ export const LEVEL_INFO = {
   level9: 'The Suburbs: an endless neighbourhood at midnight. Wet streets, dead street lamps, dark houses. Stay on the sidewalk. Something is always watching.',
   level10: 'Bumper Crop: endless wheat and barley under a grey sky, hedgerows, barns and lakes. For a moment you think you\'ve escaped. Don\'t stand still too long.',
   level11: 'The City That Never Sleeps: an endless city of towers and shops, golden afternoon into a night of lit windows. Safe, mostly. Every door could lead somewhere else.',
+  level12: 'Matrix: a white room with a table, a chair and a locked door, and white forever beyond it. It won\'t let itself be filmed. The way out is a ritual.',
   level63: 'Tranquility: wooden bridges and platforms high in the sky over an endless void, ringed by shifting walls of vines. Sit at a Meditation Point and breathe.',
 };

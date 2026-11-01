@@ -25,6 +25,8 @@ export const STICKERS = [
   { id: 'city11', icon: '🏙', name: 'CITY LIGHTS', desc: 'Reach Level 11.' },
   { id: 'meg11', icon: '🛡', name: 'BASE BETA', desc: 'Find M.E.G. Base Beta in Level 11.' },
   { id: 'luck11', icon: '🕊', name: 'LUCKY', desc: 'Touch a Lucky Crane.' },
+  { id: 'room12', icon: '⬜', name: '[NULL]', desc: 'Reach Level 12.' },
+  { id: 'out12', icon: '🚪', name: 'THE RITUAL', desc: 'Open the door in Level 12.' },
   { id: 'sea7', icon: '🌊', name: 'SEA LEGS', desc: 'Reach Level 7.' },
   { id: 'thing', icon: '🐍', name: 'MONSTER HUNTER', desc: 'Sink the Thing on Level 7.' },
   { id: 'sky63', icon: '☁', name: 'HEAD IN THE CLOUDS', desc: 'Find Level 63.' },
@@ -145,7 +147,7 @@ export class Extras {
       this.award('out0');
       if (g.runTime < 60) this.award('fast0');
     }
-    const reach = { level5: 'deep5', level6: 'dark6', level7: 'sea7', level8: 'cave8', level9: 'sub9', level10: 'farm10', level11: 'city11', level63: 'sky63', level601: 'end601', level14: 'red14' };
+    const reach = { level5: 'deep5', level6: 'dark6', level7: 'sea7', level8: 'cave8', level9: 'sub9', level10: 'farm10', level11: 'city11', level12: 'room12', level63: 'sky63', level601: 'end601', level14: 'red14' };
     if (reach[id]) this.award(reach[id]);
     if (id === 'level94' && from === 'level601') this.award('home94');
     const distinct = new Set(this.route).size;
