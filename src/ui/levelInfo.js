@@ -17,5 +17,6 @@ export const LEVEL_INFO = {
   level15: 'Futuristic Halls: endless white vaulted halls, machines still running behind reinforced doors, people in lab coats where they fell. Safe, silent, and no Almond Water. Enric lives here.',
   level8: 'Cave Systems: endless dark caves over black water. Glowing jungles, poison air, stone hands, floods. Follow the 9th Road.',
   level9: 'The Suburbs: an endless neighbourhood at midnight. Wet streets, dead street lamps, dark houses. Stay on the sidewalk. Something is always watching.',
+  level10: 'Bumper Crop: endless wheat and barley under a grey sky, hedgerows, barns and lakes. For a moment you think you\'ve escaped. Don\'t stand still too long.',
   level63: 'Tranquility: wooden bridges and platforms high in the sky over an endless void, ringed by shifting walls of vines. Sit at a Meditation Point and breathe.',
 };

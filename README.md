@@ -2,7 +2,7 @@
 
 A replayable 3D horror game set in the Backrooms, playable in the browser on desktop and mobile.
 
-Playable now: **Level 0 — "The Lobby" / "The Yellow Hell"**, its sub-level **Level 0.2 — "The Remodel"**, **Level 1 — "The Habitable Zone"**, **Level 1.3**, **Level 1.5 — "Inverted"**, **Level 2 — "Abandoned Utility Halls"**, **Level 3 — "Electrical Station"**, **Level 4 — "Abandoned Office"**, **Level 5 — "Terror Hotel"**, **Level 6 — "Lights Out"**, **Level 7 — "Thalassophobia"**, **Level 8 — "Cave Systems"**, **Level 9 — "The Suburbs"**, **Level 14 — "Paradise"**, **Level 15 — "Futuristic Halls"**, **Level 63 — "Tranquility"**, **Level 94 — "Motion"** and **Level 601 — "The End"**. More levels will follow.
+Playable now: **Level 0 — "The Lobby" / "The Yellow Hell"**, its sub-level **Level 0.2 — "The Remodel"**, **Level 1 — "The Habitable Zone"**, **Level 1.3**, **Level 1.5 — "Inverted"**, **Level 2 — "Abandoned Utility Halls"**, **Level 3 — "Electrical Station"**, **Level 4 — "Abandoned Office"**, **Level 5 — "Terror Hotel"**, **Level 6 — "Lights Out"**, **Level 7 — "Thalassophobia"**, **Level 8 — "Cave Systems"**, **Level 9 — "The Suburbs"**, **Level 10 — "Bumper Crop"**, **Level 14 — "Paradise"**, **Level 15 — "Futuristic Halls"**, **Level 63 — "Tranquility"**, **Level 94 — "Motion"** and **Level 601 — "The End"**. More levels will follow.
 
 ## Play
 
@@ -274,7 +274,23 @@ Reached by the door at the end of Level 8's 9th Road (and Level 5's dark door).
 - **Parks:** slides, swings, benches and a red playground tube. Some tubes glow white inside: crawl in for **Level 283**.
 - **Grass fields:** every so often a block is just long grass, with a stone walkway out into it. Follow the walkway to its end: **Level 9.1**. Wander off it into the grass: **Level 10**.
 - **Follow the arrows:** every street sign has an arrow and a small "11" on it. Keep following them, street after street, until a big green sign over the road says **LEVEL 11 — NEXT EXIT**.
-- Levels 9.1, 10, 11 and 283 are coming soon.
+- Levels 9.1, 11 and 283 are coming soon.
+
+## Level 10 — Bumper Crop (Survival Difficulty 1)
+
+Reached by wandering off the stone walkway into a grass field in Level 9.
+
+- **The fields:** endless square plots of golden wheat, pale barley, cut stubble and dark ploughed soil, swaying in the wind and divided by hedgerows of trees and shrubs, with a gap in each hedge to get through. The sky is a permanent overcast grey; spells of light rain and fog come and go.
+- **Lakes:** wherever the ground dips low enough, there's a lake. The water is safe to **drink** (E): it tastes of earth, restores a little sanity and health, and fills a bottle.
+- **Barns and sheds:** big old brick barns with grey roofs and open doors, with hay bales and stacks of planks inside, and sometimes **supplies**. Some have a page of a **diary** on the floor. Five pages tell the story of a family who found their way here.
+- **Dirt tracks:** tire-track paths run between the plots (on low causeways where they cross a lake). Keep following them, a long way, until the dirt turns to tarmac: **Level 11**.
+- **The worms:** a metre under the soil there's a writhing mass of worms. Stand still on the soil for too long and they come up to see what you are. Move, or they start trying to burrow in.
+- No hostile entities. Class 1.
+- **Exits:**
+  - Follow a dirt track far enough: **Level 11**.
+  - Push into a patch of bright yellow **canola** among the wheat: **Level 184**.
+  - Swim out into a lake until it's too deep to stand: an aquatic level (**Level 7**).
+- Levels 11 and 184 are coming soon.
 
 ## Level 14 — Paradise (Survival Difficulty: Paradise)
 
@@ -350,8 +366,8 @@ Reached by escaping Level 601.
 
 Little things to come back for:
 
-- **Stickers:** 27 small goals ("Get out of Level 0 in under a minute", "Sink the Thing on Level 7", "Fill all four backpack slots", "Make it to dawn in Level 94", "Pass through 8 levels in one run"...). Each pops up as a sticker when you earn it and goes on the sticker board in the Archive.
-- **The Field Guide:** photograph an entity (V or the camera button) and it's documented: your photo becomes its picture in the guide, with its description. 23 to find, including the Host, the Animations, the Robo-Men, the Animated King, the Thing on Level 7, the children of Level 14, and Enric.
+- **Stickers:** 33 small goals ("Get out of Level 0 in under a minute", "Sink the Thing on Level 7", "Fill all four backpack slots", "Make it to dawn in Level 94", "Pass through 8 levels in one run"...). Each pops up as a sticker when you earn it and goes on the sticker board in the Archive.
+- **The Field Guide:** photograph an entity (V or the camera button) and it's documented: your photo becomes its picture in the guide, with its description. 27 to find, including the Host, the Animations, the Robo-Men, the Animated King, the Thing on Level 7, the children of Level 14, and Enric.
 - **Tape stamps:** get out of a level alive and its tape gets a red SURVIVED stamp; each tape also counts how many times you got lost there (☠).
 - **Your route:** the death and escape screens show every level the run went through (L0 → L1 → L2...), and any stickers you earned on the way. The menu remembers your longest trip.
 - **Tonight's tape:** one seed a day, the same for everyone. Play it from the menu; the menu remembers how far you got.
@@ -479,6 +495,7 @@ src/levels/level94/           Level 94 (terrain and sky, town and props kit, cas
 src/levels/level601/          Level 601 (shop layout, shop and computer dressing, the field and the house, the host, the acts)
 src/levels/level8/            Level 8 (marching-squares cave generator, zones, glow, Light Guides, floods, gas, exits)
 src/levels/level9/            Level 9 (streamed blocks of houses, streets and lamps, fog and the Mangled, the Neighborhood Watch, exits)
+src/levels/level10/           Level 10 (streamed farm plots, wheat, hedgerows, tracks and causeways, barns, lakes, rain, the worms, exits)
 src/levels/level14/           Level 14 (streamed forest, sky, waterfall cliff and pool, guests, children, the cacophony)
 src/levels/level15/           Level 15 (streamed vaulted halls and rooms, machines, corpses, I.L.N. computers, Enric, the way out)
 src/levels/level63/           Level 63 generator (platforms, bridges, ladders, monkey bars, Meditation Points) and runtime (sky, clouds, vines, climbing, falling)
@@ -492,4 +509,4 @@ All textures and sounds are generated in code, so there are no asset files.
 2. Grid-style levels can reuse `GridMap` and `GridWorld` with their own generator, textures and lighting.
 3. Register the level in `src/levels/registry.js`.
 
-Levels hand off with `ctx.onEscape(targetId, 'noclip' | 'door' | 'walk')`, and player stats carry over. An exit that targets a level that isn't built yet shows a "coming soon" screen, using the names in `UPCOMING`. Level 4's and Level 5's exits already target `level9` and `level71`, Level 6's target `level129` and `level6_1`, Level 7's target `level9`, `level83` and `level880`, Level 8's target `level69`, Level 9's target `level9_1`, `level10`, `level11` and `level283`. (Level 601's `level94` is now built.)
+Levels hand off with `ctx.onEscape(targetId, 'noclip' | 'door' | 'walk')`, and player stats carry over. An exit that targets a level that isn't built yet shows a "coming soon" screen, using the names in `UPCOMING`. Level 4's and Level 5's exits already target `level9` and `level71`, Level 6's target `level129` and `level6_1`, Level 7's target `level9`, `level83` and `level880`, Level 8's target `level69`, Level 9's target `level9_1`, `level11` and `level283`, Level 10's target `level11` and `level184`. (Level 601's `level94`, Level 9's `level10` and Level 10's `level7` are built.)
