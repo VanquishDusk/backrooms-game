@@ -17,6 +17,7 @@ import { LEVEL15 } from './level15/Level15.js';
 import { LEVEL8 } from './level8/Level8.js';
 import { LEVEL9 } from './level9/Level9.js';
 import { LEVEL10 } from './level10/Level10.js';
+import { LEVEL11 } from './level11/Level11.js';
 
 // Every playable level registers here. A level definition is:
 //
@@ -63,6 +64,7 @@ export const LEVELS = {
   [LEVEL8.id]: LEVEL8,
   [LEVEL9.id]: LEVEL9,
   [LEVEL10.id]: LEVEL10,
+  [LEVEL11.id]: LEVEL11,
 };
 
 // Names for levels that exits point at but that aren't built yet.
@@ -71,7 +73,6 @@ export const UPCOMING = {
   level69: 'LEVEL 69',
   level9_1: 'LEVEL 9.1',
   level184: 'LEVEL 184',
-  level11: 'LEVEL 11',
   level283: 'LEVEL 283',
   level39: 'LEVEL 39',
   level797: 'LEVEL 797',
@@ -79,6 +80,33 @@ export const UPCOMING = {
   level129: 'LEVEL 129',
   level83: 'LEVEL 83',
   level880: 'LEVEL 880',
+  level12: 'LEVEL 12',
+  level20: 'LEVEL 20',
+  level232: 'LEVEL 232',
+  level458: 'LEVEL 458',
+  level55: 'LEVEL 55',
+  level126: 'LEVEL 126',
+  level68: 'LEVEL 68',
+  level808: 'LEVEL 808',
+  level179: 'LEVEL 179',
+  level304: 'LEVEL 304',
+  level370: 'LEVEL 370',
+  level900: 'LEVEL 900',
+  level214: 'LEVEL 214',
+  level119: 'LEVEL 119',
+  level213: 'LEVEL 213',
+  level511: 'LEVEL 511',
+  level33: 'LEVEL 33',
+  level115: 'LEVEL 115',
+  level713: 'LEVEL 713',
+  level990: 'LEVEL 990',
+  level49: 'LEVEL 49',
+  level325: 'LEVEL 325',
+  level34: 'LEVEL 34',
+  level218: 'LEVEL 218',
+  level138: 'LEVEL 138',
+  level215: 'LEVEL 215',
+  level147: 'LEVEL 147',
 };
 
 // Exits that leave the Backrooms altogether.

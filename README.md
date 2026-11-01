@@ -2,7 +2,7 @@
 
 A replayable 3D horror game set in the Backrooms, playable in the browser on desktop and mobile.
 
-Playable now: **Level 0 — "The Lobby" / "The Yellow Hell"**, its sub-level **Level 0.2 — "The Remodel"**, **Level 1 — "The Habitable Zone"**, **Level 1.3**, **Level 1.5 — "Inverted"**, **Level 2 — "Abandoned Utility Halls"**, **Level 3 — "Electrical Station"**, **Level 4 — "Abandoned Office"**, **Level 5 — "Terror Hotel"**, **Level 6 — "Lights Out"**, **Level 7 — "Thalassophobia"**, **Level 8 — "Cave Systems"**, **Level 9 — "The Suburbs"**, **Level 10 — "Bumper Crop"**, **Level 14 — "Paradise"**, **Level 15 — "Futuristic Halls"**, **Level 63 — "Tranquility"**, **Level 94 — "Motion"** and **Level 601 — "The End"**. More levels will follow.
+Playable now: **Level 0 — "The Lobby" / "The Yellow Hell"**, its sub-level **Level 0.2 — "The Remodel"**, **Level 1 — "The Habitable Zone"**, **Level 1.3**, **Level 1.5 — "Inverted"**, **Level 2 — "Abandoned Utility Halls"**, **Level 3 — "Electrical Station"**, **Level 4 — "Abandoned Office"**, **Level 5 — "Terror Hotel"**, **Level 6 — "Lights Out"**, **Level 7 — "Thalassophobia"**, **Level 8 — "Cave Systems"**, **Level 9 — "The Suburbs"**, **Level 10 — "Bumper Crop"**, **Level 11 — "The City That Never Sleeps"**, **Level 14 — "Paradise"**, **Level 15 — "Futuristic Halls"**, **Level 63 — "Tranquility"**, **Level 94 — "Motion"** and **Level 601 — "The End"**. More levels will follow.
 
 ## Play
 
@@ -274,7 +274,7 @@ Reached by the door at the end of Level 8's 9th Road (and Level 5's dark door).
 - **Parks:** slides, swings, benches and a red playground tube. Some tubes glow white inside: crawl in for **Level 283**.
 - **Grass fields:** every so often a block is just long grass, with a stone walkway out into it. Follow the walkway to its end: **Level 9.1**. Wander off it into the grass: **Level 10**.
 - **Follow the arrows:** every street sign has an arrow and a small "11" on it. Keep following them, street after street, until a big green sign over the road says **LEVEL 11 — NEXT EXIT**.
-- Levels 9.1, 11 and 283 are coming soon.
+- Levels 9.1 and 283 are coming soon.
 
 ## Level 10 — Bumper Crop (Survival Difficulty 1)
 
@@ -290,7 +290,30 @@ Reached by wandering off the stone walkway into a grass field in Level 9.
   - Follow a dirt track far enough: **Level 11**.
   - Push into a patch of bright yellow **canola** among the wheat: **Level 184**.
   - Swim out into a lake until it's too deep to stand: an aquatic level (**Level 7**).
-- Levels 11 and 184 are coming soon.
+- Level 184 is coming soon.
+
+## Level 11 — The City That Never Sleeps (Survival Difficulty 2)
+
+Reached by following the arrow signs in Level 9, or a dirt track in Level 10 until it turns into a road.
+
+- **The city:** endless blocks of it, built as you walk. Downtown towers of glass, granite and pale stone stepping back from their podiums; midtown offices and apartments with water towers on the roofs; low brick shops further out. Windows are dark mirrors that reflect the sky. Four-lane streets with lane lines, zebra crossings and stop lines, kerbs, street trees in their grates, lamp posts, hydrants, parked cars, bus shelters, and traffic lights that cycle for nobody, with blue street-name signs on their arms. Alleys run between the rows of buildings, with dumpsters and fire escapes.
+- **Time passes:** you arrive in the afternoon with real sun and shadows between the towers. The light turns gold, the sun sets, and then every window, sign and shop front lights up. (Shadows are switched off at the low quality setting.)
+- **Safe, mostly (the Level 11 Effect):** Facelings walk the pavements and Hounds nose along the gutters, but they leave you alone. Hit one, or keep crowding it, and it remembers what it is. Give it time and room and it calms down again.
+- **Open shops:** some shops are unlocked, lit and stocked, with nobody minding them. They often have **supplies**, and the tap in the back gives clean water (E). **Malt Marters** depots always do. **Camp Amber** is a classroom with advice on the board.
+- **The city changes when you aren't looking:** billboards show different ads, and parked cars move.
+- **Lucky Cranes** fly over the streets in flocks of folded paper. Now and then one comes down to you: touch it for a boost to sanity and health. **Living Pizzas** hop about on the pavement and run away from you.
+- **Landmarks:** a green sign by the start points the way. **New Times Square** is two blocks north: a plaza walled with big screens, B.N.T.G. trading stalls (take what's on the counters) and a statue. **M.E.G. Base Beta** is two blocks east: sandbags, flags, supplies inside, and a whiteboard listing the exits they know about.
+- **Exits:** the city is a hub, and most of the ways out are one-way.
+  - Shops with the wrong names have a door standing ajar at the back: **FUN ZONE** (20), **Caspian's Antiques** (232), **Papa Pedro's Pizza Palace of Pleasantries** (458), **Frivolous Frank's Fabulous Frozen Food** (55), **Mr. Holloway's Grand Exhibit** (126), a **cinema** (68), an **arcade** (808), a **thrift store** (179), a **bakery** (304, and you can smell it from the street), a **pub** (370), **Mattress Kingdom** (900), a **flower shop** (214), **Pure Water Supply** (119), a **trattoria** (213), a **hospital** (511) and a **mall** (33).
+  - M.E.G. Base Beta's marked door: **Level 115**.
+  - Run into the shrubbery and trip: **Level 63**.
+  - Walk deep into a neon-lit alley: **Level 138**. Or a grimy one with no neon: **Level 215**.
+  - Stand on the bare ground floor of a construction site: **Level 325**.
+  - Fall through an open sewer grate in the gutter: **Level 34** or **218**.
+  - Go in through the door of a boarded-up building: **Level 713**. One swallowed by ivy: **Level 990**.
+  - Touch a military recruitment poster: **Level 49**.
+  - Board the bus that's sometimes waiting at a stop, doors open and no driver: **Level 147**.
+- Every exit except Level 63 is coming soon.
 
 ## Level 14 — Paradise (Survival Difficulty: Paradise)
 
@@ -366,8 +389,8 @@ Reached by escaping Level 601.
 
 Little things to come back for:
 
-- **Stickers:** 33 small goals ("Get out of Level 0 in under a minute", "Sink the Thing on Level 7", "Fill all four backpack slots", "Make it to dawn in Level 94", "Pass through 8 levels in one run"...). Each pops up as a sticker when you earn it and goes on the sticker board in the Archive.
-- **The Field Guide:** photograph an entity (V or the camera button) and it's documented: your photo becomes its picture in the guide, with its description. 27 to find, including the Host, the Animations, the Robo-Men, the Animated King, the Thing on Level 7, the children of Level 14, and Enric.
+- **Stickers:** 36 small goals ("Get out of Level 0 in under a minute", "Sink the Thing on Level 7", "Fill all four backpack slots", "Make it to dawn in Level 94", "Pass through 8 levels in one run"...). Each pops up as a sticker when you earn it and goes on the sticker board in the Archive.
+- **The Field Guide:** photograph an entity (V or the camera button) and it's documented: your photo becomes its picture in the guide, with its description. 29 to find, including the Host, the Animations, the Robo-Men, the Animated King, the Thing on Level 7, the children of Level 14, and Enric.
 - **Tape stamps:** get out of a level alive and its tape gets a red SURVIVED stamp; each tape also counts how many times you got lost there (☠).
 - **Your route:** the death and escape screens show every level the run went through (L0 → L1 → L2...), and any stickers you earned on the way. The menu remembers your longest trip.
 - **Tonight's tape:** one seed a day, the same for everyone. Play it from the menu; the menu remembers how far you got.
@@ -496,6 +519,7 @@ src/levels/level601/          Level 601 (shop layout, shop and computer dressing
 src/levels/level8/            Level 8 (marching-squares cave generator, zones, glow, Light Guides, floods, gas, exits)
 src/levels/level9/            Level 9 (streamed blocks of houses, streets and lamps, fog and the Mangled, the Neighborhood Watch, exits)
 src/levels/level10/           Level 10 (streamed farm plots, wheat, hedgerows, tracks and causeways, barns, lakes, rain, the worms, exits)
+src/levels/level11/           Level 11 (block plans, facade/sign/ad textures and the road shader, block shells and street detail, cranes and pizzas, sun and shadows, streaming, exits)
 src/levels/level14/           Level 14 (streamed forest, sky, waterfall cliff and pool, guests, children, the cacophony)
 src/levels/level15/           Level 15 (streamed vaulted halls and rooms, machines, corpses, I.L.N. computers, Enric, the way out)
 src/levels/level63/           Level 63 generator (platforms, bridges, ladders, monkey bars, Meditation Points) and runtime (sky, clouds, vines, climbing, falling)
@@ -509,4 +533,4 @@ All textures and sounds are generated in code, so there are no asset files.
 2. Grid-style levels can reuse `GridMap` and `GridWorld` with their own generator, textures and lighting.
 3. Register the level in `src/levels/registry.js`.
 
-Levels hand off with `ctx.onEscape(targetId, 'noclip' | 'door' | 'walk')`, and player stats carry over. An exit that targets a level that isn't built yet shows a "coming soon" screen, using the names in `UPCOMING`. Level 4's and Level 5's exits already target `level9` and `level71`, Level 6's target `level129` and `level6_1`, Level 7's target `level9`, `level83` and `level880`, Level 8's target `level69`, Level 9's target `level9_1`, `level11` and `level283`, Level 10's target `level11` and `level184`. (Level 601's `level94`, Level 9's `level10` and Level 10's `level7` are built.)
+Levels hand off with `ctx.onEscape(targetId, 'noclip' | 'door' | 'walk')`, and player stats carry over. An exit that targets a level that isn't built yet shows a "coming soon" screen, using the names in `UPCOMING`. Level 4's and Level 5's exits already target `level9` and `level71`, Level 6's target `level129` and `level6_1`, Level 7's target `level9`, `level83` and `level880`, Level 8's target `level69`, Level 9's target `level9_1` and `level283`, Level 10's target `level184`, and Level 11's target many hub exits (see its section). (Level 601's `level94`, Level 9's `level10` and `level11`, Level 10's `level7` and `level11`, and Level 11's `level63` are built.)

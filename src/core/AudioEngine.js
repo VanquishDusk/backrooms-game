@@ -217,6 +217,7 @@ export class AudioEngine {
   stopAmbience() {
     if (this.jazzOut) this.jazzOut.gain.setValueAtTime(0, this.ctx.currentTime);
     if (this.windOut) this.windOut.gain.setValueAtTime(0, this.ctx.currentTime);
+    if (this.cityOut) this.cityOut.gain.setValueAtTime(0, this.ctx.currentTime);
     if (this.wavesOut) this.wavesOut.gain.setValueAtTime(0, this.ctx.currentTime);
     if (this.fallsOut) this.fallsOut.gain.setValueAtTime(0, this.ctx.currentTime);
     if (this.chorusOut) this.chorusOut.gain.setValueAtTime(0, this.ctx.currentTime);
@@ -253,6 +254,7 @@ export class AudioEngine {
     this.machineGain.gain.setTargetAtTime(s.machine || 0, t, 0.2);
     this.updateJazz(s.jazz || 0, s.jazzMuffle ?? 6000);
     this.updateWind(s.wind || 0);
+    if (s.city || this.cityOut) this.updateCity(s.city || 0);
     this.updateWaves(s.waves || 0, s.wavesPan || 0);
     if (s.falls || this.fallsOut) this.updateFalls(s.falls || 0, s.fallsPan || 0);
     if (s.chorus || this.chorusOut) this.updateChorus(s.chorus || 0);
@@ -779,6 +781,124 @@ export class AudioEngine {
       lfo2.start();
     }
     this.windOut.gain.setTargetAtTime(level, ctx.currentTime, 0.5);
+  }
+
+  // A city heard from the street: a far-off roar of traffic that never
+  // arrives, swelling and falling, with a hiss of tyres on top.
+  updateCity(level) {
+    const ctx = this.ctx;
+    if (!this.cityOut) {
+      if (level < 0.001) return;
+      this.cityOut = ctx.createGain();
+      this.cityOut.gain.value = 0;
+      const src = this.noiseSource(true);
+      const lp = ctx.createBiquadFilter();
+      lp.type = 'lowpass';
+      lp.frequency.value = 180;
+      lp.Q.value = 0.5;
+      const swell = ctx.createGain();
+      swell.gain.value = 0.8;
+      const lfo = ctx.createOscillator();
+      lfo.frequency.value = 0.045;
+      const lfoG = ctx.createGain();
+      lfoG.gain.value = 0.3;
+      lfo.connect(lfoG).connect(swell.gain);
+      src.connect(lp).connect(swell).connect(this.cityOut);
+      const src2 = this.noiseSource(true);
+      const bp = ctx.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.value = 1400;
+      bp.Q.value = 0.4;
+      const hiss = ctx.createGain();
+      hiss.gain.value = 0.05;
+      const lfo2 = ctx.createOscillator();
+      lfo2.frequency.value = 0.11;
+      const lfo2G = ctx.createGain();
+      lfo2G.gain.value = 0.04;
+      lfo2.connect(lfo2G).connect(hiss.gain);
+      src2.connect(bp).connect(hiss).connect(this.cityOut);
+      this.cityOut.connect(this.master);
+      src.start();
+      src2.start();
+      lfo.start();
+      lfo2.start();
+    }
+    this.cityOut.gain.setTargetAtTime(level, ctx.currentTime, 0.6);
+  }
+
+  // A siren, a long way off: a slow wail, rising and falling.
+  siren(pan = 0, vol = 0.05) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    const o = this.ctx.createOscillator();
+    o.type = 'triangle';
+    const dur = 5;
+    o.frequency.setValueAtTime(640, t);
+    for (let k = 0; k < 3; k++) {
+      o.frequency.linearRampToValueAtTime(980, t + k * 1.6 + 0.8);
+      o.frequency.linearRampToValueAtTime(640, t + k * 1.6 + 1.6);
+    }
+    const lp = this.ctx.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = 1500;
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(vol, t + 1.2);
+    g.gain.linearRampToValueAtTime(vol * 0.8, t + dur - 1.5);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(lp).connect(g).connect(this.out(pan));
+    o.start(t);
+    o.stop(t + dur + 0.1);
+  }
+
+  // A car horn, a few streets over.
+  horn(pan = 0, vol = 0.05) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    const dur = 0.25 + Math.random() * 0.5;
+    const lp = this.ctx.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = 1100;
+    const g = this.ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(vol, t + 0.02);
+    g.gain.setValueAtTime(vol, t + dur);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.12);
+    lp.connect(g).connect(this.out(pan));
+    for (const f of [392, 494]) {
+      const o = this.ctx.createOscillator();
+      o.type = 'square';
+      o.frequency.value = f;
+      o.connect(lp);
+      o.start(t);
+      o.stop(t + dur + 0.15);
+    }
+  }
+
+  // A pigeon on a ledge: a soft, throaty coo.
+  pigeon(pan = 0, vol = 0.05) {
+    if (!this.ctx) return;
+    const t = this.ctx.currentTime;
+    for (let k = 0; k < 3; k++) {
+      const t0 = t + k * 0.32;
+      const o = this.ctx.createOscillator();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(330, t0);
+      o.frequency.linearRampToValueAtTime(k === 1 ? 420 : 300, t0 + 0.12);
+      o.frequency.linearRampToValueAtTime(280, t0 + 0.24);
+      const vib = this.ctx.createOscillator();
+      vib.frequency.value = 28;
+      const vg = this.ctx.createGain();
+      vg.gain.value = 18;
+      vib.connect(vg).connect(o.frequency);
+      const g = this.ctx.createGain();
+      this.env(g, t0, vol * (k === 1 ? 1 : 0.7), 0.03, 0.22);
+      o.connect(g).connect(this.out(pan));
+      o.start(t0);
+      vib.start(t0);
+      o.stop(t0 + 0.3);
+      vib.stop(t0 + 0.3);
+    }
   }
 
   // Far-off waves on a shore: slow swells of low noise, from one direction.
