@@ -16,5 +16,6 @@ export const LEVEL_INFO = {
   level14: 'Paradise. A forest at night under a sky full of stars, crimson leaves, waterfalls. You should visit sometime. You\'ll be happy here. Everyone else is.',
   level15: 'Futuristic Halls: endless white vaulted halls, machines still running behind reinforced doors, people in lab coats where they fell. Safe, silent, and no Almond Water. Enric lives here.',
   level8: 'Cave Systems: endless dark caves over black water. Glowing jungles, poison air, stone hands, floods. Follow the 9th Road.',
+  level9: 'The Suburbs: an endless neighbourhood at midnight. Wet streets, dead street lamps, dark houses. Stay on the sidewalk. Something is always watching.',
   level63: 'Tranquility: wooden bridges and platforms high in the sky over an endless void, ringed by shifting walls of vines. Sit at a Meditation Point and breathe.',
 };

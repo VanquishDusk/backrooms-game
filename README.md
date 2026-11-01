@@ -2,7 +2,7 @@
 
 A replayable 3D horror game set in the Backrooms, playable in the browser on desktop and mobile.
 
-Playable now: **Level 0 — "The Lobby" / "The Yellow Hell"**, its sub-level **Level 0.2 — "The Remodel"**, **Level 1 — "The Habitable Zone"**, **Level 1.3**, **Level 1.5 — "Inverted"**, **Level 2 — "Abandoned Utility Halls"**, **Level 3 — "Electrical Station"**, **Level 4 — "Abandoned Office"**, **Level 5 — "Terror Hotel"**, **Level 6 — "Lights Out"**, **Level 7 — "Thalassophobia"**, **Level 8 — "Cave Systems"**, **Level 14 — "Paradise"**, **Level 15 — "Futuristic Halls"**, **Level 63 — "Tranquility"**, **Level 94 — "Motion"** and **Level 601 — "The End"**. More levels will follow.
+Playable now: **Level 0 — "The Lobby" / "The Yellow Hell"**, its sub-level **Level 0.2 — "The Remodel"**, **Level 1 — "The Habitable Zone"**, **Level 1.3**, **Level 1.5 — "Inverted"**, **Level 2 — "Abandoned Utility Halls"**, **Level 3 — "Electrical Station"**, **Level 4 — "Abandoned Office"**, **Level 5 — "Terror Hotel"**, **Level 6 — "Lights Out"**, **Level 7 — "Thalassophobia"**, **Level 8 — "Cave Systems"**, **Level 9 — "The Suburbs"**, **Level 14 — "Paradise"**, **Level 15 — "Futuristic Halls"**, **Level 63 — "Tranquility"**, **Level 94 — "Motion"** and **Level 601 — "The End"**. More levels will follow.
 
 ## Play
 
@@ -260,7 +260,21 @@ Reached through the underwater cave by the mountain in Level 7, or sometimes thr
 - **The 9th Road:** a marked route of yellow-banded stakes and rope from Kavragost to a door with a 9 painted on it: **Level 9**.
 - **Floods:** every so often a roar comes up through the rock and the water rises fast, sometimes over your head. Get to high ground. Watch your **breath**.
 - Smilers wait at the ends of the side passages.
-- Levels 9 and 69 are coming soon.
+- Level 69 is coming soon.
+
+## Level 9 — The Suburbs (Survival Difficulty 5)
+
+Reached by the door at the end of Level 8's 9th Road (and Level 5's dark door).
+
+- **The neighbourhood:** endless blocks of houses at permanent midnight. Wet asphalt with puddles, fallen leaves gathered along the curbs, raised sidewalks, lawns, picket-less wooden fences between the back yards, driveways, autumn trees (some bare). Most street lamps are dead, some flicker, a few just work, cool white or orange.
+- **Houses:** some you can walk into (dusty wallpaper, a dead television, a fridge, a bed, a table and chairs), and they often have **supplies** in them. Now and then two houses stand in the same place, clipped through each other. A few have a lawn floodlight still glowing green.
+- **The sidewalk is safer than the street:** being out in the road wears on you more, and when the **fog** rolls in the **Mangled** come out of it, twisted and wrong, down the middle of the road. They won't set foot on the sidewalk, and can't hurt you there; get inside a house or stay on the curb until the fog lifts.
+- **The Neighborhood Watch:** very tall, very still figures standing in yards, watching you. Looking at them hurts. Get close and nobody's there.
+- Smilers, Hounds, Skin-Stealers, Wretches, Deathrats and Deathmoths walk the streets.
+- **Parks:** slides, swings, benches and a red playground tube. Some tubes glow white inside: crawl in for **Level 283**.
+- **Grass fields:** every so often a block is just long grass, with a stone walkway out into it. Follow the walkway to its end: **Level 9.1**. Wander off it into the grass: **Level 10**.
+- **Follow the arrows:** every street sign has an arrow and a small "11" on it. Keep following them, street after street, until a big green sign over the road says **LEVEL 11 — NEXT EXIT**.
+- Levels 9.1, 10, 11 and 283 are coming soon.
 
 ## Level 14 — Paradise (Survival Difficulty: Paradise)
 
@@ -464,6 +478,7 @@ src/levels/level7/            Level 7 (layout and sea floor, the room/sea/scener
 src/levels/level94/           Level 94 (terrain and sky, town and props kit, castle interior, Animations, Robo-Men, the King, day/night)
 src/levels/level601/          Level 601 (shop layout, shop and computer dressing, the field and the house, the host, the acts)
 src/levels/level8/            Level 8 (marching-squares cave generator, zones, glow, Light Guides, floods, gas, exits)
+src/levels/level9/            Level 9 (streamed blocks of houses, streets and lamps, fog and the Mangled, the Neighborhood Watch, exits)
 src/levels/level14/           Level 14 (streamed forest, sky, waterfall cliff and pool, guests, children, the cacophony)
 src/levels/level15/           Level 15 (streamed vaulted halls and rooms, machines, corpses, I.L.N. computers, Enric, the way out)
 src/levels/level63/           Level 63 generator (platforms, bridges, ladders, monkey bars, Meditation Points) and runtime (sky, clouds, vines, climbing, falling)
@@ -477,4 +492,4 @@ All textures and sounds are generated in code, so there are no asset files.
 2. Grid-style levels can reuse `GridMap` and `GridWorld` with their own generator, textures and lighting.
 3. Register the level in `src/levels/registry.js`.
 
-Levels hand off with `ctx.onEscape(targetId, 'noclip' | 'door' | 'walk')`, and player stats carry over. An exit that targets a level that isn't built yet shows a "coming soon" screen, using the names in `UPCOMING`. Level 4's and Level 5's exits already target `level9` and `level71`, Level 6's target `level129` and `level6_1`, Level 7's target `level9`, `level83` and `level880`, Level 8's target `level9` and `level69`. (Level 601's `level94` is now built.)
+Levels hand off with `ctx.onEscape(targetId, 'noclip' | 'door' | 'walk')`, and player stats carry over. An exit that targets a level that isn't built yet shows a "coming soon" screen, using the names in `UPCOMING`. Level 4's and Level 5's exits already target `level9` and `level71`, Level 6's target `level129` and `level6_1`, Level 7's target `level9`, `level83` and `level880`, Level 8's target `level69`, Level 9's target `level9_1`, `level10`, `level11` and `level283`. (Level 601's `level94` is now built.)

@@ -18,6 +18,8 @@ export const STICKERS = [
   { id: 'dark6', icon: '🌑', name: 'LIGHTS OUT', desc: 'Reach Level 6.' },
   { id: 'cave8', icon: '🦇', name: 'SPELUNKER', desc: 'Reach Level 8.' },
   { id: 'road9', icon: '🪧', name: 'THE 9TH ROAD', desc: 'Follow the 9th Road to its end.' },
+  { id: 'sub9', icon: '🏘', name: 'NICE NEIGHBOURHOOD', desc: 'Reach Level 9.' },
+  { id: 'fog9', icon: '🌫', name: 'PEA SOUPER', desc: 'Make it through a fog in Level 9.' },
   { id: 'sea7', icon: '🌊', name: 'SEA LEGS', desc: 'Reach Level 7.' },
   { id: 'thing', icon: '🐍', name: 'MONSTER HUNTER', desc: 'Sink the Thing on Level 7.' },
   { id: 'sky63', icon: '☁', name: 'HEAD IN THE CLOUDS', desc: 'Find Level 63.' },
@@ -52,6 +54,8 @@ const EXTRA_SUBJECTS = {
   thing: { name: 'The Thing on Level 7', blurb: 'Seventy metres of sea serpent. It comes for anything out in open water.' },
   children: { name: 'The Children', blurb: 'They stand in rows and howl at the moon, waiting to become whole.' },
   lightguide: { name: 'Light Guide', blurb: 'Little lights in the caves of Level 8. When you move, they move, and wait for you.' },
+  mangled: { name: 'The Mangled', blurb: 'They come out of the fog in Level 9, down the middle of the street. They won\'t step onto the sidewalk.' },
+  watch: { name: 'The Neighborhood Watch', blurb: 'Very tall, very still, standing in a yard. When you get close, nobody is there.' },
   enric: { name: 'Enric', blurb: 'The only person living in Level 15. Two years and counting.' },
 };
 
@@ -133,7 +137,7 @@ export class Extras {
       this.award('out0');
       if (g.runTime < 60) this.award('fast0');
     }
-    const reach = { level5: 'deep5', level6: 'dark6', level7: 'sea7', level8: 'cave8', level63: 'sky63', level601: 'end601', level14: 'red14' };
+    const reach = { level5: 'deep5', level6: 'dark6', level7: 'sea7', level8: 'cave8', level9: 'sub9', level63: 'sky63', level601: 'end601', level14: 'red14' };
     if (reach[id]) this.award(reach[id]);
     if (id === 'level94' && from === 'level601') this.award('home94');
     const distinct = new Set(this.route).size;
