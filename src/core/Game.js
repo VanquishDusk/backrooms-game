@@ -688,6 +688,8 @@ export class Game {
     post.glitch.value = atm.glitch || 0;
     post.soften.value = atm.soften || 0;
     post.craft.value = atm.craft || 0;
+    if (atm.tint) post.tint.value.copy(atm.tint);
+    else post.tint.value.setRGB(1, 1, 1);
     this.renderer.forcePost = !!(atm.invert || atm.flip);
     document.body.classList.toggle('inverted', !!atm.invert && this.state !== 'menu');
 

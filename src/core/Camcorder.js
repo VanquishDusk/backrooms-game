@@ -82,7 +82,8 @@ export class Camcorder {
     // colourless test card, and even the name is gone.
     const censored = !!g.level?.censor;
     const meta = censored ? { level: level.id, name: '[NULL]', title: '[NULL]', seed: g.levelSeed, time: Date.now() } : { level: level.id, name: level.name, title: level.title, seed: g.levelSeed, time: Date.now() };
-    const url = censored ? censorFrame() : canvas.toDataURL('image/jpeg', 0.92);
+    // Some levels decide what the photo shows.
+    const url = censored ? censorFrame() : g.level?.photoFilter ? g.level.photoFilter(canvas) : canvas.toDataURL('image/jpeg', 0.92);
     g.extras.photoTaken();
     if (!censored) g.extras.documentShot(g.camera, canvas);
     g.audio.shutter?.();

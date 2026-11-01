@@ -18,7 +18,7 @@ import { Kit, Colliders, paintTex } from '../level94/kit.js';
 //   - Walk into a patch of bright yellow canola among the wheat: Level 184
 //   - Swim out into a lake and go under: somewhere wetter (Level 7)
 
-const P = 70; // plot size
+export const P = 70; // plot size
 const WATER = -1.6;
 const HEDGE = 2.2; // half-width of a hedgerow
 
@@ -35,13 +35,13 @@ const smooth = (a, b, x) => {
   return t * t * (3 - 2 * t);
 };
 
-function hash(i, j, k = 0, seed = 0) {
+export function hash(i, j, k = 0, seed = 0) {
   let h = (i * 374761393 + j * 668265263 + k * 1442695041 + seed * 2246822519) | 0;
   h = Math.imul(h ^ (h >>> 13), 1274126177);
   return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
 }
 
-const CROPS = {
+export const CROPS = {
   wheat: { ground: [0.92, 0.74, 0.42], tuft: 0xfff4dc, h: 1.0 },
   barley: { ground: [0.88, 0.8, 0.52], tuft: 0xfbf8e8, h: 0.85 },
   stubble: { ground: [0.9, 0.74, 0.46], tuft: 0xffe8b8, h: 0.25 },
@@ -621,6 +621,8 @@ export class Level10 {
       p.page = { x: page[0], z: page[1] };
       p.inside = { x: p.cx, z: p.cz };
       p.barnY = y;
+      const hy = at(-4.7, -2.8);
+      p.hay = { x: hy[0], z: hy[1] };
       p.built = true;
     }
     // A small wooden shed.
@@ -667,6 +669,7 @@ export class Level10 {
     this.sun.target.position.set(px, 0, pz);
     this.updateWeather(dt, player);
     this.updateBarns(dt, player);
+    if (this.done) return;
     this.updateWorms(dt, player);
     this.updateExits(dt, player);
     if (this.done) return;
@@ -714,6 +717,23 @@ export class Level10 {
     for (const b of this.plots.values()) {
       const p = b.plan;
       if (!p.built) continue;
+      // Push into the hay bales long enough and you go through them.
+      if (p.hay) {
+        const d = Math.hypot(p.hay.x - player.pos.x, p.hay.z - player.pos.z);
+        if (d < 3.5 && !this.told.hay) {
+          this.told.hay = true;
+          ctx.hud.message('A stack of hay bales against the wall. They look deep. Deeper than bales should.', 3.5);
+        }
+        if (d < 1.9) {
+          this.hayT = (this.hayT || 0) + dt;
+          if (this.hayT > 1.5) {
+            this.done = true;
+            ctx.hud.message('You push into the hay and it gives, and gives, and you\'re through, into sunshine and the smell of cut straw.', 5);
+            ctx.onEscape('level10_2', 'noclip');
+            return;
+          }
+        } else if (d < 4) this.hayT = 0;
+      }
       if (!p.toldBarn && Math.hypot(p.cx - player.pos.x, p.cz - player.pos.z) < 22) {
         p.toldBarn = true;
         if (!this.told.barn) {

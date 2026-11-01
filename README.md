@@ -2,7 +2,7 @@
 
 A replayable 3D horror game set in the Backrooms, playable in the browser on desktop and mobile.
 
-Playable now: **Level 0 — "The Lobby" / "The Yellow Hell"**, its sub-level **Level 0.2 — "The Remodel"**, **Level 1 — "The Habitable Zone"**, **Level 1.3**, **Level 1.5 — "Inverted"**, **Level 2 — "Abandoned Utility Halls"**, **Level 3 — "Electrical Station"**, **Level 4 — "Abandoned Office"**, **Level 5 — "Terror Hotel"**, **Level 6 — "Lights Out"**, **Level 7 — "Thalassophobia"**, **Level 8 — "Cave Systems"**, **Level 9 — "The Suburbs"**, **Level 10 — "Bumper Crop"**, **Level 11 — "The City That Never Sleeps"**, **Level 11.3 — "The Red Light District"**, **Level 12 — "Matrix"**, **Level 13 — "The Boiling Frogs"**, **Level 14 — "Paradise"**, **Level 15 — "Futuristic Halls"**, **Level 63 — "Tranquility"**, **Level 94 — "Motion"** and **Level 601 — "The End"**. More levels will follow.
+Playable now: **Level 0 — "The Lobby" / "The Yellow Hell"**, its sub-level **Level 0.2 — "The Remodel"**, **Level 1 — "The Habitable Zone"**, **Level 1.3**, **Level 1.5 — "Inverted"**, **Level 2 — "Abandoned Utility Halls"**, **Level 3 — "Electrical Station"**, **Level 4 — "Abandoned Office"**, **Level 5 — "Terror Hotel"**, **Level 6 — "Lights Out"**, **Level 7 — "Thalassophobia"**, **Level 8 — "Cave Systems"**, **Level 9 — "The Suburbs"**, **Level 10 — "Bumper Crop"**, **Level 10.2 — "Hay Bale Heaven"**, **Level 11 — "The City That Never Sleeps"**, **Level 11.3 — "The Red Light District"**, **Level 12 — "Matrix"**, **Level 13 — "The Boiling Frogs"**, **Level 14 — "Paradise"**, **Level 15 — "Futuristic Halls"**, **Level 63 — "Tranquility"**, **Level 94 — "Motion"** and **Level 601 — "The End"**. More levels will follow.
 
 ## Play
 
@@ -290,7 +290,21 @@ Reached by wandering off the stone walkway into a grass field in Level 9.
   - Follow a dirt track far enough: **Level 11**.
   - Push into a patch of bright yellow **canola** among the wheat: **Level 184**.
   - Swim out into a lake until it's too deep to stand: an aquatic level (**Level 7**).
+  - Push into the stack of hay bales inside a barn and keep pushing: **Level 10.2**.
 - Level 184 is coming soon.
+
+## Level 10.2 — Hay Bale Heaven (Survival Difficulty 1)
+
+Reached by pushing into the hay bales inside one of Level 10's barns.
+
+- **The fields:** golden stubble, green pasture and wheat under a clear blue sky with fair-weather clouds, scattered with round hay bales, tall stacks of square bales and little square ones. Metal fences with open gates divide the fields forever. Oak trees, bushes, patches of flowers. Cows and sheep graze, and are easily upset: get close and they'll glare, then charge.
+- **Don't touch the bales.** The **Hayruler** walks the fields tending them: tall, made of hay, straw spilling out, three eyes, a big nose, no mouth, six-inch fingers. Brush against a bale and it screams and comes for you, fast. It gives up if you get far enough away or hold out long enough. A stun works on it.
+- **How the bales make you feel** is decided when you arrive. Either they make you **sick** (health slowly drains near them and the picture swims), or you **never want to leave** (the COMFORT bar fills near them and slows you; fill it and you stay forever). Your photos show it too: a glowing paradise, or a burning field full of skulls.
+- **Flowers:** standing in a patch makes you breathe the scent. Lilac: visions (warping, colour fringes, sanity loss). Daisy: sharpened senses (endless stamina, wider view). Dandelion: bliss (soft focus, calm). Violet: rage (red flushes, shaking).
+- **The Harvesters** stand smiling outside a hut made of hay bales, stained dark round the door. Talk to them (act button): they say odd, lovely things, and the first time each will give you a supply. **Don't go inside the hut.**
+- **Day and night:** long days, short cold nights, when it rains Almond Water. Puddles form. Drink from them (E), or jump in (act button): **Level 4**. They dry up by midday.
+- **The sky can go black** in the middle of the day. And when the Hayruler chases you, or when you run from the Harvesters, you see the level for what it really is: dead grey-red fields, black sky, rotten bales.
+- **Exits:** jump into an Almond Water puddle: **Level 4**. Touch the hay bale that fades in and out of the third dimension and fall through the floor: **Level 10**.
 
 ## Level 11 — The City That Never Sleeps (Survival Difficulty 2)
 
@@ -438,8 +452,8 @@ Reached by escaping Level 601.
 
 Little things to come back for:
 
-- **Stickers:** 42 small goals ("Get out of Level 0 in under a minute", "Sink the Thing on Level 7", "Fill all four backpack slots", "Make it to dawn in Level 94", "Pass through 8 levels in one run"...). Each pops up as a sticker when you earn it and goes on the sticker board in the Archive.
-- **The Field Guide:** photograph an entity (V or the camera button) and it's documented: your photo becomes its picture in the guide, with its description. 31 to find, including the Host, the Animations, the Robo-Men, the Animated King, the Thing on Level 7, the children of Level 14, and Enric.
+- **Stickers:** 43 small goals ("Get out of Level 0 in under a minute", "Sink the Thing on Level 7", "Fill all four backpack slots", "Make it to dawn in Level 94", "Pass through 8 levels in one run"...). Each pops up as a sticker when you earn it and goes on the sticker board in the Archive.
+- **The Field Guide:** photograph an entity (V or the camera button) and it's documented: your photo becomes its picture in the guide, with its description. 32 to find, including the Host, the Animations, the Robo-Men, the Animated King, the Thing on Level 7, the children of Level 14, and Enric.
 - **Tape stamps:** get out of a level alive and its tape gets a red SURVIVED stamp; each tape also counts how many times you got lost there (☠).
 - **Your route:** the death and escape screens show every level the run went through (L0 → L1 → L2...), and any stickers you earned on the way. The menu remembers your longest trip.
 - **Tonight's tape:** one seed a day, the same for everyone. Play it from the menu; the menu remembers how far you got.
@@ -570,6 +584,7 @@ src/levels/level9/            Level 9 (streamed blocks of houses, streets and la
 src/levels/level10/           Level 10 (streamed farm plots, wheat, hedgerows, tracks and causeways, barns, lakes, rain, the worms, exits)
 src/levels/level13/           Level 13 (streamed corridors and apartments per floor, elevators and stairs, the comfort pull, the TV, exits)
 src/levels/level12/           Level 12 (the white room, the clock and the ritual, streamed white void with decaying furniture and copycat doors)
+src/levels/level10_2/         Level 10.2 (Level 10's land retuned: bales, fences, oaks, flowers, animals, the Hayruler, the Harvesters, day/night and puddles, the true view)
 src/levels/level11_3/         Level 11.3 (Level 11's city retuned red: water and bridges, the Embassy, the Vortex sky, rain and lightning, Servants and Ambassadors, the bad air)
 src/levels/level11/           Level 11 (block plans, facade/sign/ad textures and the road shader, block shells and street detail, cranes and pizzas, sun and shadows, streaming, exits)
 src/levels/level14/           Level 14 (streamed forest, sky, waterfall cliff and pool, guests, children, the cacophony)
