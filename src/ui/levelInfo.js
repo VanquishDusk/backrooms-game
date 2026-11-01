@@ -20,5 +20,6 @@ export const LEVEL_INFO = {
   level10: 'Bumper Crop: endless wheat and barley under a grey sky, hedgerows, barns and lakes. For a moment you think you\'ve escaped. Don\'t stand still too long.',
   level11: 'The City That Never Sleeps: an endless city of towers and shops, golden afternoon into a night of lit windows. Safe, mostly. Every door could lead somewhere else.',
   level12: 'Matrix: a white room with a table, a chair and a locked door, and white forever beyond it. It won\'t let itself be filmed. The way out is a ritual.',
+  level13: 'The Boiling Frogs: an endless 290-floor apartment building. The fridges are always full, the TV is always on. Don\'t get too comfortable.',
   level63: 'Tranquility: wooden bridges and platforms high in the sky over an endless void, ringed by shifting walls of vines. Sit at a Meditation Point and breathe.',
 };

@@ -315,6 +315,7 @@ button { font-family: inherit; }
 #stat-breath .fill { background: #8fd0e8; }
 #stat-warmth .fill { background: #e8a070; }
 #stat-hull .fill { background: #c8b090; }
+#stat-home .fill { background: #d8b8e0; }
 .stat.low .fill { background: var(--bad); }
 
 /* A boss's health, top centre. */

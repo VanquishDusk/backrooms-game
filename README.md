@@ -2,7 +2,7 @@
 
 A replayable 3D horror game set in the Backrooms, playable in the browser on desktop and mobile.
 
-Playable now: **Level 0 — "The Lobby" / "The Yellow Hell"**, its sub-level **Level 0.2 — "The Remodel"**, **Level 1 — "The Habitable Zone"**, **Level 1.3**, **Level 1.5 — "Inverted"**, **Level 2 — "Abandoned Utility Halls"**, **Level 3 — "Electrical Station"**, **Level 4 — "Abandoned Office"**, **Level 5 — "Terror Hotel"**, **Level 6 — "Lights Out"**, **Level 7 — "Thalassophobia"**, **Level 8 — "Cave Systems"**, **Level 9 — "The Suburbs"**, **Level 10 — "Bumper Crop"**, **Level 11 — "The City That Never Sleeps"**, **Level 12 — "Matrix"**, **Level 14 — "Paradise"**, **Level 15 — "Futuristic Halls"**, **Level 63 — "Tranquility"**, **Level 94 — "Motion"** and **Level 601 — "The End"**. More levels will follow.
+Playable now: **Level 0 — "The Lobby" / "The Yellow Hell"**, its sub-level **Level 0.2 — "The Remodel"**, **Level 1 — "The Habitable Zone"**, **Level 1.3**, **Level 1.5 — "Inverted"**, **Level 2 — "Abandoned Utility Halls"**, **Level 3 — "Electrical Station"**, **Level 4 — "Abandoned Office"**, **Level 5 — "Terror Hotel"**, **Level 6 — "Lights Out"**, **Level 7 — "Thalassophobia"**, **Level 8 — "Cave Systems"**, **Level 9 — "The Suburbs"**, **Level 10 — "Bumper Crop"**, **Level 11 — "The City That Never Sleeps"**, **Level 12 — "Matrix"**, **Level 13 — "The Boiling Frogs"**, **Level 14 — "Paradise"**, **Level 15 — "Futuristic Halls"**, **Level 63 — "Tranquility"**, **Level 94 — "Motion"** and **Level 601 — "The End"**. More levels will follow.
 
 ## Play
 
@@ -329,7 +329,26 @@ Reached through a Window Entity in Level 11.
   2. Get up and try the door. It's locked; do it anyway. (Very rarely, it opens.)
   3. Go out into the white and walk through a copycat door.
   4. Back in the room, wait exactly one hour (one full turn, give or take a few seconds) and try the door again. Too soon or too late and you have to start over.
+- **A white staircase** stands somewhere out in the white now and then, going up into nothing. Climb it: **Level 13**.
 - **Exits:** the door opens onto one of **Level 1**, **Level 4**, **Level 10**, **Level 19**, **Level 23**, **Level 25**, **Level 34** or **Level 287**. Levels 19, 23, 25, 34 and 287 are coming soon.
+
+## Level 13 — The Boiling Frogs (Survival Difficulty 2e)
+
+Reached by climbing a white staircase in Level 12.
+
+- **The building:** an endless, outdated apartment complex, 290 floors. Long beige hallways of painted cinder block, terrazzo floors with dark borders, popcorn ceilings and crown moulding, fluorescent tubes (some dead, some flickering), exit signs, and apartment door after apartment door. Some corridors dead-end.
+- **Apartments:** some doors stand open. Inside: a kitchen-living room with a fridge, stove and counter, a sofa facing a television playing old black-and-white shows, boxes never unpacked; a bedroom; a bathroom. The fridge is always full again later (act button: a microwave dinner, health and sanity, sometimes a bottle). The kitchen tap gives water. Some have **supplies**.
+- **The danger is comfort.** Time inside the apartments fills the **COMFORT** bar, faster in front of the television and faster the longer you've been on the level. The fuller it gets, the slower and hazier you get. Fill it and you never leave. It drains again out in the halls.
+- **Floors:** elevators (▼ goes down a long way, ▲ goes up, and often stops at 283) and stairwells (one floor down). Stairs and lifts are in the same place on every floor; everything else changes. **Floor 283** is the B.N.T.G.'s Free Home Project, with more doors open.
+- **Exits:**
+  - A plain, flush door with no number or frame: **Level 0** (built), or Level 114, 327, 395 or 410.
+  - Ride the elevator all the way down past floor 1: **Level 208**. Take the stairs down past floor 1: **Level 70**.
+  - An apartment with a chessboard and two chairs: touch the board, **Level 157**.
+  - Try the door marked **235**: **Level 235**.
+  - A **red door**: **Level 275**.
+  - Walk into a stretch of deeper-yellow wallpaper: **Level 289**.
+  - A white stairwell marked STAIRS ▲ that keeps going up: **Level 280**.
+- All but Level 0 are coming soon.
 
 ## Level 14 — Paradise (Survival Difficulty: Paradise)
 
@@ -405,7 +424,7 @@ Reached by escaping Level 601.
 
 Little things to come back for:
 
-- **Stickers:** 38 small goals ("Get out of Level 0 in under a minute", "Sink the Thing on Level 7", "Fill all four backpack slots", "Make it to dawn in Level 94", "Pass through 8 levels in one run"...). Each pops up as a sticker when you earn it and goes on the sticker board in the Archive.
+- **Stickers:** 39 small goals ("Get out of Level 0 in under a minute", "Sink the Thing on Level 7", "Fill all four backpack slots", "Make it to dawn in Level 94", "Pass through 8 levels in one run"...). Each pops up as a sticker when you earn it and goes on the sticker board in the Archive.
 - **The Field Guide:** photograph an entity (V or the camera button) and it's documented: your photo becomes its picture in the guide, with its description. 29 to find, including the Host, the Animations, the Robo-Men, the Animated King, the Thing on Level 7, the children of Level 14, and Enric.
 - **Tape stamps:** get out of a level alive and its tape gets a red SURVIVED stamp; each tape also counts how many times you got lost there (☠).
 - **Your route:** the death and escape screens show every level the run went through (L0 → L1 → L2...), and any stickers you earned on the way. The menu remembers your longest trip.
@@ -535,6 +554,7 @@ src/levels/level601/          Level 601 (shop layout, shop and computer dressing
 src/levels/level8/            Level 8 (marching-squares cave generator, zones, glow, Light Guides, floods, gas, exits)
 src/levels/level9/            Level 9 (streamed blocks of houses, streets and lamps, fog and the Mangled, the Neighborhood Watch, exits)
 src/levels/level10/           Level 10 (streamed farm plots, wheat, hedgerows, tracks and causeways, barns, lakes, rain, the worms, exits)
+src/levels/level13/           Level 13 (streamed corridors and apartments per floor, elevators and stairs, the comfort pull, the TV, exits)
 src/levels/level12/           Level 12 (the white room, the clock and the ritual, streamed white void with decaying furniture and copycat doors)
 src/levels/level11/           Level 11 (block plans, facade/sign/ad textures and the road shader, block shells and street detail, cranes and pizzas, sun and shadows, streaming, exits)
 src/levels/level14/           Level 14 (streamed forest, sky, waterfall cliff and pool, guests, children, the cacophony)

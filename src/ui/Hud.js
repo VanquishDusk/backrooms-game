@@ -16,6 +16,7 @@ export class Hud {
       breath: $('stat-breath'),
       warmth: $('stat-warmth'),
       hull: $('stat-hull'),
+      home: $('stat-home'),
     };
     this.boss = $('boss');
     this.bossFill = this.boss.querySelector('.fill');
@@ -65,7 +66,7 @@ export class Hud {
     this.setBar('battery', player.battery, !player.flashlight && player.battery >= 99.5);
 
     // Level-specific bars (breath, warmth, a boat's hull) show only where they matter.
-    for (const name of ['breath', 'warmth', 'hull']) {
+    for (const name of ['breath', 'warmth', 'hull', 'home']) {
       const v = extra.bars?.[name];
       const el = this.bars[name];
       if (v == null) {
@@ -74,7 +75,7 @@ export class Hud {
       }
       el.classList.remove('hidden');
       this.setBar(name, v, false);
-      el.classList.toggle('low', v < 25);
+      el.classList.toggle('low', name === 'home' ? v > 70 : v < 25);
     }
     const boss = extra.boss;
     this.boss.classList.toggle('show', !!boss);

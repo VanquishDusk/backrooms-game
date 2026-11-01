@@ -259,7 +259,7 @@ export class Level12 {
   makeChunk(i, j) {
     const kit = new Kit();
     const h = (k) => hash(i, j, k, this.seed);
-    const solids = [], doors = [], floaters = [];
+    const solids = [], doors = [], floaters = [], stairs = [];
     const solid = (x, z, hw, hd, y1 = 2) => {
       const s = this.colliders.add({ x, z, hw, hd, rot: 0, y0: -1, y1 });
       solids.push(s);
@@ -278,6 +278,15 @@ export class Level12 {
       // The frame posts are solid; the doorway itself takes you back.
       for (const side of [-1, 1]) solid(x + c * side * 0.58, z - s * side * 0.58, 0.1, 0.1, 2.3);
       doors.push({ x, z, rot });
+    }
+    // Now and then, a white staircase going up into nothing.
+    if (h(6) < 0.16) {
+      const sx = x0 + 8 + h(7) * (CHUNK - 16), sz = z0 + 8 + h(8) * (CHUNK - 16);
+      if (!nearRoom(sx, sz, 10)) {
+        for (let k = 0; k < 12; k++) kit.box('frame', sx, 0.1 + k * 0.2, sz - k * 0.28, 1.4, 0.2, 0.3);
+        for (const s of [-1, 1]) kit.box('frame', sx + s * 0.75, 1.4, sz - 1.5, 0.06, 2.8, 3.4);
+        stairs.push({ x: sx, z: sz - 0.4 });
+      }
     }
     // Furniture: old, beaten up, some of it sinking into the floor. It gets
     // worse further out.
@@ -320,7 +329,7 @@ export class Level12 {
       own.geos.push(...s.geos);
     }
     this.group.add(group);
-    return { group, geos: own.geos, solids, doors, floaters };
+    return { group, geos: own.geos, solids, doors, floaters, stairs };
   }
 
   // ---- Per frame ------------------------------------------------------------------------------
@@ -373,6 +382,20 @@ export class Level12 {
       else if (Math.hypot(dx, dz) < 12 && !this.told.copy) {
         this.told.copy = true;
         ctx.hud.message('A door, standing on its own in the white. The same door as the one in the room. Exactly the same.', 4);
+      }
+    }
+    // A white staircase up into the white: somewhere else.
+    for (const c of this.chunks.values()) for (const s of c.stairs) {
+      const d = Math.hypot(p.x - s.x, p.z - s.z);
+      if (d < 14 && !this.told.stairs) {
+        this.told.stairs = true;
+        ctx.hud.message('A white staircase, going up into nothing. No banister, no landing at the top.', 4);
+      }
+      if (d < 0.7) {
+        this.done = true;
+        ctx.hud.message('You climb. At the top there is a hallway: beige walls, fluorescent tubes, apartment doors.', 5);
+        ctx.onEscape('level13', 'walk');
+        return;
       }
     }
     // Memory fog: the further out, the worse.
