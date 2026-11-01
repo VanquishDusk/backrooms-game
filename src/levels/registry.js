@@ -1,27 +1,28 @@
-import { LEVEL0 } from './level0/Level0.js';
-import { LEVEL0_2 } from './level0_2/Level02.js';
-import { LEVEL1 } from './level1/Level1.js';
-import { LEVEL1_3 } from './level1_3/Level13.js';
-import { LEVEL1_5 } from './level1_5/Level15.js';
-import { LEVEL2 } from './level2/Level2.js';
-import { LEVEL3 } from './level3/Level3.js';
-import { LEVEL4 } from './level4/Level4.js';
-import { LEVEL5 } from './level5/Level5.js';
-import { LEVEL6 } from './level6/Level6.js';
-import { LEVEL7 } from './level7/Level7.js';
-import { LEVEL63 } from './level63/Level63.js';
-import { LEVEL601 } from './level601/Level601.js';
-import { LEVEL94 } from './level94/Level94.js';
-import { LEVEL14 } from './level14/Level14.js';
-import { LEVEL15 } from './level15/Level15.js';
-import { LEVEL8 } from './level8/Level8.js';
-import { LEVEL9 } from './level9/Level9.js';
-import { LEVEL10 } from './level10/Level10.js';
-import { LEVEL11 } from './level11/Level11.js';
-import { LEVEL12 } from './level12/Level12.js';
-import { LEVEL13 } from './level13/Level13.js';
-import { LEVEL11_3 } from './level11_3/Level113.js';
-import { LEVEL10_2 } from './level10_2/Level102.js';
+import { LEVEL0 } from './level0/Level0.js?v=20261101b';
+import { LEVEL0_2 } from './level0_2/Level02.js?v=20261101b';
+import { LEVEL1 } from './level1/Level1.js?v=20261101b';
+import { LEVEL1_3 } from './level1_3/Level13.js?v=20261101b';
+import { LEVEL1_5 } from './level1_5/Level15.js?v=20261101b';
+import { LEVEL2 } from './level2/Level2.js?v=20261101b';
+import { LEVEL3 } from './level3/Level3.js?v=20261101b';
+import { LEVEL4 } from './level4/Level4.js?v=20261101b';
+import { LEVEL5 } from './level5/Level5.js?v=20261101b';
+import { LEVEL6 } from './level6/Level6.js?v=20261101b';
+import { LEVEL7 } from './level7/Level7.js?v=20261101b';
+import { LEVEL63 } from './level63/Level63.js?v=20261101b';
+import { LEVEL601 } from './level601/Level601.js?v=20261101b';
+import { LEVEL94 } from './level94/Level94.js?v=20261101b';
+import { LEVEL14 } from './level14/Level14.js?v=20261101b';
+import { LEVEL15 } from './level15/Level15.js?v=20261101b';
+import { LEVEL8 } from './level8/Level8.js?v=20261101b';
+import { LEVEL9 } from './level9/Level9.js?v=20261101b';
+import { LEVEL10 } from './level10/Level10.js?v=20261101b';
+import { LEVEL11 } from './level11/Level11.js?v=20261101b';
+import { LEVEL12 } from './level12/Level12.js?v=20261101b';
+import { LEVEL13 } from './level13/Level13.js?v=20261101b';
+import { LEVEL11_3 } from './level11_3/Level113.js?v=20261101b';
+import { LEVEL10_2 } from './level10_2/Level102.js?v=20261101b';
+import { LEVEL6_1 } from './level6_1/Level61.js?v=20261101b';
 
 // Every playable level registers here. A level definition is:
 //
@@ -73,11 +74,12 @@ export const LEVELS = {
   [LEVEL13.id]: LEVEL13,
   [LEVEL11_3.id]: LEVEL11_3,
   [LEVEL10_2.id]: LEVEL10_2,
+  [LEVEL6_1.id]: LEVEL6_1,
 };
 
 // Names for levels that exits point at but that aren't built yet.
 export const UPCOMING = {
-  level6_1: 'LEVEL 6.1',
+  blue_channel: 'THE BLUE CHANNEL',
   level69: 'LEVEL 69',
   level9_1: 'LEVEL 9.1',
   level184: 'LEVEL 184',

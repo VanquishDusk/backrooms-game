@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { Entity } from './Entity.js';
-import { houndSkin } from './textures.js';
+import { Entity } from './Entity.js?v=20261101b';
+import { houndSkin } from './textures.js?v=20261101b';
 
 // Hound: a hairless, emaciated human body forced onto all fours. Human
 // hands for front paws, knees bent the wrong way, a stretched jaw full of

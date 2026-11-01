@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { Entity } from './Entity.js';
-import { cableSkin } from './textures.js';
+import { Entity } from './Entity.js?v=20261101b';
+import { cableSkin } from './textures.js?v=20261101b';
 
 // Growler: a hulking body made of cables, twisted and bundled like muscle,
 // loose ends fizzing. Enormously strong and not at all clever: it charges

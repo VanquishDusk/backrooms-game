@@ -1,4 +1,4 @@
-import { DIRS, EDGE_OPEN, EDGE_BARS } from './GridMap.js';
+import { DIRS, EDGE_OPEN, EDGE_BARS } from './GridMap.js?v=20261101b';
 
 // Places set dressing in local frames ({ x, z, rot }, local x along, z
 // across) into ChunkedBuilders by material name, records solid footprints

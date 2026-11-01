@@ -1,11 +1,11 @@
 import * as THREE from 'three';
-import { disposeTextures } from '../../world/props.js';
-import { GridMap, EDGE_OPEN, EDGE_WALL } from '../../world/GridMap.js';
-import { EntityManager } from '../../entities/lib/index.js';
-import { Entity } from '../../entities/lib/Entity.js';
-import { buildHumanoid, resetPose, walk } from '../../entities/lib/rig.js';
-import { Colliders } from '../level94/kit.js';
-import { B, ROAD, IN0, IN1, LOT, isRoad, isSidewalk, blockPlan, blockSolids, buildMaterials, buildBlock, treeGeometries } from './suburbs.js';
+import { disposeTextures } from '../../world/props.js?v=20261101b';
+import { GridMap, EDGE_OPEN, EDGE_WALL } from '../../world/GridMap.js?v=20261101b';
+import { EntityManager } from '../../entities/lib/index.js?v=20261101b';
+import { Entity } from '../../entities/lib/Entity.js?v=20261101b';
+import { buildHumanoid, resetPose, walk } from '../../entities/lib/rig.js?v=20261101b';
+import { Colliders } from '../level94/kit.js?v=20261101b';
+import { B, ROAD, IN0, IN1, LOT, isRoad, isSidewalk, blockPlan, blockSolids, buildMaterials, buildBlock, treeGeometries } from './suburbs.js?v=20261101b';
 
 // Level 9 — "The Suburbs".
 //

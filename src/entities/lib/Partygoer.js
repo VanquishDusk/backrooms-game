@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import { Entity } from './Entity.js';
-import { buildHumanoid, resetPose, walk, reach } from './rig.js';
-import { partyYellow, partyFace } from './textures.js';
+import { Entity } from './Entity.js?v=20261101b';
+import { buildHumanoid, resetPose, walk, reach } from './rig.js?v=20261101b';
+import { partyYellow, partyFace } from './textures.js?v=20261101b';
 
 // Partygoer: smooth, featureless yellow figures with a face like a drawn-on
 // =). They're thrilled to see you. They wave, they dance, they toot a

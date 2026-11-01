@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { BACKPACK_SLOTS, makeItem } from './items.js';
+import { BACKPACK_SLOTS, makeItem } from './items.js?v=20261101b';
 
 const WALK = 2.5;
 const RUN = 4.6;

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { createNoise2D } from '../../core/rng.js';
-import { GridMap, EDGE_OPEN, EDGE_WALL } from '../../world/GridMap.js';
+import { createNoise2D } from '../../core/rng.js?v=20261101b';
+import { GridMap, EDGE_OPEN, EDGE_WALL } from '../../world/GridMap.js?v=20261101b';
 
 // Level 8's caves, laid out on a grid of 2 m corners. Each corner is rock or
 // air. Named caverns are blobs of air, joined by winding tunnels; marching

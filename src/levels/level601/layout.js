@@ -1,4 +1,4 @@
-import { GridMap, EDGE_OPEN, EDGE_WALL, EDGE_BARS, DIRS } from '../../world/GridMap.js';
+import { GridMap, EDGE_OPEN, EDGE_WALL, EDGE_BARS, DIRS } from '../../world/GridMap.js?v=20261101b';
 
 // Level 601's floor plan, on a grid of 1.25 m cells.
 //

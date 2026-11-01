@@ -1,4 +1,4 @@
-import { DIRS, EDGE_WALL, EDGE_EXIT } from './GridMap.js';
+import { DIRS, EDGE_WALL, EDGE_EXIT } from './GridMap.js?v=20261101b';
 
 // Wall and ceiling services for industrial grid levels (Levels 2 and 3).
 //

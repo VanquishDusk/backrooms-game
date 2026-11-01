@@ -1,9 +1,9 @@
 import * as THREE from 'three';
-import { Level11 } from '../level11/Level11.js';
-import { EDGE_WALL } from '../../world/GridMap.js';
-import { Kit } from '../level94/kit.js';
-import { B, R, SIDE, GF, mod, hash, isRoad, inAlley, blockPlan } from '../level11/city.js';
-import { Servant, Ambassador } from './servants.js';
+import { Level11 } from '../level11/Level11.js?v=20261101b';
+import { EDGE_WALL } from '../../world/GridMap.js?v=20261101b';
+import { Kit } from '../level94/kit.js?v=20261101b';
+import { B, R, SIDE, GF, mod, hash, isRoad, inAlley, blockPlan } from '../level11/city.js?v=20261101b';
+import { Servant, Ambassador } from './servants.js?v=20261101b';
 
 // Level 11.3 — "The Red Light District".
 //

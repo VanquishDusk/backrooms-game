@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import { Level10, CROPS, P, hash } from '../level10/Level10.js';
-import { Kit } from '../level94/kit.js';
-import { buildHumanoid, resetPose, walk, idle } from '../../entities/lib/rig.js';
+import { Level10, CROPS, P, hash } from '../level10/Level10.js?v=20261101b';
+import { Kit } from '../level94/kit.js?v=20261101b';
+import { buildHumanoid, resetPose, walk, idle } from '../../entities/lib/rig.js?v=20261101b';
 
 // Level 10.2 — "Hay Bale Heaven".
 //

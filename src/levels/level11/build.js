@@ -1,9 +1,9 @@
 import * as THREE from 'three';
-import { Kit } from '../level94/kit.js';
+import { Kit } from '../level94/kit.js?v=20261101b';
 import {
   B, R, IN0, IN1, ALLEY0, ALLEY1, GF, FH, CEIL, SIDE, TEX_W, TEX_H, STYLES,
   hash, mod, signSlot, avenueName, streetName, AD_COUNT,
-} from './city.js';
+} from './city.js?v=20261101b';
 
 // Geometry for Level 11's blocks. A block is built in two layers: the shell
 // (buildings, storefronts, signs, pavement), which stands for a couple of

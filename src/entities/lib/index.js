@@ -1,24 +1,24 @@
-import { Smiler } from './Smiler.js';
-import { Hound } from './Hound.js';
-import { Faceling } from './Faceling.js';
-import { SkinStealer } from './SkinStealer.js';
-import { Deathmoth } from './Deathmoth.js';
-import { Clump } from './Clump.js';
-import { Duller } from './Duller.js';
-import { Partygoer } from './Partygoer.js';
-import { Wretch } from './Wretch.js';
-import { Woodlin } from './Woodlin.js';
-import { Watcher } from './Watcher.js';
-import { Nguithrxurh } from './Nguithrxurh.js';
-import { Growler } from './Growler.js';
-import { Deathrat } from './Deathrat.js';
-import { Wrangler } from './Wrangler.js';
-import { Samantha } from './Samantha.js';
+import { Smiler } from './Smiler.js?v=20261101b';
+import { Hound } from './Hound.js?v=20261101b';
+import { Faceling } from './Faceling.js?v=20261101b';
+import { SkinStealer } from './SkinStealer.js?v=20261101b';
+import { Deathmoth } from './Deathmoth.js?v=20261101b';
+import { Clump } from './Clump.js?v=20261101b';
+import { Duller } from './Duller.js?v=20261101b';
+import { Partygoer } from './Partygoer.js?v=20261101b';
+import { Wretch } from './Wretch.js?v=20261101b';
+import { Woodlin } from './Woodlin.js?v=20261101b';
+import { Watcher } from './Watcher.js?v=20261101b';
+import { Nguithrxurh } from './Nguithrxurh.js?v=20261101b';
+import { Growler } from './Growler.js?v=20261101b';
+import { Deathrat } from './Deathrat.js?v=20261101b';
+import { Wrangler } from './Wrangler.js?v=20261101b';
+import { Samantha } from './Samantha.js?v=20261101b';
 
 // The Backrooms entity library. A level opts in by creating an
 // EntityManager and spawning what it wants (Level 2 is an example):
 //
-//   import { EntityManager } from '../../entities/lib/index.js';
+//   import { EntityManager } from '../../entities/lib/index.js?v=20261101b';
 //   this.entities = new EntityManager({ scene, world, audio: ctx.audio, rng, shared });
 //   this.entities.spawnFar('hound', player, { min: 15, max: 30 });
 //   this.entities.spawn('faceling', { x, z, variant: 'hostile' });

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { Entity } from './Entity.js';
-import { smilerFace } from './textures.js';
+import { Entity } from './Entity.js?v=20261101b';
+import { smilerFace } from './textures.js?v=20261101b';
 
 // Smiler: nothing but two glowing eyes and an enormous grin, floating in the
 // dark. It can only exist where it's dark. It drifts closer while you're in

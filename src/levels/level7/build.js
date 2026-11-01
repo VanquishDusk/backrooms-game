@@ -1,10 +1,10 @@
 import * as THREE from 'three';
-import { mergeGeometries } from '../../world/props.js';
+import { mergeGeometries } from '../../world/props.js?v=20261101b';
 import {
   carpetTexture, wallpaperTexture, mahoganyTexture, stripedFabricTexture, concreteWallTexture,
   pipeTexture, stoneBlockTexture, guestDoorTexture,
-} from '../../world/textures.js';
-import { CEILING, ROOM_Y, WAVES } from './layout.js';
+} from '../../world/textures.js?v=20261101b';
+import { CEILING, ROOM_Y, WAVES } from './layout.js?v=20261101b';
 
 // Everything in Level 7 you can see: the flooded room, the pillar it's
 // in, the sea, the ceiling, the sea floor and what lies on it, the Level 9

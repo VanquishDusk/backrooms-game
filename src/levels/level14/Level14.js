@@ -1,10 +1,10 @@
 import * as THREE from 'three';
-import { disposeTextures } from '../../world/props.js';
-import { buildHumanoid, resetPose, walk } from '../../entities/lib/rig.js';
+import { disposeTextures } from '../../world/props.js?v=20261101b';
+import { buildHumanoid, resetPose, walk } from '../../entities/lib/rig.js?v=20261101b';
 import {
   MESA, POOL, GUESTS, CHILDREN, SPAWN, DOOR, FALL_ANGLE, MOON_DIR, nearest,
   makeGround, Trees, buildGround, buildGrass, buildSky, buildCliff, buildFogBanks, buildMotes, buildGuests,
-} from './forest.js';
+} from './forest.js?v=20261101b';
 
 // Level 14 — "Paradise".
 //

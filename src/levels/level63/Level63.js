@@ -1,8 +1,8 @@
 import * as THREE from 'three';
-import { ChunkedBuilders } from '../../world/tubes.js';
-import { utilityDoorTexture } from '../../world/textures.js';
-import { disposeTextures } from '../../world/props.js';
-import { generateLevel63, BASE } from './generate.js';
+import { ChunkedBuilders } from '../../world/tubes.js?v=20261101b';
+import { utilityDoorTexture } from '../../world/textures.js?v=20261101b';
+import { disposeTextures } from '../../world/props.js?v=20261101b';
+import { generateLevel63, BASE } from './generate.js?v=20261101b';
 
 // Level 63 — "Tranquility".
 //

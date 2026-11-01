@@ -1,12 +1,12 @@
 import * as THREE from 'three';
-import { GridMap, EDGE_OPEN, EDGE_WALL } from '../../world/GridMap.js';
-import { disposeTextures } from '../../world/props.js';
-import { EntityManager } from '../../entities/lib/index.js';
-import { Colliders } from './kit.js';
-import { makeTerrain, buildGround, buildSky, TOWN } from './terrain.js';
-import { buildMaterials, buildTown, buildWaterTower, buildCastle, buildHillProp } from './town.js';
-import { buildCastleInterior, CC, ROOMS, THRONE_DOOR } from './castle.js';
-import { Animation, RoboMan, nightmareTextures } from './toons.js';
+import { GridMap, EDGE_OPEN, EDGE_WALL } from '../../world/GridMap.js?v=20261101b';
+import { disposeTextures } from '../../world/props.js?v=20261101b';
+import { EntityManager } from '../../entities/lib/index.js?v=20261101b';
+import { Colliders } from './kit.js?v=20261101b';
+import { makeTerrain, buildGround, buildSky, TOWN } from './terrain.js?v=20261101b';
+import { buildMaterials, buildTown, buildWaterTower, buildCastle, buildHillProp } from './town.js?v=20261101b';
+import { buildCastleInterior, CC, ROOMS, THRONE_DOOR } from './castle.js?v=20261101b';
+import { Animation, RoboMan, nightmareTextures } from './toons.js?v=20261101b';
 
 // Level 94 — "Motion".
 //

@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import { createNoise2D } from '../../core/rng.js';
-import { mergeGeometries } from '../../world/props.js';
-import { skeletonGeo } from '../level7/build.js';
+import { createNoise2D } from '../../core/rng.js?v=20261101b';
+import { mergeGeometries } from '../../world/props.js?v=20261101b';
+import { skeletonGeo } from '../level7/build.js?v=20261101b';
 
 // Level 14's forest: tall bare trunks reaching for an eternal starlit sky,
 // a floor of crimson leaves and wet red grass, drifting blue and violet fog,

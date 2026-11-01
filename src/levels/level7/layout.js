@@ -1,4 +1,4 @@
-import { createNoise2D } from '../../core/rng.js';
+import { createNoise2D } from '../../core/rng.js?v=20261101b';
 
 // Level 7's world, as plain numbers: where everything is and how deep the
 // sea is at any point. The surface is y = 0 and the concrete ceiling is

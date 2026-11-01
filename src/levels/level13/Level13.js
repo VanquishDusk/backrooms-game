@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import { disposeTextures } from '../../world/props.js';
-import { Kit, Colliders, paintTex } from '../level94/kit.js';
-import { hash } from '../level11/city.js';
+import { disposeTextures } from '../../world/props.js?v=20261101b';
+import { Kit, Colliders, paintTex } from '../level94/kit.js?v=20261101b';
+import { hash } from '../level11/city.js?v=20261101b';
 
 // Level 13 — "The Boiling Frogs".
 //

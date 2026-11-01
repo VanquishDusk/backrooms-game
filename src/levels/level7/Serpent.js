@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { mergeGeometries } from '../../world/props.js';
+import { mergeGeometries } from '../../world/props.js?v=20261101b';
 
 // The Thing on Level 7: a sea serpent seventy metres long. The body is one
 // tube whose rings follow the path the head has swum, rebuilt every frame.

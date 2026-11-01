@@ -2,7 +2,7 @@
 
 A replayable 3D horror game set in the Backrooms, playable in the browser on desktop and mobile.
 
-Playable now: **Level 0 — "The Lobby" / "The Yellow Hell"**, its sub-level **Level 0.2 — "The Remodel"**, **Level 1 — "The Habitable Zone"**, **Level 1.3**, **Level 1.5 — "Inverted"**, **Level 2 — "Abandoned Utility Halls"**, **Level 3 — "Electrical Station"**, **Level 4 — "Abandoned Office"**, **Level 5 — "Terror Hotel"**, **Level 6 — "Lights Out"**, **Level 7 — "Thalassophobia"**, **Level 8 — "Cave Systems"**, **Level 9 — "The Suburbs"**, **Level 10 — "Bumper Crop"**, **Level 10.2 — "Hay Bale Heaven"**, **Level 11 — "The City That Never Sleeps"**, **Level 11.3 — "The Red Light District"**, **Level 12 — "Matrix"**, **Level 13 — "The Boiling Frogs"**, **Level 14 — "Paradise"**, **Level 15 — "Futuristic Halls"**, **Level 63 — "Tranquility"**, **Level 94 — "Motion"** and **Level 601 — "The End"**. More levels will follow.
+Playable now: **Level 0 — "The Lobby" / "The Yellow Hell"**, its sub-level **Level 0.2 — "The Remodel"**, **Level 1 — "The Habitable Zone"**, **Level 1.3**, **Level 1.5 — "Inverted"**, **Level 2 — "Abandoned Utility Halls"**, **Level 3 — "Electrical Station"**, **Level 4 — "Abandoned Office"**, **Level 5 — "Terror Hotel"**, **Level 6 — "Lights Out"**, **Level 7 — "Thalassophobia"**, **Level 8 — "Cave Systems"**, **Level 9 — "The Suburbs"**, **Level 6.1 — "Snackroom"**, **Level 10 — "Bumper Crop"**, **Level 10.2 — "Hay Bale Heaven"**, **Level 11 — "The City That Never Sleeps"**, **Level 11.3 — "The Red Light District"**, **Level 12 — "Matrix"**, **Level 13 — "The Boiling Frogs"**, **Level 14 — "Paradise"**, **Level 15 — "Futuristic Halls"**, **Level 63 — "Tranquility"**, **Level 94 — "Motion"** and **Level 601 — "The End"**. More levels will follow.
 
 ## Play
 
@@ -293,6 +293,21 @@ Reached by wandering off the stone walkway into a grass field in Level 9.
   - Push into the stack of hay bales inside a barn and keep pushing: **Level 10.2**.
 - Level 184 is coming soon.
 
+## Level 6.1 — Snackroom (Survival Difficulty 0)
+
+Reached by tripping on a wire in Level 6, or through the kitchen door of a DINER in Level 11.
+
+- **The food court:** an endless 1980s mall: wide halls with terrazzo floors, navy-blue tables and chairs, pillars, planters, sunken seating pits, and skylights that show only darkness (it's lit like daylight anyway). 80s music on the speakers.
+- **Restaurants and bars** of every age off the halls: red-walled bars with dark wood, bottle shelves and a stained-glass arch (Clippers, Liquorette), an old tavern, diners with checkered floors and red booths, snack joints. A friendly Faceling works each counter: **GET FOOD** (act button) for a meal, sometimes a bottle. The taps give real, clean water (E).
+- **Vending rooms:** rows of snack machines and drink coolers, sometimes piled up in heaps. They're free: **VEND** for a snack, sometimes Almond Water or Almond Milk. Machines restock after a while.
+- **Back doors:** walk out the back of a restaurant and you come in through the front of a different one.
+- Safe. No hostile entities.
+- **Exits:**
+  - Sliding glass doors with daylight behind them: **Level 11**.
+  - Crawl into a vent low on a wall: **Level 3**.
+  - The rusty steel door the M.E.G. guards: ask once and they refuse; ask again quickly and they let you through to **Level 6**.
+  - A wall that bows inward, wrong: **The Blue Channel** (coming soon).
+
 ## Level 10.2 — Hay Bale Heaven (Survival Difficulty 1)
 
 Reached by pushing into the hay bales inside one of Level 10's barns.
@@ -452,7 +467,7 @@ Reached by escaping Level 601.
 
 Little things to come back for:
 
-- **Stickers:** 43 small goals ("Get out of Level 0 in under a minute", "Sink the Thing on Level 7", "Fill all four backpack slots", "Make it to dawn in Level 94", "Pass through 8 levels in one run"...). Each pops up as a sticker when you earn it and goes on the sticker board in the Archive.
+- **Stickers:** 44 small goals ("Get out of Level 0 in under a minute", "Sink the Thing on Level 7", "Fill all four backpack slots", "Make it to dawn in Level 94", "Pass through 8 levels in one run"...). Each pops up as a sticker when you earn it and goes on the sticker board in the Archive.
 - **The Field Guide:** photograph an entity (V or the camera button) and it's documented: your photo becomes its picture in the guide, with its description. 32 to find, including the Host, the Animations, the Robo-Men, the Animated King, the Thing on Level 7, the children of Level 14, and Enric.
 - **Tape stamps:** get out of a level alive and its tape gets a red SURVIVED stamp; each tape also counts how many times you got lost there (☠).
 - **Your route:** the death and escape screens show every level the run went through (L0 → L1 → L2...), and any stickers you earned on the way. The menu remembers your longest trip.
@@ -586,6 +601,7 @@ src/levels/level9/            Level 9 (streamed blocks of houses, streets and la
 src/levels/level10/           Level 10 (streamed farm plots, wheat, hedgerows, tracks and causeways, barns, lakes, rain, the worms, exits)
 src/levels/level13/           Level 13 (streamed corridors and apartments per floor, elevators and stairs, the comfort pull, the TV, exits)
 src/levels/level12/           Level 12 (the white room, the clock and the ritual, streamed white void with decaying furniture and copycat doors)
+src/levels/level6_1/          Level 6.1 (streamed food-court halls, restaurants and bars, vending rooms, back-door shuffle, exits)
 src/levels/level10_2/         Level 10.2 (Level 10's land retuned: bales, fences, oaks, flowers, animals, the Hayruler, the Harvesters, day/night and puddles, the true view)
 src/levels/level11_3/         Level 11.3 (Level 11's city retuned red: water and bridges, the Embassy, the Vortex sky, rain and lightning, Servants and Ambassadors, the bad air)
 src/levels/level11/           Level 11 (block plans, facade/sign/ad textures and the road shader, block shells and street detail, cranes and pizzas, sun and shadows, streaming, exits)

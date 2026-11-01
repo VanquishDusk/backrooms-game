@@ -1,8 +1,8 @@
-import { LEVELS, FIRST_LEVEL } from '../levels/registry.js';
-import { listPhotos, deletePhoto } from '../core/photos.js';
-import { randomSeedString } from '../core/rng.js';
-import { LEVEL_INFO } from './levelInfo.js';
-import { STICKERS, ALL_SUBJECTS, subjectInfo } from '../core/extras.js';
+import { LEVELS, FIRST_LEVEL } from '../levels/registry.js?v=20261101b';
+import { listPhotos, deletePhoto } from '../core/photos.js?v=20261101b';
+import { randomSeedString } from '../core/rng.js?v=20261101b';
+import { LEVEL_INFO } from './levelInfo.js?v=20261101b';
+import { STICKERS, ALL_SUBJECTS, subjectInfo } from '../core/extras.js?v=20261101b';
 
 // The main menu's archive: every level as a VHS tape on a shelf, with your
 // newest photo of it as the cover. Levels you haven't found are blank

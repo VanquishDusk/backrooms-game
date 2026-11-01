@@ -1,12 +1,12 @@
 import * as THREE from 'three';
-import { GridWorld } from '../../world/GridWorld.js';
-import { EDGE_OPEN, EDGE_WALL } from '../../world/GridMap.js';
-import { wallpaperTexture, carpetTexture, ceilingTexture } from '../../world/textures.js';
-import { MAX_DYN_LIGHTS } from '../../world/materials.js';
-import { Stalker } from '../../entities/Stalker.js';
-import { PropKit, nearDoor, disposeTextures } from '../../world/props.js';
-import { generateLevel0, ZONE } from './generate.js';
-import { scatterItems } from '../../world/scatter.js';
+import { GridWorld } from '../../world/GridWorld.js?v=20261101b';
+import { EDGE_OPEN, EDGE_WALL } from '../../world/GridMap.js?v=20261101b';
+import { wallpaperTexture, carpetTexture, ceilingTexture } from '../../world/textures.js?v=20261101b';
+import { MAX_DYN_LIGHTS } from '../../world/materials.js?v=20261101b';
+import { Stalker } from '../../entities/Stalker.js?v=20261101b';
+import { PropKit, nearDoor, disposeTextures } from '../../world/props.js?v=20261101b';
+import { generateLevel0, ZONE } from './generate.js?v=20261101b';
+import { scatterItems } from '../../world/scatter.js?v=20261101b';
 
 // Level 0 — "The Lobby" / "The Yellow Hell".
 //

@@ -1,4 +1,4 @@
-import { GridMap, EDGE_OPEN, EDGE_WALL, DIRS } from '../../world/GridMap.js';
+import { GridMap, EDGE_OPEN, EDGE_WALL, DIRS } from '../../world/GridMap.js?v=20261101b';
 
 // Level 2 layout: a labyrinth of narrow maintenance tunnels.
 //

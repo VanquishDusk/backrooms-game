@@ -1,13 +1,13 @@
 import * as THREE from 'three';
-import { GridWorld } from '../../world/GridWorld.js';
-import { EDGE_OPEN, EDGE_WALL, DIRS } from '../../world/GridMap.js';
-import { SURFACE } from '../../world/materials.js';
-import { disposeTextures } from '../../world/props.js';
-import { EntityManager } from '../../entities/lib/index.js';
-import { generateLevel601, CELL, HEIGHT, KIND, HALL, STORE_TOP, COLS, ROWS } from './layout.js';
-import { libraryTextures, buildLibrary, setLetters, drawScreen } from './build.js';
-import { buildField, FIELD } from './field.js';
-import { Host, Ghost } from './Host.js';
+import { GridWorld } from '../../world/GridWorld.js?v=20261101b';
+import { EDGE_OPEN, EDGE_WALL, DIRS } from '../../world/GridMap.js?v=20261101b';
+import { SURFACE } from '../../world/materials.js?v=20261101b';
+import { disposeTextures } from '../../world/props.js?v=20261101b';
+import { EntityManager } from '../../entities/lib/index.js?v=20261101b';
+import { generateLevel601, CELL, HEIGHT, KIND, HALL, STORE_TOP, COLS, ROWS } from './layout.js?v=20261101b';
+import { libraryTextures, buildLibrary, setLetters, drawScreen } from './build.js?v=20261101b';
+import { buildField, FIELD } from './field.js?v=20261101b';
+import { Host, Ghost } from './Host.js?v=20261101b';
 
 // Level 601 — "The End".
 //

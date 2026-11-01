@@ -1,11 +1,11 @@
 import * as THREE from 'three';
-import { disposeTextures } from '../../world/props.js';
-import { GridMap, EDGE_OPEN, EDGE_WALL } from '../../world/GridMap.js';
-import { EntityManager } from '../../entities/lib/index.js';
-import { Kit, Colliders } from '../level94/kit.js';
-import { B, R, GF, FH, SIDE, TEX_W, TEX_H, AD_COUNT, hash, isRoad, isSidewalk, inAlley, blockPlan, blockSolids, buildMaterials, groundMaterial } from './city.js';
-import { buildShell, buildDetail, propGeometries, setAd } from './build.js';
-import { Cranes, Pizzas } from './critters.js';
+import { disposeTextures } from '../../world/props.js?v=20261101b';
+import { GridMap, EDGE_OPEN, EDGE_WALL } from '../../world/GridMap.js?v=20261101b';
+import { EntityManager } from '../../entities/lib/index.js?v=20261101b';
+import { Kit, Colliders } from '../level94/kit.js?v=20261101b';
+import { B, R, GF, FH, SIDE, TEX_W, TEX_H, AD_COUNT, hash, isRoad, isSidewalk, inAlley, blockPlan, blockSolids, buildMaterials, groundMaterial } from './city.js?v=20261101b';
+import { buildShell, buildDetail, propGeometries, setAd } from './build.js?v=20261101b';
+import { Cranes, Pizzas } from './critters.js?v=20261101b';
 
 // Level 11 — "The City That Never Sleeps".
 //
@@ -47,6 +47,7 @@ const EXIT_LINES = {
   level900: 'MATTRESS KINGDOM. Beds as far as the back wall, and a door there, softly lit.',
   level214: 'FLOWERS. Buckets of them, all in bloom. The back door is open onto more flowers than the shop could hold.',
   level119: 'PURE WATER SUPPLY. Jugs and jugs of water. The back door opens onto the sound of running water.',
+  level6_1: 'A diner, open, empty, the coffee still hot. The kitchen door at the back swings, and through it: the clatter and chatter of a food court.',
   level213: 'The trattoria. Tables laid for two. The kitchen door swings gently, though there\'s no draught.',
   level511: 'A hospital lobby. Clean, quiet, the lights on. The doors to the wards are open.',
   level33: 'A shopping mall entrance. Muzak. The doors into the mall proper stand open.',

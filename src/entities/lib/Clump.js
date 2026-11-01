@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { Entity } from './Entity.js';
-import { flesh, paleSkin } from './textures.js';
+import { Entity } from './Entity.js?v=20261101b';
+import { flesh, paleSkin } from './textures.js?v=20261101b';
 
 // Clump: a knot of human limbs fused into a mass of flesh. Arms and legs
 // jut out at every angle, hands still clenching. It wedges itself into

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { Entity } from '../../entities/lib/Entity.js';
-import { buildHumanoid, resetPose, walk, idle, reach } from '../../entities/lib/rig.js';
+import { Entity } from '../../entities/lib/Entity.js?v=20261101b';
+import { buildHumanoid, resetPose, walk, idle, reach } from '../../entities/lib/rig.js?v=20261101b';
 
 // Level 94's own creatures.
 //

@@ -1,8 +1,8 @@
 import * as THREE from 'three';
-import { disposeTextures } from '../../world/props.js';
-import { Colliders } from '../level94/kit.js';
-import { buildHumanoid, resetPose, idle } from '../../entities/lib/rig.js';
-import { P, W, GLYPHS, textures, blockPlan, buildBlock } from './halls.js';
+import { disposeTextures } from '../../world/props.js?v=20261101b';
+import { Colliders } from '../level94/kit.js?v=20261101b';
+import { buildHumanoid, resetPose, idle } from '../../entities/lib/rig.js?v=20261101b';
+import { P, W, GLYPHS, textures, blockPlan, buildBlock } from './halls.js?v=20261101b';
 
 // Level 15 — "Futuristic Halls".
 //

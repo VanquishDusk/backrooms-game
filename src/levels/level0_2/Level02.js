@@ -1,9 +1,9 @@
 import * as THREE from 'three';
-import { GridWorld } from '../../world/GridWorld.js';
-import { EDGE_WALL } from '../../world/GridMap.js';
-import { paintedWallTexture, carpetTexture, ceilingTexture, tileTexture, woodTexture } from '../../world/textures.js';
-import { PropKit, nearDoor, disposeTextures } from '../../world/props.js';
-import { generateLevel02 } from './generate.js';
+import { GridWorld } from '../../world/GridWorld.js?v=20261101b';
+import { EDGE_WALL } from '../../world/GridMap.js?v=20261101b';
+import { paintedWallTexture, carpetTexture, ceilingTexture, tileTexture, woodTexture } from '../../world/textures.js?v=20261101b';
+import { PropKit, nearDoor, disposeTextures } from '../../world/props.js?v=20261101b';
+import { generateLevel02 } from './generate.js?v=20261101b';
 
 // Level 0.2 — Level 0, "remodelled" by the Backrooms Remodeling Co.
 //

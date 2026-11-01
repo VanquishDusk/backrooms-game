@@ -1,9 +1,9 @@
 import * as THREE from 'three';
-import { GridWorld, GeoBuilder } from '../../world/GridWorld.js';
-import { SURFACE, MAX_DYN_LIGHTS, MAX_DECAY, createWorldMaterial } from '../../world/materials.js';
-import { whiteTileWallTexture, whiteFloorTexture, ceilingTexture, solidTexture } from '../../world/textures.js';
-import { PropKit, disposeTextures } from '../../world/props.js';
-import { generateLevel13, ROOM } from './generate.js';
+import { GridWorld, GeoBuilder } from '../../world/GridWorld.js?v=20261101b';
+import { SURFACE, MAX_DYN_LIGHTS, MAX_DECAY, createWorldMaterial } from '../../world/materials.js?v=20261101b';
+import { whiteTileWallTexture, whiteFloorTexture, ceilingTexture, solidTexture } from '../../world/textures.js?v=20261101b';
+import { PropKit, disposeTextures } from '../../world/props.js?v=20261101b';
+import { generateLevel13, ROOM } from './generate.js?v=20261101b';
 
 // Level 1.3 — blinding white rooms and corridors off one long hallway.
 //

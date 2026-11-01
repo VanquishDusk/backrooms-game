@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import { Entity } from './Entity.js';
-import { buildHumanoid, resetPose, walk, idle, reach } from './rig.js';
-import { dullGrey } from './textures.js';
+import { Entity } from './Entity.js?v=20261101b';
+import { buildHumanoid, resetPose, walk, idle, reach } from './rig.js?v=20261101b';
+import { dullGrey } from './textures.js?v=20261101b';
 
 // Duller: a washed-out grey figure with no clear features, as if someone
 // had been photocopied too many times. When it holds still it fades into

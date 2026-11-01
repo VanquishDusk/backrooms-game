@@ -1,12 +1,12 @@
 import * as THREE from 'three';
-import { GridWorld, GeoBuilder } from '../../world/GridWorld.js';
-import { DIRS } from '../../world/GridMap.js';
-import { SURFACE, MAX_DYN_LIGHTS, createWorldMaterial, createGlitchMaterial } from '../../world/materials.js';
+import { GridWorld, GeoBuilder } from '../../world/GridWorld.js?v=20261101b';
+import { DIRS } from '../../world/GridMap.js?v=20261101b';
+import { SURFACE, MAX_DYN_LIGHTS, createWorldMaterial, createGlitchMaterial } from '../../world/materials.js?v=20261101b';
 import {
   plasterTexture, stainedCeilingTexture, floorboardTexture, pictureAtlasTexture, wallWritingTexture, solidTexture,
-} from '../../world/textures.js';
-import { disposeTextures } from '../../world/props.js';
-import { generateLevel15, FEATURE } from './generate.js';
+} from '../../world/textures.js?v=20261101b';
+import { disposeTextures } from '../../world/props.js?v=20261101b';
+import { generateLevel15, FEATURE } from './generate.js?v=20261101b';
 
 // Level 1.5 — "Inverted".
 //

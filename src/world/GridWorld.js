@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import { EDGE_OPEN, EDGE_WALL, EDGE_EXIT, EDGE_BARS } from './GridMap.js';
-import { SURFACE, createWorldMaterial, createGlitchMaterial } from './materials.js';
-import { mergeGeometries } from './props.js';
+import { EDGE_OPEN, EDGE_WALL, EDGE_EXIT, EDGE_BARS } from './GridMap.js?v=20261101b';
+import { SURFACE, createWorldMaterial, createGlitchMaterial } from './materials.js?v=20261101b';
+import { mergeGeometries } from './props.js?v=20261101b';
 
 // Turns a GridMap plus fixtures (lights, pillars, pits) into renderable,
 // collidable geometry. Reusable by any grid-based level.
@@ -96,7 +96,7 @@ export class GeoBuilder {
 export class GridWorld {
   /**
    * @param {object} opts
-   * @param {import('./GridMap.js').GridMap} opts.map
+   * @param {import('./GridMap.js?v=20261101b').GridMap} opts.map
    * @param {Array<{x:number,z:number,color:number[],power:number,state:string,zone?:number}>} opts.lights
    *   (layer: 1 bakes a light into the emergency lightmap instead)
    * @param {Array<{x:number,z:number,size:number,round?:boolean,flare?:boolean,style?:string}>} opts.pillars  world-space centers

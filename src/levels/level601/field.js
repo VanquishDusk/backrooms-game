@@ -1,8 +1,8 @@
 import * as THREE from 'three';
-import { createNoise2D } from '../../core/rng.js';
-import { mergeGeometries } from '../../world/props.js';
-import { lettersGeometry } from './build.js';
-import { partyYellow } from '../../entities/lib/textures.js';
+import { createNoise2D } from '../../core/rng.js?v=20261101b';
+import { mergeGeometries } from '../../world/props.js?v=20261101b';
+import { lettersGeometry } from './build.js?v=20261101b';
+import { partyYellow } from '../../entities/lib/textures.js?v=20261101b';
 
 // The fake reality: an overexposed field of long grass under a white sky,
 // low green hills all round, and a vending machine standing on its own in

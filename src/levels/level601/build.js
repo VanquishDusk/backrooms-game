@@ -1,8 +1,8 @@
 import * as THREE from 'three';
-import { ChunkedBuilders, TubeBuilder } from '../../world/tubes.js';
-import { SURFACE, createWorldMaterial } from '../../world/materials.js';
-import { mergeGeometries } from '../../world/props.js';
-import { CELL, HEIGHT, COLS, ROWS, STORE_TOP, BULKHEAD, HALL } from './layout.js';
+import { ChunkedBuilders, TubeBuilder } from '../../world/tubes.js?v=20261101b';
+import { SURFACE, createWorldMaterial } from '../../world/materials.js?v=20261101b';
+import { mergeGeometries } from '../../world/props.js?v=20261101b';
+import { CELL, HEIGHT, COLS, ROWS, STORE_TOP, BULKHEAD, HALL } from './layout.js?v=20261101b';
 
 // The bookshop: empty oak shelving, slatted A-frame displays, curved
 // service desks with beige computers, sage-green pillars covered in

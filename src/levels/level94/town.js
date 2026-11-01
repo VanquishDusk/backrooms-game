@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { Kit, paintTex, brushed } from './kit.js';
-import { TOWN } from './terrain.js';
+import { Kit, paintTex, brushed } from './kit.js?v=20261101b';
+import { TOWN } from './terrain.js?v=20261101b';
 
 // Level 94's town, hills and castle, built like a model: painted clapboard
 // houses with gable roofs, white picket fences, round-fendered 1930s cars,

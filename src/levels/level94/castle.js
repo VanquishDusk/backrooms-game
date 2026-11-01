@@ -1,9 +1,9 @@
 import * as THREE from 'three';
-import { GridMap, EDGE_OPEN, EDGE_WALL } from '../../world/GridMap.js';
-import { GridWorld } from '../../world/GridWorld.js';
-import { SURFACE } from '../../world/materials.js';
-import { paintTex, Kit } from './kit.js';
-import { buildKing } from './toons.js';
+import { GridMap, EDGE_OPEN, EDGE_WALL } from '../../world/GridMap.js?v=20261101b';
+import { GridWorld } from '../../world/GridWorld.js?v=20261101b';
+import { SURFACE } from '../../world/materials.js?v=20261101b';
+import { paintTex, Kit } from './kit.js?v=20261101b';
+import { buildKing } from './toons.js?v=20261101b';
 
 // Inside the castle on the Transparent Mountain: a fun-house, very bright
 // in places, bigger inside than out. Room after room: an entrance hall, a

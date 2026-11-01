@@ -1,9 +1,9 @@
 import * as THREE from 'three';
-import { GridWorld } from '../../world/GridWorld.js';
-import { GridMap, EDGE_OPEN, EDGE_WALL, DIRS } from '../../world/GridMap.js';
-import { concreteWallTexture, concreteFloorTexture, concreteCeilingTexture, solidTexture } from '../../world/textures.js';
-import { SURFACE, createWorldMaterial } from '../../world/materials.js';
-import { disposeTextures } from '../../world/props.js';
+import { GridWorld } from '../../world/GridWorld.js?v=20261101b';
+import { GridMap, EDGE_OPEN, EDGE_WALL, DIRS } from '../../world/GridMap.js?v=20261101b';
+import { concreteWallTexture, concreteFloorTexture, concreteCeilingTexture, solidTexture } from '../../world/textures.js?v=20261101b';
+import { SURFACE, createWorldMaterial } from '../../world/materials.js?v=20261101b';
+import { disposeTextures } from '../../world/props.js?v=20261101b';
 
 // Level 6 — "Lights Out".
 //

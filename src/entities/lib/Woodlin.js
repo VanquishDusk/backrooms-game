@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import { Entity } from './Entity.js';
-import { buildHumanoid, resetPose, walk, reach } from './rig.js';
-import { woodSkin } from './textures.js';
+import { Entity } from './Entity.js?v=20261101b';
+import { buildHumanoid, resetPose, walk, reach } from './rig.js?v=20261101b';
+import { woodSkin } from './textures.js?v=20261101b';
 
 // Woodlin: a small, jointed figure of dark lacquered wood, like an artist's
 // mannequin left behind in a hotel corridor. A blank oval face with two

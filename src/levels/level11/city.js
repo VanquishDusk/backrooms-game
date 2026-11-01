@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { paintTex } from '../level94/kit.js';
+import { paintTex } from '../level94/kit.js?v=20261101b';
 
 // Level 11's city, as plans and materials. A block is B metres square and
 // owns the road along its west and north edges (with the crossing at its
@@ -85,6 +85,7 @@ export const EXIT_SHOPS = [
   { name: 'FLOWERS', kind: 'flowers', exit: 'level214', w: 1 },
   { name: 'PURE WATER SUPPLY', kind: 'store', exit: 'level119', w: 0.8 },
   { name: 'TRATTORIA', kind: 'cafe', exit: 'level213', w: 1 },
+  { name: 'DINER', kind: 'cafe', exit: 'level6_1', w: 1.4 },
   { name: 'GENERAL HOSPITAL', kind: 'hospital', exit: 'level511', w: 0.5 },
   { name: 'PLAZA MALL', kind: 'mall', exit: 'level33', w: 0.5 },
 ];

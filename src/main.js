@@ -1,4 +1,4 @@
-import { Game } from './core/Game.js';
+import { Game } from './core/Game.js?v=20261101b';
 
 function webglAvailable() {
   try {

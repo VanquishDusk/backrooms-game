@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import { Entity } from './Entity.js';
-import { buildHumanoid, resetPose, walk, reach } from './rig.js';
-import { flesh } from './textures.js';
+import { Entity } from './Entity.js?v=20261101b';
+import { buildHumanoid, resetPose, walk, reach } from './rig.js?v=20261101b';
+import { flesh } from './textures.js?v=20261101b';
 
 // Wretch: what's left of a person who stayed too long. Skinless red flesh,
 // hunched almost double, ribs showing, one arm far longer than the other,

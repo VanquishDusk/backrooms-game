@@ -1,23 +1,23 @@
 import * as THREE from 'three';
-import { GridWorld } from '../../world/GridWorld.js';
-import { DIRS, EDGE_BARS } from '../../world/GridMap.js';
-import { SURFACE, MAX_DYN_LIGHTS, createWorldMaterial } from '../../world/materials.js';
+import { GridWorld } from '../../world/GridWorld.js?v=20261101b';
+import { DIRS, EDGE_BARS } from '../../world/GridMap.js?v=20261101b';
+import { SURFACE, MAX_DYN_LIGHTS, createWorldMaterial } from '../../world/materials.js?v=20261101b';
 import {
   unevenBrickTexture, glazedTileTexture, flakingCeilingTexture, greyTileFloorTexture, marbleFloorTexture,
   stoneBlockTexture, metalTexture, blackFluidTexture, purpleStainTexture, sacredPaintingsTexture,
   level3SignTexture, L3_SIGNS, liftPanelTexture, utilityFloorTexture, diamondPlateTexture, pipeTexture,
   solidTexture, crateTexture, utilityDoorTexture, gaugeTexture,
-} from '../../world/textures.js';
-import { disposeTextures, nearDoor } from '../../world/props.js';
-import { ChunkedBuilders, TubeBuilder } from '../../world/tubes.js';
-import { Fixtures, applyDynamicLights } from '../../world/fixtures.js';
-import { planServices, buildServices } from '../../world/services.js';
-import { createNoise2D } from '../../core/rng.js';
-import { EntityManager } from '../../entities/lib/index.js';
-import { generateLevel3, KIND, CEIL } from './generate.js';
-import { Dresser, blockFurnishedSteps } from '../../world/dresser.js';
-import { generatorRoom, boilerRoom, assemblyHall, sanctum, baseGamma, gallery } from './dress.js';
-import { scatterItems } from '../../world/scatter.js';
+} from '../../world/textures.js?v=20261101b';
+import { disposeTextures, nearDoor } from '../../world/props.js?v=20261101b';
+import { ChunkedBuilders, TubeBuilder } from '../../world/tubes.js?v=20261101b';
+import { Fixtures, applyDynamicLights } from '../../world/fixtures.js?v=20261101b';
+import { planServices, buildServices } from '../../world/services.js?v=20261101b';
+import { createNoise2D } from '../../core/rng.js?v=20261101b';
+import { EntityManager } from '../../entities/lib/index.js?v=20261101b';
+import { generateLevel3, KIND, CEIL } from './generate.js?v=20261101b';
+import { Dresser, blockFurnishedSteps } from '../../world/dresser.js?v=20261101b';
+import { generatorRoom, boilerRoom, assemblyHall, sanctum, baseGamma, gallery } from './dress.js?v=20261101b';
+import { scatterItems } from '../../world/scatter.js?v=20261101b';
 
 // Level 3 — "Electrical Station".
 //

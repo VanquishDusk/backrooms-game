@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import { GridWorld } from '../../world/GridWorld.js';
-import { DIRS, EDGE_WALL } from '../../world/GridMap.js';
-import { SURFACE, MAX_DYN_LIGHTS, createWorldMaterial } from '../../world/materials.js';
+import { GridWorld } from '../../world/GridWorld.js?v=20261101b';
+import { DIRS, EDGE_WALL } from '../../world/GridMap.js?v=20261101b';
+import { SURFACE, MAX_DYN_LIGHTS, createWorldMaterial } from '../../world/materials.js?v=20261101b';
 import {
   ochrePlasterTexture, paintedBeamTexture, hotelFriezeTexture, redMarbleTexture, goldRopeTexture, creamStoneTexture,
   damaskWallTexture, hotelCarpetTexture, medallionRugTexture, sageCarpetTexture, parquetTexture, mahoganyTexture,
@@ -9,22 +9,22 @@ import {
   dirtyConcreteTexture, hotelPaintingsTexture, level5SignTexture, doorDigitsTexture, elevatorDialTexture,
   clockFaceTexture, elevatorDoorTexture, plasterTexture, unevenBrickTexture, pipeTexture, metalTexture, solidTexture, gaugeTexture,
   crateTexture, brushedSteelTexture, concreteCeilingTexture, woodTexture, utilityDoorTexture,
-} from '../../world/textures.js';
-import { disposeTextures } from '../../world/props.js';
-import { ChunkedBuilders } from '../../world/tubes.js';
-import { Dresser, blockFurnishedSteps } from '../../world/dresser.js';
-import { Fixtures, applyDynamicLights, glowTexture } from '../../world/fixtures.js';
-import { planServices, buildServices } from '../../world/services.js';
-import { EntityManager } from '../../entities/lib/index.js';
-import { generateLevel5, ZONE, CEIL, inHotel } from './generate.js';
+} from '../../world/textures.js?v=20261101b';
+import { disposeTextures } from '../../world/props.js?v=20261101b';
+import { ChunkedBuilders } from '../../world/tubes.js?v=20261101b';
+import { Dresser, blockFurnishedSteps } from '../../world/dresser.js?v=20261101b';
+import { Fixtures, applyDynamicLights, glowTexture } from '../../world/fixtures.js?v=20261101b';
+import { planServices, buildServices } from '../../world/services.js?v=20261101b';
+import { EntityManager } from '../../entities/lib/index.js?v=20261101b';
+import { generateLevel5, ZONE, CEIL, inHotel } from './generate.js?v=20261101b';
 import {
   faceFrame, edgeFrame, lobby, homely, housekeeping, ballroom, guestRoom, guestDoor, lanternSconce, painting,
   sideTable, serviceCart, sign, beamX,
-} from './hotel.js';
+} from './hotel.js?v=20261101b';
 import {
   BOILER_PROFILES, pickBoilerProfile, passageRuns, boilerHall, tankRoom, pumpRoom, gallery, furnaceRoom, waterTap, debris,
-} from './boiler.js';
-import { scatterItems } from '../../world/scatter.js';
+} from './boiler.js?v=20261101b';
+import { scatterItems } from '../../world/scatter.js?v=20261101b';
 
 // Level 5 — "Terror Hotel".
 //

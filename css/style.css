@@ -1112,3 +1112,6 @@ body.in-menu #rotate-hint { top: auto; bottom: calc(var(--safe-b) + 6px); color:
   .wm-body .tape-foot { font-size: 11px; }
   .wm-body .tape-reels { display: none; }
 }
+@media (min-width: 900px) {
+  .wiki-nav { justify-content: center; gap: clamp(30px, 6vw, 90px); }
+}

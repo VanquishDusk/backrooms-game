@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import { createNoise2D } from '../../core/rng.js';
-import { disposeTextures, mergeGeometries } from '../../world/props.js';
-import { Kit, Colliders, paintTex } from '../level94/kit.js';
+import { createNoise2D } from '../../core/rng.js?v=20261101b';
+import { disposeTextures, mergeGeometries } from '../../world/props.js?v=20261101b';
+import { Kit, Colliders, paintTex } from '../level94/kit.js?v=20261101b';
 
 // Level 10 — "Bumper Crop".
 //

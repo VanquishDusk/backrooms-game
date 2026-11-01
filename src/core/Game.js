@@ -1,17 +1,17 @@
 import * as THREE from 'three';
-import { Renderer } from './Renderer.js';
-import { Input } from './Input.js';
-import { Player } from './Player.js';
-import { AudioEngine } from './AudioEngine.js';
-import { createRng, randomSeedString } from './rng.js';
-import { load, save } from './storage.js';
-import { createSharedUniforms } from '../world/materials.js';
-import { Hud } from '../ui/Hud.js';
-import { Backpack } from './Backpack.js';
-import { Camcorder } from './Camcorder.js';
-import { Archive } from '../ui/Archive.js';
-import { Extras, dailySeed } from './extras.js';
-import { LEVELS, FIRST_LEVEL, UPCOMING, ENDINGS } from '../levels/registry.js';
+import { Renderer } from './Renderer.js?v=20261101b';
+import { Input } from './Input.js?v=20261101b';
+import { Player } from './Player.js?v=20261101b';
+import { AudioEngine } from './AudioEngine.js?v=20261101b';
+import { createRng, randomSeedString } from './rng.js?v=20261101b';
+import { load, save } from './storage.js?v=20261101b';
+import { createSharedUniforms } from '../world/materials.js?v=20261101b';
+import { Hud } from '../ui/Hud.js?v=20261101b';
+import { Backpack } from './Backpack.js?v=20261101b';
+import { Camcorder } from './Camcorder.js?v=20261101b';
+import { Archive } from '../ui/Archive.js?v=20261101b';
+import { Extras, dailySeed } from './extras.js?v=20261101b';
+import { LEVELS, FIRST_LEVEL, UPCOMING, ENDINGS } from '../levels/registry.js?v=20261101b';
 
 const $ = (id) => document.getElementById(id);
 

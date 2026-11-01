@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { DIRS } from '../world/GridMap.js';
+import { DIRS } from '../world/GridMap.js?v=20261101b';
 
 // "Dark figures stalking them between the corridors." Nobody knows whether
 // it is real. It feeds on a wanderer's slipping sanity: first glimpsed far

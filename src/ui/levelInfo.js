@@ -18,6 +18,7 @@ export const LEVEL_INFO = {
   level8: 'Cave Systems: endless dark caves over black water. Glowing jungles, poison air, stone hands, floods. Follow the 9th Road.',
   level9: 'The Suburbs: an endless neighbourhood at midnight. Wet streets, dead street lamps, dark houses. Stay on the sidewalk. Something is always watching.',
   level10: 'Bumper Crop: endless wheat and barley under a grey sky, hedgerows, barns and lakes. For a moment you think you\'ve escaped. Don\'t stand still too long.',
+  level6_1: 'Snackroom: an endless 1980s mall food court. Free vending machines, friendly Facelings at the counters. Restaurant back doors come out in other restaurants.',
   level10_2: 'Hay Bale Heaven: golden fields and hay bales under a clear sky. Beautiful. Don\'t touch the bales, don\'t smell the flowers, and don\'t go into the Harvesters\' hut.',
   level11: 'The City That Never Sleeps: an endless city of towers and shops, golden afternoon into a night of lit windows. Safe, mostly. Every door could lead somewhere else.',
   level12: 'Matrix: a white room with a table, a chair and a locked door, and white forever beyond it. It won\'t let itself be filmed. The way out is a ritual.',

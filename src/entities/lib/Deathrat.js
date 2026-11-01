@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { Entity } from './Entity.js';
-import { ratFur } from './textures.js';
+import { Entity } from './Entity.js?v=20261101b';
+import { ratFur } from './textures.js?v=20261101b';
 
 // Deathrat: a rat that has adapted to the Backrooms. It looks like where it
 // lives: grey-brown in the halls, pale and eyeless in the dark levels,

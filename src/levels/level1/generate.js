@@ -1,5 +1,5 @@
-import { GridMap, EDGE_OPEN, EDGE_WALL, DIRS } from '../../world/GridMap.js';
-import { createNoise2D } from '../../core/rng.js';
+import { GridMap, EDGE_OPEN, EDGE_WALL, DIRS } from '../../world/GridMap.js?v=20261101b';
+import { createNoise2D } from '../../core/rng.js?v=20261101b';
 
 // Level 1 — The Habitable Zone. A seemingly endless concrete complex: open
 // parking-garage halls, tighter corridor blocks with rooms, warehouse

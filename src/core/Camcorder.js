@@ -1,4 +1,4 @@
-import { addPhoto } from './photos.js';
+import { addPhoto } from './photos.js?v=20261101b';
 
 // The camcorder: V (or the camera button) grabs the frame, runs it through
 // an old-VHS filter (low resolution, smeared colour, tracking noise, head

@@ -1,20 +1,20 @@
 import * as THREE from 'three';
-import { GridWorld, GeoBuilder } from '../../world/GridWorld.js';
-import { DIRS, EDGE_EXIT } from '../../world/GridMap.js';
-import { SURFACE, MAX_DYN_LIGHTS, createWorldMaterial } from '../../world/materials.js';
+import { GridWorld, GeoBuilder } from '../../world/GridWorld.js?v=20261101b';
+import { DIRS, EDGE_EXIT } from '../../world/GridMap.js?v=20261101b';
+import { SURFACE, MAX_DYN_LIGHTS, createWorldMaterial } from '../../world/materials.js?v=20261101b';
 import {
   chalkyConcreteTexture, darkBrickTexture, utilityFloorTexture, diamondPlateTexture, utilityCeilingTexture,
   pipeTexture, utilityDoorTexture, signAtlasTexture, SIGN_TILES, crateTexture, solidTexture, gaugeTexture,
   carpetTexture, hazardTexture,
-} from '../../world/textures.js';
-import { disposeTextures, nearDoor, mergeGeometries } from '../../world/props.js';
-import { ChunkedBuilders } from '../../world/tubes.js';
-import { Fixtures, applyDynamicLights } from '../../world/fixtures.js';
-import { createNoise2D } from '../../core/rng.js';
-import { EntityManager } from '../../entities/lib/index.js';
-import { generateLevel2, KIND } from './generate.js';
-import { planServices, buildServices, valve } from '../../world/services.js';
-import { scatterItems } from '../../world/scatter.js';
+} from '../../world/textures.js?v=20261101b';
+import { disposeTextures, nearDoor, mergeGeometries } from '../../world/props.js?v=20261101b';
+import { ChunkedBuilders } from '../../world/tubes.js?v=20261101b';
+import { Fixtures, applyDynamicLights } from '../../world/fixtures.js?v=20261101b';
+import { createNoise2D } from '../../core/rng.js?v=20261101b';
+import { EntityManager } from '../../entities/lib/index.js?v=20261101b';
+import { generateLevel2, KIND } from './generate.js?v=20261101b';
+import { planServices, buildServices, valve } from '../../world/services.js?v=20261101b';
+import { scatterItems } from '../../world/scatter.js?v=20261101b';
 
 // Level 2 — "Abandoned Utility Halls".
 //

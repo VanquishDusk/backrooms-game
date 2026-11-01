@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { DIRS } from '../../world/GridMap.js';
+import { DIRS } from '../../world/GridMap.js?v=20261101b';
 
 // Base class for every entity in the library.
 //

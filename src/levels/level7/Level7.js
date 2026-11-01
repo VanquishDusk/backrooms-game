@@ -1,11 +1,11 @@
 import * as THREE from 'three';
-import { disposeTextures } from '../../world/props.js';
-import { generateLevel7, waveHeight, zoneAt, ZONES, ROOM_Y, WEST_EDGE } from './layout.js';
+import { disposeTextures } from '../../world/props.js?v=20261101b';
+import { generateLevel7, waveHeight, zoneAt, ZONES, ROOM_Y, WEST_EDGE } from './layout.js?v=20261101b';
 import {
   buildMaterials, buildPillarAndRoom, buildWater, buildCeiling, buildFloor, buildPillars, buildDoorPlatform,
   buildCave, buildFort, buildDebris, buildBoat, buildSnow, Particles, ROOM, PILLAR, DOOR_W,
-} from './build.js';
-import { Serpent } from './Serpent.js';
+} from './build.js?v=20261101b';
+import { Serpent } from './Serpent.js?v=20261101b';
 
 // Level 7 — "Thalassophobia".
 //

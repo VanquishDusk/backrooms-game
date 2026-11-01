@@ -1,4 +1,4 @@
-import { GridMap, EDGE_OPEN, EDGE_WALL } from '../../world/GridMap.js';
+import { GridMap, EDGE_OPEN, EDGE_WALL } from '../../world/GridMap.js?v=20261101b';
 
 // Level 1.3: one long white hallway with branching paths left and right,
 // each leading to one of sixteen large rooms (medical supplies, The Ward,

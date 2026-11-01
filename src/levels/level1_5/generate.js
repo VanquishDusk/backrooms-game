@@ -1,4 +1,4 @@
-import { GridMap, EDGE_OPEN, EDGE_WALL, DIRS } from '../../world/GridMap.js';
+import { GridMap, EDGE_OPEN, EDGE_WALL, DIRS } from '../../world/GridMap.js?v=20261101b';
 
 // Level 1.5: narrow house hallways that go on and on, lined with doors and
 // picture frames, ending in more doors. Long straight runs, as in the photo.

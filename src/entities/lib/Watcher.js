@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { Entity } from './Entity.js';
-import { scleraSkin, flesh } from './textures.js';
+import { Entity } from './Entity.js?v=20261101b';
+import { scleraSkin, flesh } from './textures.js?v=20261101b';
 
 // Watcher (Entity 96): a giant floating eyeball trailing optic nerves.
 // It glides in silence, scanning. When it fixes on you its pupil swells and

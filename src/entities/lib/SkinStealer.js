@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import { Entity } from './Entity.js';
-import { buildHumanoid, resetPose, walk, idle, reach, lookAt } from './rig.js';
-import { fabric, skinTone, paleSkin, stolenFace } from './textures.js';
+import { Entity } from './Entity.js?v=20261101b';
+import { buildHumanoid, resetPose, walk, idle, reach, lookAt } from './rig.js?v=20261101b';
+import { fabric, skinTone, paleSkin, stolenFace } from './textures.js?v=20261101b';
 
 // Skin-Stealer: wears a person. At a distance it passes for a lost
 // wanderer: ordinary clothes, a face, a wave, a call for help. Up close

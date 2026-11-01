@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { Entity } from './Entity.js';
-import { catFur } from './textures.js';
+import { Entity } from './Entity.js?v=20261101b';
+import { catFur } from './textures.js?v=20261101b';
 
 // Samantha (Entity 26): a small black-and-white cat with green eyes and
 // teeth far too sharp for a cat. She talks. She offers psychic readings in

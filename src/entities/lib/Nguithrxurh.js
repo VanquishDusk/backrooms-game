@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { Entity } from './Entity.js';
-import { chitinSkin, webSkin, flesh } from './textures.js';
+import { Entity } from './Entity.js?v=20261101b';
+import { chitinSkin, webSkin, flesh } from './textures.js?v=20261101b';
 
 // Nguithr'xurh: a grey, insect-like thing the length of a person, with far
 // too many jointed limbs, that lives upside down on the ceiling beside its

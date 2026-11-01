@@ -1,5 +1,5 @@
-import { DIRS, EDGE_WALL } from '../../world/GridMap.js';
-import { faceFrame } from './hotel.js';
+import { DIRS, EDGE_WALL } from '../../world/GridMap.js?v=20261101b';
+import { faceFrame } from './hotel.js?v=20261101b';
 
 // Set dressing for the Boiler Room: boiler halls (a big grey-blue fire-tube
 // boiler with its burner, rusty risers, yellow gas lines, tanks, debris),

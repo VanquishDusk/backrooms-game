@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { DIRS } from '../world/GridMap.js';
+import { DIRS } from '../world/GridMap.js?v=20261101b';
 
 // Something that hunts the halls of Level 1 when the lights go out. It
 // can't (or won't) follow you into the corridors.

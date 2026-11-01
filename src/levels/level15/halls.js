@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { Kit, paintTex } from '../level94/kit.js';
+import { Kit, paintTex } from '../level94/kit.js?v=20261101b';
 
 // Level 15's architecture: an endless grid of barrel-vaulted halls between
 // blocks of rooms. Every block sits at (i * P, j * P) and owns the hall

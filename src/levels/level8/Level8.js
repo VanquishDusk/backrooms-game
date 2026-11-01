@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import { disposeTextures, mergeGeometries } from '../../world/props.js';
-import { EntityManager } from '../../entities/lib/index.js';
-import { generateCave, buildCaveMeshes, buildColliders, CS, N, WATER } from './cave.js';
+import { disposeTextures, mergeGeometries } from '../../world/props.js?v=20261101b';
+import { EntityManager } from '../../entities/lib/index.js?v=20261101b';
+import { generateCave, buildCaveMeshes, buildColliders, CS, N, WATER } from './cave.js?v=20261101b';
 
 // Level 8 — "Cave Systems".
 //

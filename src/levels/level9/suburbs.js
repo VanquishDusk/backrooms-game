@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import { Kit, paintTex } from '../level94/kit.js';
-import { Placer, house, table, chair, dresser, picture } from '../level94/town.js';
-import { mergeGeometries } from '../../world/props.js';
+import { Kit, paintTex } from '../level94/kit.js?v=20261101b';
+import { Placer, house, table, chair, dresser, picture } from '../level94/town.js?v=20261101b';
+import { mergeGeometries } from '../../world/props.js?v=20261101b';
 
 // Level 9's neighbourhood, block by block. Each block is B metres square
 // and owns the road along its west and north edges (with the crossing at

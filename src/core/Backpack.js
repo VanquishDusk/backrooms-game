@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import { ITEMS, BACKPACK_SLOTS } from './items.js';
-import { MAX_DYN_LIGHTS } from '../world/materials.js';
-import { glowTexture } from '../world/fixtures.js';
+import { ITEMS, BACKPACK_SLOTS } from './items.js?v=20261101b';
+import { MAX_DYN_LIGHTS } from '../world/materials.js?v=20261101b';
+import { glowTexture } from '../world/fixtures.js?v=20261101b';
 
 const $ = (id) => document.getElementById(id);
 

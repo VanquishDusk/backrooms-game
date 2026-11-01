@@ -1,20 +1,20 @@
 import * as THREE from 'three';
-import { GridWorld, GeoBuilder } from '../../world/GridWorld.js';
-import { DIRS, EDGE_WALL } from '../../world/GridMap.js';
-import { SURFACE, MAX_DYN_LIGHTS, createWorldMaterial } from '../../world/materials.js';
+import { GridWorld, GeoBuilder } from '../../world/GridWorld.js?v=20261101b';
+import { DIRS, EDGE_WALL } from '../../world/GridMap.js?v=20261101b';
+import { SURFACE, MAX_DYN_LIGHTS, createWorldMaterial } from '../../world/materials.js?v=20261101b';
 import {
   officeWallTexture, officeCarpetTexture, dropCeilingTexture, blackoutTexture, outsideViewTexture, vendingTexture,
   officeBoardsTexture, brushedSteelTexture, level4SignTexture, L4_SIGNS, officeDoorTexture, greyTileFloorTexture,
   utilityFloorTexture, solidTexture, crateTexture,
-} from '../../world/textures.js';
-import { disposeTextures, nearDoor } from '../../world/props.js';
-import { ChunkedBuilders } from '../../world/tubes.js';
-import { Dresser, blockFurnishedSteps } from '../../world/dresser.js';
-import { createNoise2D } from '../../core/rng.js';
-import { EntityManager } from '../../entities/lib/index.js';
-import { generateLevel4, ZONE } from './generate.js';
-import { office, openPlan, conference, breakRoom, storage, megOutpost, camp, emptyRoom, vending, cooler, fountain } from './dress.js';
-import { scatterItems } from '../../world/scatter.js';
+} from '../../world/textures.js?v=20261101b';
+import { disposeTextures, nearDoor } from '../../world/props.js?v=20261101b';
+import { ChunkedBuilders } from '../../world/tubes.js?v=20261101b';
+import { Dresser, blockFurnishedSteps } from '../../world/dresser.js?v=20261101b';
+import { createNoise2D } from '../../core/rng.js?v=20261101b';
+import { EntityManager } from '../../entities/lib/index.js?v=20261101b';
+import { generateLevel4, ZONE } from './generate.js?v=20261101b';
+import { office, openPlan, conference, breakRoom, storage, megOutpost, camp, emptyRoom, vending, cooler, fountain } from './dress.js?v=20261101b';
+import { scatterItems } from '../../world/scatter.js?v=20261101b';
 
 // Level 4 — "Abandoned Office".
 //

@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import { Entity } from './Entity.js';
-import { buildHumanoid, resetPose, walk, idle, reach, lookAt } from './rig.js';
-import { fabric, skinTone } from './textures.js';
+import { Entity } from './Entity.js?v=20261101b';
+import { buildHumanoid, resetPose, walk, idle, reach, lookAt } from './rig.js?v=20261101b';
+import { fabric, skinTone } from './textures.js?v=20261101b';
 
 // Faceling: an ordinary-looking person in ordinary clothes, with a smooth,
 // completely blank face. Most are passive and simply stop to "watch" you.

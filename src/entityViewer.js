@@ -1,12 +1,12 @@
 import * as THREE from 'three';
-import { Renderer } from './core/Renderer.js';
-import { AudioEngine } from './core/AudioEngine.js';
-import { createRng } from './core/rng.js';
-import { GridMap, EDGE_WALL } from './world/GridMap.js';
-import { GridWorld } from './world/GridWorld.js';
-import { createSharedUniforms } from './world/materials.js';
-import { wallpaperTexture, carpetTexture, ceilingTexture } from './world/textures.js';
-import { ENTITY_TYPES, EntityManager } from './entities/lib/index.js';
+import { Renderer } from './core/Renderer.js?v=20261101b';
+import { AudioEngine } from './core/AudioEngine.js?v=20261101b';
+import { createRng } from './core/rng.js?v=20261101b';
+import { GridMap, EDGE_WALL } from './world/GridMap.js?v=20261101b';
+import { GridWorld } from './world/GridWorld.js?v=20261101b';
+import { createSharedUniforms } from './world/materials.js?v=20261101b';
+import { wallpaperTexture, carpetTexture, ceilingTexture } from './world/textures.js?v=20261101b';
+import { ENTITY_TYPES, EntityManager } from './entities/lib/index.js?v=20261101b';
 
 // Entity viewer: inspect each library entity in a small Level 0-style room.
 // Pose buttons force an animation state; "Live AI" lets the entity act

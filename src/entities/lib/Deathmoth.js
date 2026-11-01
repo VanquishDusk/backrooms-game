@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { Entity } from './Entity.js';
-import { mothFur, mothWing } from './textures.js';
+import { Entity } from './Entity.js?v=20261101b';
+import { mothFur, mothWing } from './textures.js?v=20261101b';
 
 // Deathmoth: a moth the size of a dog. Fuzzy, dark body; broad, dusty wings
 // with a staring eyespot on each; feathered antennae; too many legs.

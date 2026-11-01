@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { createNoise2D } from '../../core/rng.js';
-import { paintTex } from './kit.js';
+import { createNoise2D } from '../../core/rng.js?v=20261101b';
+import { paintTex } from './kit.js?v=20261101b';
 
 // Level 94's ground: a flat town, then smooth round grassy hills in every
 // direction, forever. Somewhere out there a transparent mountain rises

@@ -1,7 +1,7 @@
 // Every sound is synthesized with WebAudio — no audio files to load.
 
-import { Piano } from './piano.js';
-import { CartoonBand } from './cartoon.js';
+import { Piano } from './piano.js?v=20261101b';
+import { CartoonBand } from './cartoon.js?v=20261101b';
 
 export class AudioEngine {
   constructor() {

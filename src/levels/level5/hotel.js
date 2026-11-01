@@ -1,5 +1,5 @@
-import { DIRS, EDGE_WALL } from '../../world/GridMap.js';
-import { L5_SIGNS } from '../../world/textures.js';
+import { DIRS, EDGE_WALL } from '../../world/GridMap.js?v=20261101b';
+import { L5_SIGNS } from '../../world/textures.js?v=20261101b';
 
 // Set dressing for the Main Hall and the Beverly Room. Everything goes into
 // the Dresser's ChunkedBuilders by material name (see Level5's material

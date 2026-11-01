@@ -1,4 +1,4 @@
-import { GridMap, EDGE_OPEN, EDGE_WALL, DIRS } from '../../world/GridMap.js';
+import { GridMap, EDGE_OPEN, EDGE_WALL, DIRS } from '../../world/GridMap.js?v=20261101b';
 
 // Level 4 layout: an empty office floor that goes on and on.
 //

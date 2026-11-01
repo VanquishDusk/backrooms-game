@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { Entity } from './Entity.js';
-import { scaleSkin, wranglerFace } from './textures.js';
+import { Entity } from './Entity.js?v=20261101b';
+import { scaleSkin, wranglerFace } from './textures.js?v=20261101b';
 
 // Wrangler: a massive snake-like creature with a face that shouldn't be on
 // a snake: a calm, stretched human face, or an insect's. It burrows through

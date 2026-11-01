@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { mergeGeometries } from '../../world/props.js';
+import { mergeGeometries } from '../../world/props.js?v=20261101b';
 
 // Little helpers for building Level 94's handmade-looking props: painted
 // canvas textures, and a kit that collects geometry per material and

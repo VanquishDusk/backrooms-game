@@ -1,4 +1,4 @@
-import { GridMap, EDGE_OPEN, EDGE_WALL, DIRS } from '../../world/GridMap.js';
+import { GridMap, EDGE_OPEN, EDGE_WALL, DIRS } from '../../world/GridMap.js?v=20261101b';
 
 // Level 0.2: Level 0 as remodelled by the Backrooms Remodeling Co. Same
 // bones (partitions, small rooms) but tidier, with the odd bathroom.

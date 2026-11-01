@@ -1,4 +1,4 @@
-import { GridMap, EDGE_OPEN, EDGE_WALL, EDGE_BARS, DIRS } from '../../world/GridMap.js';
+import { GridMap, EDGE_OPEN, EDGE_WALL, EDGE_BARS, DIRS } from '../../world/GridMap.js?v=20261101b';
 
 // Level 3 layout: an old electrical station.
 //

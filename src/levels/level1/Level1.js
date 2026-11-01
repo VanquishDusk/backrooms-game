@@ -1,16 +1,16 @@
 import * as THREE from 'three';
-import { GridWorld, GeoBuilder } from '../../world/GridWorld.js';
-import { EDGE_OPEN, EDGE_WALL } from '../../world/GridMap.js';
-import { SURFACE, MAX_DYN_LIGHTS, createWorldMaterial, createGlitchMaterial } from '../../world/materials.js';
+import { GridWorld, GeoBuilder } from '../../world/GridWorld.js?v=20261101b';
+import { EDGE_OPEN, EDGE_WALL } from '../../world/GridMap.js?v=20261101b';
+import { SURFACE, MAX_DYN_LIGHTS, createWorldMaterial, createGlitchMaterial } from '../../world/materials.js?v=20261101b';
 import {
   concreteFloorTexture, concreteWallTexture, concreteCeilingTexture, grassTexture, flagstoneTexture,
   woodPanelTexture, woodTexture, crateTexture, hazardTexture, solidTexture, gaugeTexture, leavesTexture,
   whiteTileWallTexture, invertedGlimpseTexture, pipeTexture,
-} from '../../world/textures.js';
-import { TubeBuilder } from '../../world/tubes.js';
-import { PropKit, disposeTextures, mergeGeometries, nearDoor } from '../../world/props.js';
-import { Hound } from '../../entities/Hound.js';
-import { generateLevel1, ZONE, SECTOR } from './generate.js';
+} from '../../world/textures.js?v=20261101b';
+import { TubeBuilder } from '../../world/tubes.js?v=20261101b';
+import { PropKit, disposeTextures, mergeGeometries, nearDoor } from '../../world/props.js?v=20261101b';
+import { Hound } from '../../entities/Hound.js?v=20261101b';
+import { generateLevel1, ZONE, SECTOR } from './generate.js?v=20261101b';
 
 // Level 1 — "The Habitable Zone".
 //

@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import { Entity } from '../../entities/lib/Entity.js';
-import { buildHumanoid, resetPose, walk, idle, reach } from '../../entities/lib/rig.js';
-import { partyYellow, partyFace } from '../../entities/lib/textures.js';
+import { Entity } from '../../entities/lib/Entity.js?v=20261101b';
+import { buildHumanoid, resetPose, walk, idle, reach } from '../../entities/lib/rig.js?v=20261101b';
+import { partyYellow, partyFace } from '../../entities/lib/textures.js?v=20261101b';
 
 // The host. Whoever throws the party at the end of the Backrooms: very tall,
 // a black suit, white gloves, a smooth yellow head with the Partygoers'
