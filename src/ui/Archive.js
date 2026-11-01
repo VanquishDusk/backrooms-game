@@ -29,21 +29,49 @@ export class Archive {
     tap('tv-next', () => this.step(1));
     tap('tv-del', () => this.erase());
     tap('tv-save', () => this.save());
-    tap('tape-back', () => game.showScreen('menu'));
-    for (const b of document.querySelectorAll('.atab')) {
+    tap('tape-back', () => {
+      game.showScreen('menu');
+      if (this.lastPane) this.modal(this.lastPane);
+    });
+    // The wiki-style menu: everything opens in its own window.
+    for (const b of document.querySelectorAll('[data-modal]')) {
       b.addEventListener('click', (e) => {
         e.preventDefault();
         game.audio.unlock();
         game.audio.click();
-        this.tab(b.dataset.tab);
+        this.drawer(false);
+        this.modal(b.dataset.modal);
       });
     }
+    for (const b of document.querySelectorAll('[data-go]')) {
+      b.addEventListener('click', (e) => {
+        e.preventDefault();
+        game.audio.unlock();
+        game.audio.click();
+        this.modal(null);
+        game.returnTo = 'menu';
+        game.showScreen(b.dataset.go);
+      });
+    }
+    tap('wm-close', () => this.modal(null));
+    tap('btn-seedopen', () => this.modal('seed'));
+    tap('wnav-burger', () => this.drawer());
+    $('wiki-modal').addEventListener('click', (e) => {
+      if (e.target.id === 'wiki-modal') this.modal(null);
+    });
+    for (const id of ['btn-howto', 'btn-settings', 'btn-fullscreen']) $(id).addEventListener('click', () => this.drawer(false));
     tap('tape-play', () => this.def && game.startRun(randomSeedString(), this.def.id));
     window.addEventListener('keydown', (e) => {
       if (game.screen !== 'tape') return;
       if (e.code === 'ArrowLeft') this.step(-1);
       if (e.code === 'ArrowRight') this.step(1);
-      if (e.code === 'Escape') game.showScreen('menu');
+      if (e.code === 'Escape') {
+        game.showScreen('menu');
+        if (this.lastPane) this.modal(this.lastPane);
+      }
+    });
+    window.addEventListener('keydown', (e) => {
+      if (game.screen === 'menu' && e.code === 'Escape' && this.pane) this.modal(null);
     });
   }
 
@@ -71,14 +99,44 @@ export class Archive {
     if (this.game.screen === 'tape' && this.def) this.open(this.def, this.index);
   }
 
+  modal(name) {
+    const m = $('wiki-modal');
+    this.pane = name;
+    if (!name) {
+      m.classList.add('hidden');
+      return;
+    }
+    if (name !== 'seed' && name !== 'info') this.lastPane = name;
+    const titles = { levels: 'Level Archive', sub: 'Sub-Levels', guide: 'Field Guide', stickers: 'Stickers', info: 'Info Pages', seed: 'Play a Seed' };
+    $('wm-title').textContent = titles[name];
+    $('wm-meta').textContent = { levels: this.counts?.main, sub: this.counts?.sub, guide: this.counts?.guide, stickers: this.counts?.stickers }[name] || '';
+    for (const p of document.querySelectorAll('.wm-pane')) p.classList.toggle('hidden', p.dataset.pane !== name);
+    m.classList.remove('hidden');
+    m.querySelector('.wm-body').scrollTop = 0;
+    if (name === 'seed') setTimeout(() => $('seed-input').focus(), 50);
+  }
+
+  drawer(on) {
+    const d = $('wiki-drawer');
+    d.classList.toggle('hidden', on === undefined ? !d.classList.contains('hidden') : !on);
+  }
+
   render() {
-    const shelf = $('unlocked-levels');
-    shelf.textContent = '';
+    $('unlocked-levels').textContent = '';
+    $('sub-levels').textContent = '';
     const defs = Object.values(LEVELS).sort((a, b) => a.number - b.number);
-    let found = 0;
+    let found = 0, foundSub = 0, nMain = 0, nSub = 0;
     defs.forEach((def, k) => {
+      const sub = !Number.isInteger(def.number);
+      const shelf = $(sub ? 'sub-levels' : 'unlocked-levels');
       const open = this.reached(def.id);
-      if (open) found++;
+      if (sub) {
+        nSub++;
+        if (open) foundSub++;
+      } else {
+        nMain++;
+        if (open) found++;
+      }
       const shots = this.byLevel.get(def.id) || [];
       const b = document.createElement('button');
       b.className = `tape${open ? '' : ' locked'}`;
@@ -114,14 +172,13 @@ export class Archive {
       });
       shelf.appendChild(b);
     });
-    $('archive-count').textContent = `${found} / ${defs.length} FOUND`;
+    this.counts = this.counts || {};
+    this.counts.main = `${found} / ${nMain} FOUND`;
+    this.counts.sub = `${foundSub} / ${nSub} FOUND`;
+    $('archive-count').textContent = this.counts.main;
+    $('sub-count').textContent = this.counts.sub;
     this.renderGuide();
     this.renderStickers();
-  }
-
-  tab(name) {
-    for (const b of document.querySelectorAll('.atab')) b.classList.toggle('on', b.dataset.tab === name);
-    for (const p of document.querySelectorAll('.apane')) p.classList.toggle('hidden', p.dataset.pane !== name);
   }
 
   renderGuide() {
@@ -146,7 +203,9 @@ export class Archive {
       }
       el.appendChild(c);
     });
-    $('guide-count').textContent = `${n}/${ALL_SUBJECTS.length}`;
+    this.counts = this.counts || {};
+    this.counts.guide = `${n} / ${ALL_SUBJECTS.length} DOCUMENTED`;
+    $('guide-count').textContent = this.counts.guide;
   }
 
   renderStickers() {
@@ -165,7 +224,8 @@ export class Archive {
       d.querySelector('.stext span').textContent = s.desc;
       el.appendChild(d);
     }
-    $('sticker-count').textContent = `${n}/${STICKERS.length}`;
+    this.counts.stickers = `${n} / ${STICKERS.length} EARNED`;
+    $('sticker-count').textContent = this.counts.stickers;
   }
 
   open(def, index = 0) {
@@ -178,6 +238,7 @@ export class Archive {
     $('tape-class').textContent = def.difficulty != null ? `SURVIVAL DIFFICULTY ${def.difficulty}` : '';
     $('tape-blurb').textContent = LEVEL_INFO[def.id] || '';
     const visits = st.visits?.[def.id] || 0;
+    $('wiki-modal').classList.add('hidden');
     $('tape-stats').textContent = `VISITED ${visits} TIME${visits === 1 ? '' : 'S'} · ${this.list.length} PHOTO${this.list.length === 1 ? '' : 'S'} ON TAPE`;
     this.game.showScreen('tape');
     this.show();

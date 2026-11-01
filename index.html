@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Permanent+Marker&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Permanent+Marker&family=Space+Mono:wght@400;700&family=Lato:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <script type="importmap">
     { "imports": { "three": "./vendor/three.module.min.js" } }
@@ -98,49 +98,87 @@
   <!-- Screens -->
   <div id="screens">
     <section class="screen" id="screen-menu">
-      <div class="menu-wrap">
-        <header class="menu-head">
-          <h1 class="title">THE BACKROOMS</h1>
-          <p class="tagline">"If you're not careful and you noclip out of reality in the wrong areas..."</p>
-        </header>
-        <div class="menu-grid">
-          <div class="menu-side">
-            <p class="now-showing"><span class="dot"></span>NOW SHOWING &middot; <span id="menu-level">LEVEL 0 &mdash; THE LOBBY</span></p>
-            <button class="mbtn primary big-enter" id="btn-start">ENTER</button>
-            <button class="mbtn" id="btn-daily">TONIGHT'S TAPE</button>
-            <p class="daily-info" id="daily-info"></p>
-            <div class="seed-row">
-              <input id="seed-input" placeholder="SEED (optional)" maxlength="16" autocomplete="off" autocapitalize="characters" spellcheck="false">
-              <button class="mbtn small" id="btn-seed">PLAY SEED</button>
-            </div>
-            <div class="side-btns">
-              <button class="mbtn small" id="btn-howto">HOW TO SURVIVE</button>
-              <button class="mbtn small" id="btn-settings">SETTINGS</button>
-              <button class="mbtn small" id="btn-fullscreen">FULLSCREEN</button>
-            </div>
-            <p class="records" id="records"></p>
+      <div class="wiki">
+        <header class="wiki-banner">
+          <svg class="wiki-logo" viewBox="0 0 200 140" aria-hidden="true">
+            <path d="M18 30 L92 62 L80 78 Z" fill="#b8473a"/>
+            <path d="M182 30 L108 62 L120 78 Z" fill="#6a3fa0"/>
+            <path d="M40 86 L86 82 L70 104 Z" fill="#c8862e"/>
+            <path d="M160 86 L114 82 L130 104 Z" fill="#3f6aa8"/>
+            <path d="M60 116 L88 96 L84 116 Z" fill="#9a9a32"/>
+            <path d="M140 116 L112 96 L116 116 Z" fill="#3a8a3a"/>
+            <polygon points="100,22 128,38 128,70 100,86 72,70 72,38" fill="none" stroke="#b08ab0" stroke-width="9" opacity="0.85"/>
+            <polygon points="112,30 136,44 136,72 112,86 88,72 88,44" fill="none" stroke="#6aa8b8" stroke-width="7" opacity="0.7"/>
+            <polygon points="100,52 122,64 122,90 100,102 78,90 78,64" fill="none" stroke="#8a6a3a" stroke-width="8" opacity="0.8"/>
+          </svg>
+          <div class="wiki-title">
+            <h1>The Backrooms</h1>
+            <p>You've been here before.</p>
           </div>
-          <div class="archive">
-            <div class="archive-head">
-              <h2>THE ARCHIVE</h2>
-              <span id="archive-count"></span>
+        </header>
+        <nav class="wiki-nav">
+          <button class="wnav-burger" id="wnav-burger" aria-label="Menu"><i></i><i></i><i></i></button>
+          <button class="wnav" data-modal="levels">Levels</button>
+          <button class="wnav" data-modal="sub">Sub-Levels</button>
+          <button class="wnav" data-modal="info">Info Pages</button>
+        </nav>
+        <div class="wiki-drawer hidden" id="wiki-drawer">
+          <button class="wdraw" id="btn-howto">How to Survive</button>
+          <button class="wdraw" id="btn-settings">Settings</button>
+          <button class="wdraw" id="btn-fullscreen">Fullscreen</button>
+          <button class="wdraw" data-modal="guide">Field Guide</button>
+          <button class="wdraw" data-modal="stickers">Stickers</button>
+        </div>
+        <main class="wiki-page">
+          <div class="wiki-quote">
+            <p>Somewhere past the edge of the ordinary, there is a place that keeps what the world throws away. Empty offices, dead malls, hallways nobody walks. Rooms that hum. It goes on further than it should, and it is never quite empty.</p>
+            <p>Mind where you step. If you're not careful, you noclip out of reality in the wrong spot, and end up here.</p>
+            <p class="now-showing"><span class="dot"></span>NOW SHOWING &middot; <span id="menu-level">LEVEL 0 &mdash; THE LOBBY</span></p>
+          </div>
+          <div class="wiki-actions">
+            <button class="wiki-join" id="btn-start"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="4.5"/><path d="M3 22c0-5 4-8 9-8s9 3 9 8z"/></svg>Enter</button>
+            <div class="wiki-pills">
+              <button class="wiki-pill" id="btn-daily" title="Tonight's tape" aria-label="Tonight's tape"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="8" cy="12" r="2.4" fill="#4a4238"/><circle cx="16" cy="12" r="2.4" fill="#4a4238"/></svg></button>
+              <button class="wiki-pill" id="btn-seedopen" title="Play a seed" aria-label="Play a seed"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M2 12h20M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="2"/></svg></button>
+              <button class="wiki-pill" data-modal="info" title="Info" aria-label="Info"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><rect x="10.8" y="10" width="2.4" height="8" fill="#4a4238"/><circle cx="12" cy="6.8" r="1.5" fill="#4a4238"/></svg></button>
             </div>
-            <div class="archive-tabs">
-              <button class="atab on" data-tab="tapes">TAPES</button>
-              <button class="atab" data-tab="guide">FIELD GUIDE <span id="guide-count"></span></button>
-              <button class="atab" data-tab="stickers">STICKERS <span id="sticker-count"></span></button>
+          </div>
+          <p class="daily-info" id="daily-info"></p>
+          <hr class="wiki-rule">
+          <button class="wiki-card" data-modal="levels"><b>Level Archive <span>&raquo;</span></b><em>"Every level you've found, on tape."</em><i id="archive-count"></i></button>
+          <button class="wiki-card" data-modal="sub"><b>Sub-Levels <span>&raquo;</span></b><em>"The places between the places."</em><i id="sub-count"></i></button>
+          <button class="wiki-card" data-modal="guide"><b>Field Guide <span>&raquo;</span></b><em>"Know what's following you."</em><i id="guide-count"></i></button>
+          <button class="wiki-card" data-modal="stickers"><b>Stickers <span>&raquo;</span></b><em>"Small goals for a long walk."</em><i id="sticker-count"></i></button>
+          <p class="records" id="records"></p>
+        </main>
+      </div>
+      <div class="wiki-modal hidden" id="wiki-modal" role="dialog" aria-modal="true">
+        <div class="wm-box">
+          <div class="wm-head">
+            <h2 id="wm-title">Levels</h2>
+            <button class="wm-x" id="wm-close" aria-label="Close">&times;</button>
+          </div>
+          <div class="wm-meta" id="wm-meta"></div>
+          <div class="wm-body">
+            <div class="wm-pane" data-pane="levels"><p class="wm-sub">Every level you've found goes on a tape. Your photos become the covers. Get out of a level alive and it gets a stamp. Pick a tape to watch the footage.</p><div class="shelf" id="unlocked-levels"></div></div>
+            <div class="wm-pane" data-pane="sub"><p class="wm-sub">Sub-levels hang off the main levels: odd corners, wrong turns, versions of a place that went bad. You won't find them by walking straight.</p><div class="shelf" id="sub-levels"></div></div>
+            <div class="wm-pane" data-pane="guide"><p class="wm-sub">Photograph an entity (V, or the camera button) to document it. Your photo goes in the guide.</p><div class="guide" id="guide"></div></div>
+            <div class="wm-pane" data-pane="stickers"><p class="wm-sub">Small things to do in the Backrooms. Each one gets you a sticker.</p><div class="stickers" id="stickers"></div></div>
+            <div class="wm-pane" data-pane="info">
+              <p class="wm-sub">Survival Difficulty: depends on you.</p>
+              <div class="wm-links">
+                <button class="wiki-card" data-go="howto"><b>How to Survive <span>&raquo;</span></b><em>"Controls, and what to do on each level."</em></button>
+                <button class="wiki-card" data-go="settings"><b>Settings <span>&raquo;</span></b><em>"Volume, sensitivity, quality."</em></button>
+                <button class="wiki-card" data-modal="guide"><b>Field Guide <span>&raquo;</span></b><em>"Entities you've documented."</em></button>
+                <button class="wiki-card" data-modal="stickers"><b>Stickers <span>&raquo;</span></b><em>"Your sticker board."</em></button>
+              </div>
             </div>
-            <div class="apane" data-pane="tapes">
-              <p class="archive-sub">Every level you find goes on a tape. Your photos become the covers. Get out of a level alive and it gets a stamp.</p>
-              <div class="shelf" id="unlocked-levels"></div>
-            </div>
-            <div class="apane hidden" data-pane="guide">
-              <p class="archive-sub">Photograph an entity to document it. Your photo goes in the guide.</p>
-              <div class="guide" id="guide"></div>
-            </div>
-            <div class="apane hidden" data-pane="stickers">
-              <p class="archive-sub">Small things to do in the Backrooms. Each one gets you a sticker.</p>
-              <div class="stickers" id="stickers"></div>
+            <div class="wm-pane" data-pane="seed">
+              <p class="wm-sub">Same seed, same Backrooms. Type one a friend gave you, or leave it blank for a random one.</p>
+              <div class="seed-row">
+                <input id="seed-input" placeholder="SEED" maxlength="16" autocomplete="off" autocapitalize="characters" spellcheck="false">
+                <button class="wiki-btn" id="btn-seed">Play Seed</button>
+              </div>
             </div>
           </div>
         </div>

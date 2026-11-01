@@ -102,6 +102,7 @@ export class Game {
   showScreen(name) {
     for (const s of document.querySelectorAll('.screen')) s.classList.toggle('active', s.id === `screen-${name}`);
     document.body.classList.toggle('in-menu', name === 'menu');
+    if (name !== 'menu') document.getElementById('wiki-modal')?.classList.add('hidden');
     this.screen = name;
   }
 

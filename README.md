@@ -460,12 +460,14 @@ Little things to come back for:
 
 ## The archive and the camera
 
-The main menu's **Archive** shows every level as a VHS tape on a shelf, with your newest photo of it as the cover. Levels you haven't found yet are blank tapes marked **???** until you reach them. Pick a tape to watch your footage of that level (step through it, save a photo to your device or erase it), read about the level, see how often you've been there, and play it.
+The main menu is laid out like a page of the Backrooms wiki: a banner, a nav bar (**Levels**, **Sub-Levels**, **Info Pages**, and a ☰ drawer for How to Survive, Settings, Fullscreen, the Field Guide and Stickers), an intro panel with **Enter** and buttons for tonight's tape, playing a seed and info, then cards for the Level Archive, Sub-Levels, Field Guide and Stickers. Nothing is laid out all at once: each opens in its own window.
+
+The **Level Archive** window (main levels) and the **Sub-Levels** window (0.2, 1.3, 1.5, 10.2, 11.3...) show each level as a VHS tape, with your newest photo of it as the cover. Levels you haven't found yet are blank tapes marked **???** until you reach them. Pick a tape to watch your footage of that level (step through it, save a photo to your device or erase it), read about the level, see how often you've been there, and play it.
 
 Press **V** (or the camera button at the top right) to take a photo. It comes out like old camcorder footage: low resolution, smeared colour, tracking noise, a date and time burned into the corner. Photos are kept in your browser.
 
 
-Every run comes from a seed, which shows on the pause, death and escape screens. Type a seed on the main menu to replay a layout.
+Every run comes from a seed, which shows on the pause, death and escape screens. Open the seed window from the main menu (the ✳ button) to replay a layout.
 
 ## Entity library
 
@@ -562,7 +564,7 @@ src/core/items.js             backpack items (Almond Water, batteries, first aid
 src/core/Backpack.js          the backpack: HUD strip, panel, using/dropping, items on the floor, the pipe and the flare
 src/core/Camcorder.js         the camera: grabs the frame and runs it through the VHS filter
 src/core/photos.js            photo storage (IndexedDB)
-src/ui/Archive.js             the main menu's archive of levels (tapes) and the tape viewer
+src/ui/Archive.js             the main menu's windows (levels, sub-levels, field guide, stickers, info, seed) and the tape viewer
 src/ui/levelInfo.js           what the archive says about each level
 src/world/scatter.js          scatter backpack items across a level
 src/levels/registry.js        list of levels + the level interface
